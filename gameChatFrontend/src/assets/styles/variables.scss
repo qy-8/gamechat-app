@@ -1,0 +1,38 @@
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'primary': (
+      'base': #FF9100,
+    ),
+    'success': (
+      'base': #67c23a,
+    ),
+    'warning': (
+      'base': #e6a23c,
+    ),
+    'danger': (
+      'base': #f56c6c,
+    ),
+    'error': (
+      'base': #f56c6c,
+    ),
+    'info': (
+      'base': #909399,
+    ),
+  ),
+  $text-color: (
+    'primary': #FF9100, // 设置主要文字颜色
+    'regular': #000000, // 设置常规文字颜色
+    'secondary': #515151, // 次要文字颜色
+    'placeholder': #737373, // 占位符文字颜色
+    'disabled': #c0c4cc, // 禁用状态文字颜色
+  ),
+  $bg-color:(
+    'login-bgc': #ff9100, // 设置login页面的背景颜色，使用：var(--el-bg-color-login-bgc)
+    'home-details-box-bgc':#e0e0e0,
+    'group-title-box-bgc': #7e705c, // chat 页面 group title 背景颜色
+    'announcements': #f94141,
+    'group-list': #ebebeb
+  )
+);
+
+

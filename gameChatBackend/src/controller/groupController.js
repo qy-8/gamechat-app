@@ -1,0 +1,108 @@
+const Group = require('../models/Group')
+const User = require('../models/User')
+const response = require('../utils/response')
+
+// 创建群组
+const createGroup = async (req, res) => {
+  try {
+    const { name, description } = req.body
+    const userId = req.user.userId // 从 token 中获取用户信息
+    // 创建新的群组
+    const group = new Group({
+      name,
+      createdBy: userId,
+      members: [userId], // 创建者自己加入群组
+      description
+    })
+
+    await group.save()
+
+    // 返回创建成功的群组信息
+    response.success(res, group, '群组创建成功')
+  } catch (err) {
+    console.error('创建群组失败', err)
+    response.error(res, '创建群组失败', 400)
+  }
+}
+
+// 获取用户所属的群组所有用户
+const getUserGroups = async (req, res) => {
+  try {
+    const userId = req.user.userId
+    const groups = await Group.find({ members: userId }).populate(
+      'members',
+      'username avatar'
+    )
+
+    response.success(res, groups, '获取群组信息成功')
+  } catch (err) {
+    response.error(res, '获取群组信息失败', 400)
+  }
+}
+
+// 邀请用户加入群组
+const inviteUserToGroup = async (req, res) => {
+  try {
+    const { groupId, userId } = req.body
+    const currentUserId = req.user.userId
+
+    // 查找群组并检查当前用户是否是管理员
+    const group = await Group.findById(groupId)
+
+    if (!group) {
+      return response.error(res, '群组不存在', 400)
+    }
+    // _id 是 ObjectId
+    if (group.createdBy.toString() !== currentUserId.toString()) {
+      return response.error(res, '只有群主才能邀请用户', 400)
+    }
+
+    // 检查用户是否已在该群组中
+    if (group.members.includes(userId)) {
+      return response.error(res, '用户已在该群组中', 400)
+    }
+
+    // 将用户添加到群组
+    group.members.push(userId)
+    await group.save()
+
+    // 返回成功响应
+    response.success(res, {}, '邀请成功')
+  } catch (err) {
+    response.error(res, '邀请用户加入群组失败', 400)
+  }
+}
+
+// 退出群组
+const leaveGroup = async (req, res) => {
+  try {
+    const { groupId } = req.body
+    const userId = req.user.userId // 当前用户
+
+    // 查找群组
+    const group = await Group.findById(groupId)
+
+    // 确保群组存在并且用户是群组成员
+    if (!group || !group.members.includes(userId)) {
+      return response.error(res, '您不在该群组中', 400)
+    }
+
+    // 移除用户
+    group.members = group.members.filter(
+      (member) => member.toString() !== userId.toString()
+    )
+    await group.save()
+
+    // 返回成功响应
+    response.success(res, {}, '您已退出该群组')
+  } catch (err) {
+    response.error(res, '退出群组失败', 400)
+  }
+}
+
+module.exports = {
+  createGroup,
+  getUserGroups,
+  inviteUserToGroup,
+  leaveGroup
+}

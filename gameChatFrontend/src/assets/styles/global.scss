@@ -1,0 +1,59 @@
+$text-color: #FFFFFF;
+$background-color: #1E1E1E;
+$link-hover-color: #FF9100;
+$link-hover-background-color: rgba(255, 145, 0, 0.1);
+:root {
+  --link-hover-color: #FF9100;
+  --link-hover-background-color: rgba(255, 145, 0, 0.1);
+  --background-color: #1E1E1E;
+  --el-menu-hover-bg-color: #FF9100;
+  --icons-color: #FF9100;
+  --primary-text-color: #FF9100;
+  --secondary-text-color: #ffffff;
+  --login-background-color: #e09028;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+body {
+  font-family: 
+    -apple-system, BlinkMacSystemFont, /* macOS/iOS 首选 */
+    "Segoe UI", Roboto, /* Windows/Android 首选 */
+    "Helvetica Neue", Arial, /* 西文字体 */
+    "PingFang SC", "Microsoft YaHei", /* 中文字体 */
+    sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  outline: none;
+}
+
