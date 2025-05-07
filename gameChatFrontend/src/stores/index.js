@@ -9,3 +9,4 @@ export default pinia
 
 // 仓库统一导出
 export * from './modules/user'
+export * from './modules/group'

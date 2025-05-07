@@ -4,13 +4,18 @@ const {
   getUserGroups,
   inviteUserToGroup,
   createGroup,
-  leaveGroup
+  leaveGroup,
+  uploadGroupAvatar,
+  createChannel,
+  deleteChannel,
+  getChannels
 } = require('../controller/groupController')
 const authMiddleware = require('../middlewares/authMiddleware')
+const upload = require('..//middlewares/upload')
 
 /**
  * @swagger
- * /api/group/create:
+ * /api/groups/:
  *   post:
  *     summary: "创建群组"
  *     description: "用户创建一个新的群组，群组创建者会自动加入群组。需要在 `Authorization` 里添加 Token"
@@ -91,11 +96,11 @@ const authMiddleware = require('../middlewares/authMiddleware')
  *                       example: "创建群组失败"
  */
 
-router.post('/create', authMiddleware, createGroup)
+router.post('/', authMiddleware, createGroup)
 
 /**
  * @swagger
- * /api/my_groups:
+ * /api/groups/mine:
  *   get:
  *     summary: "获取用户所属的群组所有用户"
  *     description: "获取用户所属的群组内所有用户的详细信息，包括用户名、头像。需要在 `Authorization` 里添加 Token"
@@ -169,11 +174,11 @@ router.post('/create', authMiddleware, createGroup)
  *                       example: "获取群组信息失败"
  */
 
-router.get('/my_groups', authMiddleware, getUserGroups)
+router.get('/mine', authMiddleware, getUserGroups)
 
 /**
  * @swagger
- * /api/group/invite:
+ * /api/groups/members:
  *   post:
  *     summary: "邀请用户参加群组"
  *     description: "邀请用户参加群组。需要在 `Authorization` 里添加 Token"
@@ -224,11 +229,11 @@ router.get('/my_groups', authMiddleware, getUserGroups)
  *                       example: "群组不存在/用户已在该群组中/只有群主才能邀请用户/邀请用户加入群组失败"
  */
 
-router.post('/invite', authMiddleware, inviteUserToGroup)
+router.post('/members', authMiddleware, inviteUserToGroup)
 
 /**
  * @swagger
- * /api/group/leave:
+ * /api/groups/leave:
  *   post:
  *     summary: "退出群组"
  *     description: "用户退出指定的群组。用户将从群组成员列表中移除。需要在 `Authorization` 里添加 Token"
@@ -276,5 +281,179 @@ router.post('/invite', authMiddleware, inviteUserToGroup)
  */
 
 router.post('/leave', authMiddleware, leaveGroup)
+// 待改，不应该是post，应该是delete
+
+/**
+ * @swagger
+ * /api/group/avatar:
+ *   post:
+ *     summary: "上传群组头像"
+ *     description: "上传群组头像文件。需要添加 Token，以 multipart/form-data 方式上传头像。"
+ *     tags:
+ *       - Group
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - avatar
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: "要上传的群组头像文件"
+ *     responses:
+ *       200:
+ *         description: "头像上传成功，返回头像 URL"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: object
+ *                       properties:
+ *                         url:
+ *                           type: string
+ *                           example: "/uploads/group_avatar_123456.png"
+ *                     message:
+ *                       type: string
+ *                       example: "群组头像上传成功"
+ *       401:
+ *         description: "上传失败（例如未上传文件）"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ErrorResponse'
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "群组头像上传失败"
+ */
+
+router.post('/avatar', upload.single('avatar'), uploadGroupAvatar)
+
+/**
+ * @swagger
+ * /api/groups/channel:
+ *   post:
+ *     summary: "创建频道"
+ *     description: "在指定群组内创建一个新的频道。需要在 `Authorization` 里添加 Token"
+ *     tags:
+ *       - Group
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - groupId
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: "频道名称"
+ *                 example: "公告频道"
+ *               groupId:
+ *                 type: string
+ *                 description: "群组id"
+ *                 example: "63a6f8bde5bda2d43278e2c9"
+ *     responses:
+ *       200:
+ *         description: "频道创建成功"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "频道创建成功"
+ *       400:
+ *         description: "请求错误，例如群组不存在"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ErrorResponse'
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "创建频道失败"
+ */
+
+router.post('/channel', authMiddleware, createChannel)
+
+/**
+ * @swagger
+ * /api/groups/channel/{channelId}:
+ *   delete:
+ *     summary: "删除频道"
+ *     description: "通过频道 ID 删除指定频道（逻辑删除，将频道状态设为 0）。需要添加 Token。"
+ *     tags:
+ *       - Group
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: channelId
+ *         in: path
+ *         required: true
+ *         description: "要删除的频道ID"
+ *         schema:
+ *           type: string
+ *           example: "662de0fd9b49e6b58c67d0aa"
+ *     responses:
+ *       200:
+ *         description: "频道删除成功"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: "#/components/schemas/SuccessResponse"
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "频道删除成功"
+ *                     data:
+ *                       type: "null"
+ *       404:
+ *         description: "频道不存在"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: "#/components/schemas/ErrorResponse"
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "频道不存在"
+ *       500:
+ *         description: "删除频道失败"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: "#/components/schemas/ErrorResponse"
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "删除频道失败"
+ */
+
+router.delete('/channel/:channelId', authMiddleware, deleteChannel)
+
+// 获取所有频道
+router.get('/channel/:groupId/channels', authMiddleware, getChannels)
 
 module.exports = router

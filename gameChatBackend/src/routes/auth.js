@@ -7,8 +7,8 @@ const authMiddleware = require('../middlewares/authMiddleware')
 
 /**
  * @swagger
- * /api/auth/reset-password:
- *   post:
+ * /api/users/me/password:
+ *   put:
  *     summary: "重设密码"
  *     description: "重设密码。需要在请求头 `Authorization` 中携带 Token。"
  *     tags:
@@ -60,11 +60,12 @@ const authMiddleware = require('../middlewares/authMiddleware')
  *                       example: "用户不存在/旧密码不正确"
  */
 
-router.post(
-  '/reset-password',
+router.put(
+  '/users/me/password',
   authMiddleware,
   expressJoi(resetPasswordSchema),
   resetPassword
 )
 
+// 上面改成了put，待测试
 module.exports = router

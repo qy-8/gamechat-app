@@ -1,6 +1,19 @@
 <script setup>
 import { CirclePlusFilled } from '@element-plus/icons-vue'
 import ThemeSwitch from '@/components/ThemeToggle.vue'
+import CreateGroupDialog from './CreateGroupDialog.vue'
+import { ref } from 'vue'
+import { useGroupStore } from '@/stores'
+
+const groupsStore = useGroupStore()
+const showCreateGroup = ref(false)
+const props = defineProps({
+  groupList: Array
+})
+
+const saveActiveGroup = (group) => {
+  groupsStore.setActiveGroup(group)
+}
 </script>
 
 <template>
@@ -11,31 +24,25 @@ import ThemeSwitch from '@/components/ThemeToggle.vue'
       </div>
       <template #title>私信</template>
     </el-menu-item>
-    <el-menu-item class="groupList">
+    <el-menu-item
+      class="groupList"
+      v-for="item in groupList"
+      :key="item._id"
+      @click="() => saveActiveGroup(item)"
+    >
       <img
-        src="/images/groupImage.png"
-        alt="私信"
+        :src="item.avatar || '/images/background1.avif'"
+        :alt="item.name"
         class="direct-message-image"
       />
-      <template #title>群组1</template>
+      <template #title>{{ item.name }}</template>
     </el-menu-item>
-    <el-menu-item class="groupList">
-      <img
-        src="/images/groupImage.png"
-        alt="私信"
-        class="direct-message-image"
-      />
-      <template #title>群组2</template>
-    </el-menu-item>
-    <el-menu-item class="groupList">
-      <img
-        src="/images/groupImage.png"
-        alt="私信"
-        class="direct-message-image"
-      />
-      <template #title>群组3</template>
-    </el-menu-item>
-    <el-menu-item index="1" class="create-group">
+
+    <el-menu-item
+      index="1"
+      class="create-group"
+      @click="showCreateGroup = !showCreateGroup"
+    >
       <el-icon><CirclePlusFilled /></el-icon>
       <template #title>创建群组</template>
     </el-menu-item>
@@ -43,6 +50,7 @@ import ThemeSwitch from '@/components/ThemeToggle.vue'
       <ThemeSwitch class="theme-switch" />
     </el-menu-item>
   </el-menu>
+  <CreateGroupDialog v-model:visible="showCreateGroup" v-if="showCreateGroup" />
 </template>
 
 <style lang="scss" scoped>
@@ -64,6 +72,10 @@ import ThemeSwitch from '@/components/ThemeToggle.vue'
 .container .direct-message-box {
   padding-bottom: 10px;
   border-bottom: 1px solid;
+}
+
+.direct-message-box img {
+  border-radius: 50%;
 }
 
 .container .el-menu-item {

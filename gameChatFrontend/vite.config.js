@@ -29,7 +29,8 @@ export default defineConfig({
       resolvers: [
         // 自动注册图标组件
         IconsResolver({
-          enabledCollections: ['ep']
+          prefix: 'Icon',
+          enabledCollections: ['ep', 'mdi', 'ic']
         }),
         ElementPlusResolver({ importStyle: 'sass' })
       ]

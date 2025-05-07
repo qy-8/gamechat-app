@@ -16,9 +16,9 @@ const getUserInfo = async (req, res) => {
   }
 }
 
-// 更新用户信息，包括用户名，头像，手机号码
+// 更新用户信息，包括用户名，手机号码
 const updateUserInfo = async (req, res) => {
-  const { username, avatar, phoneNumber } = req.body
+  const { username, phoneNumber } = req.body
 
   const userId = req.user.userId
 
@@ -29,7 +29,6 @@ const updateUserInfo = async (req, res) => {
     }
     // 更新用户信息，当新值不为空时更新
     user.username = username || user.username
-    user.avatar = avatar || user.avatar
     user.phoneNumber = phoneNumber || user.phoneNumber
 
     await user.save()
@@ -37,6 +36,16 @@ const updateUserInfo = async (req, res) => {
   } catch (err) {
     response.error(res, err.message)
   }
+}
+
+const uploadAvatar = async (req, res) => {
+  const file = req.file
+  if (!file) {
+    return response.error(res, '头像上传失败', 401)
+  }
+
+  const fileUrl = `/uploads/${file.filename}`
+  response.success(res, { url: fileUrl }, '头像上传成功')
 }
 
 // 用户删除账号，将数据库的 status 改为 0
@@ -61,5 +70,6 @@ const deleteUser = async (req, res) => {
 module.exports = {
   getUserInfo,
   updateUserInfo,
-  deleteUser
+  deleteUser,
+  uploadAvatar
 }

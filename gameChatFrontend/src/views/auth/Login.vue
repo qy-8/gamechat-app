@@ -40,7 +40,7 @@ const userFormRules = reactive({
     { required: true, message: '请输入密码', trigger: 'blur' },
     {
       pattern: /^[\S]{6,12}$/,
-      message: '密码需为6-12位非空字符',
+      message: '密码需为6-12位字符',
       trigger: 'blur'
     }
   ]
@@ -183,5 +183,5 @@ const login = async () => {
 </template>
 
 <style lang="scss" scoped>
-@import './auth.scss';
+@use './auth.scss' as *;
 </style>

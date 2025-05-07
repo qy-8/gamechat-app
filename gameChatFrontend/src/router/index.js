@@ -35,6 +35,12 @@ router.beforeEach((to) => {
   const userStore = useUserStore()
   const isAuthenticated = !!userStore.token
 
+  // 同步 store 与 localstorage
+  const local = JSON.parse(localStorage.getItem('user') || '{}')
+  if (!local.token && userStore.token) {
+    userStore.logout() // 清 pinia
+  }
+
   // 访问权限页面 - 需要登陆但无token则导航到login页面
   if (to.meta.requiresAuth && !isAuthenticated) {
     return '/auth'

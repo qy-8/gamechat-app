@@ -15,6 +15,7 @@ const groupSchema = new mongoose.Schema(
         ref: 'User'
       }
     ], // 群组成员，关联 User
+    avatar: { type: String, default: '' }, // 群组头像路径
     status: { type: Number, enum: [0, 1], default: 1 } // 0: 禁用, 1: 正常
   },
   { timestamps: true } // 自动添加 createdAt 和 updatedAt

@@ -25,13 +25,16 @@
     'secondary': #515151, // 次要文字颜色
     'placeholder': #737373, // 占位符文字颜色
     'disabled': #c0c4cc, // 禁用状态文字颜色
+    'quoted': #676666
   ),
   $bg-color:(
     'login-bgc': #ff9100, // 设置login页面的背景颜色，使用：var(--el-bg-color-login-bgc)
     'home-details-box-bgc':#e0e0e0,
     'group-title-box-bgc': #7e705c, // chat 页面 group title 背景颜色
     'announcements': #f94141,
-    'group-list': #ebebeb
+    'group-list': #ebebeb,
+    'message-item-hover': #0000000D,
+
   )
 );
 

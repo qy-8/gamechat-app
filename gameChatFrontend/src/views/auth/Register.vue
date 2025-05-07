@@ -224,5 +224,5 @@ const resetForm = (registerFormRef) => {
 </template>
 
 <style lang="scss" scoped>
-@import './auth.scss';
+@use './auth.scss' as *;
 </style>

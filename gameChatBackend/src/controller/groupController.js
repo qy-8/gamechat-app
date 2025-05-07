@@ -1,6 +1,7 @@
 const Group = require('../models/Group')
 const User = require('../models/User')
 const response = require('../utils/response')
+const Channel = require('../models/Channel')
 
 // 创建群组
 const createGroup = async (req, res) => {
@@ -14,9 +15,11 @@ const createGroup = async (req, res) => {
       members: [userId], // 创建者自己加入群组
       description
     })
-
     await group.save()
-
+    // 把群组 ID 添加到用户的 groups 列表中
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { groups: group._id } // 避免重复
+    })
     // 返回创建成功的群组信息
     response.success(res, group, '群组创建成功')
   } catch (err) {
@@ -100,9 +103,73 @@ const leaveGroup = async (req, res) => {
   }
 }
 
+const uploadGroupAvatar = async (req, res) => {
+  const file = req.file
+  if (!file) {
+    return response.error(res, '群组头像上传失败', 401)
+  }
+
+  const fileUrl = `/uploads/${file.filename}`
+  response.success(res, { url: fileUrl }, '群组头像上传成功')
+}
+
+const createChannel = async (req, res) => {
+  try {
+    const { name, groupId } = req.body
+    const userId = req.user.userId
+
+    const newChannel = new Channel({
+      name,
+      groupId,
+      createdBy: userId
+    })
+
+    await newChannel.save()
+
+    response.success(res, newChannel, '频道创建成功')
+  } catch (error) {
+    console.error(error)
+    response.error(res, '创建频道失败')
+  }
+}
+
+const deleteChannel = async (req, res) => {
+  try {
+    const { channelId } = req.params
+
+    const channel = await Channel.findById(channelId)
+
+    if (!channel) {
+      return response.error(res, '频道不存在', 404)
+    }
+
+    await Channel.findByIdAndDelete(channelId)
+
+    response.success(res, null, '频道删除成功')
+  } catch (error) {
+    console.error(error)
+    response.error(res, '删除频道失败')
+  }
+}
+
+const getChannels = async (req, res) => {
+  const { groupId } = req.params
+
+  try {
+    const channels = await Channel.find({ groupId })
+    response.success(res, channels, '获取频道成功')
+  } catch (error) {
+    response.error(res, '获取频道失败')
+  }
+}
+
 module.exports = {
   createGroup,
   getUserGroups,
   inviteUserToGroup,
-  leaveGroup
+  leaveGroup,
+  uploadGroupAvatar,
+  createChannel,
+  deleteChannel,
+  getChannels
 }

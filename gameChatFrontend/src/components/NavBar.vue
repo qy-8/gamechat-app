@@ -28,8 +28,8 @@ themeStore.initTheme()
 
       <!-- 其他菜单项 -->
       <el-menu-item index="1">探索</el-menu-item>
-      <el-menu-item index="2">注册</el-menu-item>
-      <el-menu-item index="3">登陆</el-menu-item>
+      <el-menu-item index="2" @click="$router.push('/auth')">注册</el-menu-item>
+      <el-menu-item index="3" @click="$router.push('/auth')">登陆</el-menu-item>
       <el-menu-item index="4">个人中心</el-menu-item>
       <el-menu-item><ThemeSwitch /></el-menu-item>
     </el-menu>

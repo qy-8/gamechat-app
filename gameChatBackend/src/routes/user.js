@@ -3,6 +3,7 @@ const express = require('express')
 const router = express.Router()
 const expressJoi = require('@escook/express-joi')
 const authMiddleware = require('../middlewares/authMiddleware')
+const upload = require('..//middlewares/upload')
 const {
   register,
   sendSmsCodeToPhone,
@@ -19,7 +20,8 @@ const {
 const {
   getUserInfo,
   updateUserInfo,
-  deleteUser
+  deleteUser,
+  uploadAvatar
 } = require('../controller/userController')
 
 /**
@@ -373,7 +375,7 @@ router.get('/info', authMiddleware, getUserInfo)
  * /api/auth/update:
  *   post:
  *     summary: "更新用户信息"
- *     description: "更新用户个人信息，包括用户名，头像，手机号码。需要在请求头 `Authorization` 中携带 Token。"
+ *     description: "更新用户个人信息，包括用户名,手机号码。需要在请求头 `Authorization` 中携带 Token。"
  *     tags:
  *       - User
  *     security:
@@ -393,9 +395,6 @@ router.get('/info', authMiddleware, getUserInfo)
  *                 type: string
  *                 description: "用户名"
  *                 example: "gamer123"
- *               avatar:
- *                 type: string
- *                 example: "https://example.com/"
  *               phoneNumber:
  *                 type: string
  *                 description: "手机号码（中国格式）"
@@ -425,13 +424,16 @@ router.get('/info', authMiddleware, getUserInfo)
  *                       example: "用户名不存在"
  */
 
-router.post(
+router.put(
   '/update',
   authMiddleware,
   expressJoi(updateUserSchema),
   updateUserInfo
 )
 
+// 上面和下面都被更改为put，未测试
+
+router.put('/me/avatar', upload.single('avatar'), uploadAvatar)
 /**
  * @swagger
  * /api/auth/delete:

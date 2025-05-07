@@ -1,4 +1,5 @@
 import axios from 'axios'
+import router from '@/router'
 import { useUserStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 
@@ -14,10 +15,10 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    const UserStore = useUserStore()
+    const token = localStorage.getItem('token')
     // 如果有token的话，在请求头添加token
-    if (UserStore.token) {
-      config.headers.Authorization = UserStore.token
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
@@ -38,7 +39,10 @@ request.interceptors.response.use(
   function (error) {
     // 如果 http 响应头状态码为 401
     if (error.response?.status === 401) {
-      router.push('/login')
+      // ElMessage.error('登录已过期，请重新登录')
+      localStorage.removeItem('user')
+      localStorage.removeItem('token')
+      router.push('/auth')
     }
     ElMessage({
       message: error.response?.data?.message || '错误异常',
