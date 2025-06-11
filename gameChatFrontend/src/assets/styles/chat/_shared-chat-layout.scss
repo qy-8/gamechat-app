@@ -1,0 +1,59 @@
+.container {
+  display: flex;
+  position: relative;
+}
+
+.panel, .title-menu-container {
+  width: 250px;
+  padding-top: 2px;
+  background-color: var(--el-bg-color-group-list);
+}
+
+.panel .el-menu-item.title-box, .search-and-result-container {
+  height: 120px;
+  padding: 0 0 0 0;
+  border-bottom: 1px solid;
+}
+
+.panel .el-menu-item {
+  color: var(--el-text-color-regular);
+}
+
+.panel .panel-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+}
+
+.container .title-box:hover {
+  background-color: transparent;
+}
+
+.group-title, .title-and-search-container {
+  width: 100%;
+  padding: 0 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(
+    to bottom,
+    var(--el-bg-color-group-title-box-bgc),
+    transparent
+  );
+  border-radius: 20px 20px 0 0;
+  color: var(--el-text-color-primary);
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9); //突出文字
+}
+
+.group-title .el-icon, .title-and-search-container .el-icon {
+  margin-right: 0px;
+}
+
+.el-dropdown .el-icon {
+  font-size: 20px;
+  outline: none;
+}
+
+.group-background .el-dropdown, .title-and-search-container .el-dropdown{
+  color: var(--el-text-color-primary);
+}

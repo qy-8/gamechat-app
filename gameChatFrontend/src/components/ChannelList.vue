@@ -5,51 +5,22 @@ import CreateChannelDialog from './CreateChannelDialog.vue'
 import { useGroupStore } from '@/stores'
 import { deleteChannel, getChannelList } from '../api/group'
 import { DeleteFilled } from '@element-plus/icons-vue'
-import { changeGlobalNodesTarget } from 'element-plus/es/utils/index.mjs'
+// import { changeGlobalNodesTarget } from 'element-plus/es/utils/index.mjs'
+import UploadGroupAvatarDialog from './UploadGroupAvatarDialog.vue'
+import { useDraggableWidth } from '../composables/useDraggableWidth'
 
 const activeIndex = ref('1')
-let isDragging = false
+// let isDragging = false
 const groupInfo = ref(null)
-let startX = 0
-let startWidth = 0
-const showCreateChannel = ref(false)
+// let startX = 0
+// let startWidth = 0
+const showCreateChannelDialog = ref(false)
 const groupStore = useGroupStore()
 let channelList = ref(null)
 const showDeleteIcon = ref(false)
-
-const handleDragging = (e) => {
-  if (!isDragging || !groupInfo.value) return
-
-  const domElement = groupInfo.value.$el
-  const deltaX = e.clientX - startX
-  let newWidth = startWidth + deltaX
-  const minWidth = 200
-  const maxWidth = 500
-  // 限制新宽度比最小宽度大或比最大宽度小
-  newWidth = Math.min(Math.max(newWidth, minWidth), maxWidth)
-
-  domElement.style.width = newWidth + 'px'
-}
-
-const stopDragging = () => {
-  isDragging = false
-  document.removeEventListener('mousemove', handleDragging)
-  document.removeEventListener('mouseup', stopDragging)
-}
-
-const startDragging = (e) => {
-  if (!groupInfo.value) return
-
-  const domElement = groupInfo.value.$el || groupInfo.value
-  startX = e.clientX
-  startWidth = domElement.offsetWidth
-  isDragging = true
-
-  // 监听鼠标移动事件
-  document.addEventListener('mousemove', handleDragging)
-  // 监听用户松鼠标事件
-  document.addEventListener('mouseup', stopDragging)
-}
+const showUploadGroupAvatarDialog = ref(null)
+const groupBackgroundUrl = ref(null)
+const loading = ref(false)
 
 const getChannels = async () => {
   try {
@@ -62,44 +33,62 @@ const getChannels = async () => {
 
 onMounted(() => {
   getChannels()
+  // handleUploadSuccess()
 })
 
 // TODO: 在删除前检测是否为群主，不然不让删除
 const deleteSelectedChannel = async (channelId) => {
+  loading.value = true
   try {
     const response = await deleteChannel(channelId)
     getChannels()
+    showDeleteIcon.value = false
   } catch (error) {
     console.error('获取频道列表失败:', error)
+  } finally {
+    loading.value = false
   }
 }
 
 watch(
-  () => groupStore.activeGroup._id,
+  () => groupStore.activeGroup?._id,
   async (newGroup) => {
     if (newGroup) {
       getChannels()
     }
   }
 )
+
+const handleUploadSuccess = (data) => {
+  groupStore.activeGroup.avatar = data
+}
+
+const { startDragging } = useDraggableWidth(groupInfo, {
+  minWidth: 200,
+  maxWidth: 500
+})
 </script>
+
 <template>
-  <div class="container">
-    <el-menu :default-active="activeIndex" class="group-info" ref="groupInfo">
-      <el-menu-item class="group-name">
-        <div class="group-background">
+  <div v-loading="loading" class="container">
+    <el-menu :default-active="activeIndex" class="panel" ref="groupInfo">
+      <el-menu-item class="title-box">
+        <div
+          class="group-background"
+          :style="{ backgroundImage: `url(${groupStore.activeGroup?.avatar})` }"
+        >
           <div class="group-title">
-            <span>{{ groupStore.activeGroup.name }}</span>
+            <span>{{ groupStore.activeGroup?.name }}</span>
             <el-dropdown
               placement="bottom-end"
               dropdown-class="custom-dropdown"
               size="large"
             >
-              <el-icon><ArrowDown /></el-icon>
+              <el-icon class="has-active-scale-effect"><ArrowDown /></el-icon>
               <template #dropdown>
                 <el-dropdown-menu class="group-setting-dropdown">
                   <el-dropdown-item
-                    @click="showCreateChannel = !showCreateChannel"
+                    @click="showCreateChannelDialog = !showCreateChannelDialog"
                     >添加群组频道</el-dropdown-item
                   >
                   <el-dropdown-item
@@ -110,7 +99,14 @@ watch(
                   <el-dropdown-item @click="showDeleteIcon = false" v-else
                     >取消删除频道</el-dropdown-item
                   >
-                  <el-dropdown-item divided>更换群组头像</el-dropdown-item>
+                  <el-dropdown-item
+                    divided
+                    @click="showUploadGroupAvatarDialog = true"
+                    >更换群组头像</el-dropdown-item
+                  >
+                  <el-dropdown-item>修改群组名称</el-dropdown-item>
+                  <el-dropdown-item>修改群组描述</el-dropdown-item>
+                  <el-dropdown-item divided>解散群组</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -121,57 +117,36 @@ watch(
         v-for="item in channelList"
         :key="item._id"
         :index="item._id"
-        class="channel-list"
+        class="panel-item"
         ><span>{{ item.name }}</span>
         <div class="new-announcements" v-if="!showDeleteIcon">3</div>
         <el-icon
-          class="deleteIcon"
+          class="deleteIcon has-active-scale-effect"
           @click="deleteSelectedChannel(item._id)"
           v-if="showDeleteIcon"
           ><DeleteFilled
         /></el-icon>
       </el-menu-item>
-      <el-menu-item index="2" class="channel-list"
-        ><span>通用</span>
-        <div class="new-messages"><span>272</span></div>
-      </el-menu-item>
-      <el-menu-item index="3" class="channel-list"
-        ><span>伙伴</span>
-        <div class="new-messages"><span>272</span></div>
-      </el-menu-item>
-      <el-menu-item index="4" class="channel-list"
-        ><span>mod</span>
-        <div class="new-messages"><span>272</span></div>
-      </el-menu-item>
     </el-menu>
     <div class="resize-bar" @mousedown="startDragging"></div>
   </div>
   <CreateChannelDialog
-    v-model:visible="showCreateChannel"
-    v-if="showCreateChannel"
+    v-model:visible="showCreateChannelDialog"
+    v-if="showCreateChannelDialog"
     @created="getChannels"
   ></CreateChannelDialog>
+  <UploadGroupAvatarDialog
+    v-model:visible="showUploadGroupAvatarDialog"
+    v-if="showUploadGroupAvatarDialog"
+    @upload-success="handleUploadSuccess"
+  ></UploadGroupAvatarDialog>
 </template>
 
 <style lang="scss" scoped>
-.container {
-  display: flex;
-  position: relative;
-}
+@use '@/assets/styles/chat/_shared-chat-layout.scss' as *;
+@use '@/assets/styles/ui-effects.scss' as *;
 
-.group-info {
-  width: 250px;
-  padding-top: 2px;
-  background-color: var(--el-bg-color-group-list);
-}
-
-.group-info .el-menu-item.group-name {
-  height: 120px;
-  padding: 0 0 20px 0;
-  border-bottom: 1px solid;
-}
-
-.group-info .group-background {
+.panel .group-background {
   width: 100%;
   height: 100%;
   display: flex;
@@ -180,48 +155,10 @@ watch(
   background-position: center;
   background-size: cover;
   font-size: 20px;
-  border-radius: 20px;
-}
-
-.group-background .el-dropdown {
-  color: var(--el-text-color-primary);
-}
-
-.el-dropdown .el-icon {
-  font-size: 20px;
-  outline: none;
-}
-
-.group-info .el-menu-item {
-  color: var(--el-text-color-regular);
-}
-
-.group-title {
-  width: 100%;
-  padding: 0 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(
-    to bottom,
-    var(--el-bg-color-group-title-box-bgc),
-    transparent
-  );
   border-radius: 20px 20px 0 0;
-  color: var(--el-text-color-primary);
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9); //突出文字
 }
 
-.group-title .el-icon {
-  margin-right: 0px;
-}
-
-.group-info .channel-list {
-  display: flex;
-  justify-content: space-between;
-  font-size: 16px;
-}
-.channel-list .new-announcements {
+.panel-item .new-announcements {
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
@@ -233,7 +170,7 @@ watch(
   text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.15);
 }
 
-.channel-list .new-messages {
+.panel-item .new-messages {
   font-size: 12px;
   text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.15);
 }
@@ -243,12 +180,8 @@ watch(
 }
 
 .container .el-menu-item:hover,
-.group-info .el-menu-item.is-active {
+.panel .el-menu-item.is-active {
   background-color: var(--el-bg-color-home-details-box-bgc);
-}
-
-.container .group-name:hover {
-  background-color: transparent;
 }
 
 .resize-bar {
@@ -263,5 +196,17 @@ watch(
   height: 20px;
   color: var(--el-text-color-primary);
   margin: 0;
+}
+
+.el-menu-item.is-active i {
+  color: var(--el-text-color-primary);
+}
+
+.container .el-menu .el-menu-item.title-box {
+  padding: 0;
+}
+
+.el-menu {
+  border: none;
 }
 </style>

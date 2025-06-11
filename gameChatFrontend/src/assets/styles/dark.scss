@@ -1,20 +1,27 @@
 // 自定义暗黑主题颜色
 html.dark {
   --el-color-primary: #FF9100; // 主色调
-  --el-bg-color: #1e1e1e; // 背景色
+  --el-color-primary-light-9:#FFFFFF0D;
+  --el-color-primary-light-3:#FFB547;
+  --el-color-primary-dark-2:#CC7300;
+  --el-color-primary-light-5: #FFB547;
+  --el-color-danger: #D32F2F;
   --el-text-color-primary: #FF9100; // 主要文字颜色
   --el-text-color-regular: #ffffff; // 常规文字颜色
   --el-text-color-secondary: #E0E0E0; // 次要文字颜色
   --el-text-color-quoted: #c0bebe; // 引用文字
+  --primary-text-color: #FF9100;
+  --el-bg-color: #1e1e1e; // 背景色
   --el-bg-color-login-bgc: #e09028;
   --el-bg-color-home-details-box-bgc: #242526;
   --el-bg-color-group-title-box-bgc: #7e705c;
   --el-bg-color-announcements: #DA3E44;
   --el-bg-color-group-list: #1e1e1e;
   --el-bg-color-message-item-hover: #FFFFFF0D;
-  --el-color-primary-light-9:#FFFFFF0D;
-  --el-color-primary-light-3:#FFB547;
-  --el-color-primary-dark-2:#CC7300;
-  --el-color-primary-light-5: #FFB547;
+  --el-menu-hover-text-color: #ffffff;
+  --el-bg-color-search-user-result: #2D2D2D;
+  --el-btn-hover-border-color: #ff9100;
+  --el-text-color-timestamp: #b0b0b0;
 }
+
 

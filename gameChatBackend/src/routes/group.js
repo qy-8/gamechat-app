@@ -2,16 +2,18 @@ const express = require('express')
 const router = express.Router()
 const {
   getUserGroups,
-  inviteUserToGroup,
+  sendGroupInvitation,
   createGroup,
   leaveGroup,
   uploadGroupAvatar,
   createChannel,
   deleteChannel,
-  getChannels
+  getChannels,
+  responseToGroupInvitation,
+  getGroupDetails
 } = require('../controller/groupController')
 const authMiddleware = require('../middlewares/authMiddleware')
-const upload = require('..//middlewares/upload')
+const upload = require('../middlewares/upload')
 
 /**
  * @swagger
@@ -178,14 +180,22 @@ router.get('/mine', authMiddleware, getUserGroups)
 
 /**
  * @swagger
- * /api/groups/members:
+ * /api/groups/{groupId}/invitations:
  *   post:
- *     summary: "邀请用户参加群组"
- *     description: "邀请用户参加群组。需要在 `Authorization` 里添加 Token"
+ *     summary: 批量邀请用户加入群组
+ *     description: 只有群主可以邀请用户加入群组。支持同时邀请多个用户。
  *     tags:
  *       - Group
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: groupId
+ *         in: path
+ *         required: true
+ *         description: 群组ID
+ *         schema:
+ *           type: string
+ *           example: 60f5a3c2e4b0a51234567890
  *     requestBody:
  *       required: true
  *       content:
@@ -193,48 +203,78 @@ router.get('/mine', authMiddleware, getUserGroups)
  *           schema:
  *             type: object
  *             required:
- *               - groupId
- *               - userId
+ *               - inviteeIds
  *             properties:
- *               groupId:
- *                 type: string
- *                 description: "群组id"
- *                 example: "63a6f8bde5bda2d43278e2c9"
- *               userId:
- *                 type: string
- *                 description: "用户id"
- *                 example: "63a6f8bde5bda2d43278e2c8"
+ *               inviteeIds:
+ *                 type: array
+ *                 description: 被邀请的用户ID数组
+ *                 items:
+ *                   type: string
+ *                 example: ["60f5a3c2e4b0a51234567891"]
  *     responses:
  *       200:
- *         description: "邀请成功"
+ *         description: 邀请成功
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/SuccessResponse'
- *                 - type: object
- *                   properties:
- *                     message:
- *                       example: "邀请成功"
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 data:
+ *                   type: object
+ *                   example: {}
+ *                 message:
+ *                   type: string
+ *                   example: 邀请成功
  *       400:
- *         description: "请求错误，例如群组不存在或用户已在群组中，或者非群主用户发起邀请"
+ *         description: 请求错误，例如群组不存在、非群主邀请、用户已在群组中、或邀请自己
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ErrorResponse'
- *                 - type: object
- *                   properties:
- *                     message:
- *                       example: "群组不存在/用户已在该群组中/只有群主才能邀请用户/邀请用户加入群组失败"
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 群组不存在/只有群主才能邀请用户/用户已在该群组中/不能邀请自己加入群组
+ *       409:
+ *         description: 存在重复邀请
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 已发送过邀请，请等待用户处理
+ *       500:
+ *         description: 服务器内部错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 发送群组邀请失败
  */
 
-router.post('/members', authMiddleware, inviteUserToGroup)
+router.post('/:groupId/invitations', authMiddleware, sendGroupInvitation)
 
 /**
  * @swagger
  * /api/groups/leave:
- *   post:
+ *   delete:
  *     summary: "退出群组"
  *     description: "用户退出指定的群组。用户将从群组成员列表中移除。需要在 `Authorization` 里添加 Token"
  *     tags:
@@ -280,12 +320,11 @@ router.post('/members', authMiddleware, inviteUserToGroup)
  *                       example: "您不在该群组中/退出群组失败"
  */
 
-router.post('/leave', authMiddleware, leaveGroup)
-// 待改，不应该是post，应该是delete
+router.delete('/leave', authMiddleware, leaveGroup)
 
 /**
  * @swagger
- * /api/group/avatar:
+ * /api/groups/:groupId/avatar:
  *   post:
  *     summary: "上传群组头像"
  *     description: "上传群组头像文件。需要添加 Token，以 multipart/form-data 方式上传头像。"
@@ -338,7 +377,7 @@ router.post('/leave', authMiddleware, leaveGroup)
  *                       example: "群组头像上传失败"
  */
 
-router.post('/avatar', upload.single('avatar'), uploadGroupAvatar)
+router.post('/:groupId/avatar', upload.single('avatar'), uploadGroupAvatar)
 
 /**
  * @swagger
@@ -453,7 +492,246 @@ router.post('/channel', authMiddleware, createChannel)
 
 router.delete('/channel/:channelId', authMiddleware, deleteChannel)
 
-// 获取所有频道
+/**
+ * @swagger
+ * /api/groups/{groupId}/channels:
+ *   get:
+ *     summary: "获取群组的所有频道"
+ *     description: "根据群组 ID 获取该群组下的所有频道。需要在请求头 `Authorization` 中携带 Token。"
+ *     tags:
+ *       - Channel
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 群组的 ID
+ *     responses:
+ *       200:
+ *         description: "获取频道成功"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: "#/components/schemas/SuccessResponse"
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: "#/components/schemas/Channel"
+ *                     message:
+ *                       example: "获取频道成功"
+ *       500:
+ *         description: "获取频道失败"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: "#/components/schemas/ErrorResponse"
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "获取频道失败"
+ */
+
 router.get('/channel/:groupId/channels', authMiddleware, getChannels)
+
+/**
+ * @swagger
+ * /api/groups/{groupId}/invitations/response:
+ *   post:
+ *     summary: 响应群组邀请
+ *     description: 用户可以通过此接口接受或拒绝群组邀请。需要身份验证。
+ *     tags:
+ *       - Group
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: groupId
+ *         in: path
+ *         required: true
+ *         description: 群组ID
+ *         schema:
+ *           type: string
+ *           example: 60f5a3c2e4b0a51234567890
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - action
+ *             properties:
+ *               action:
+ *                 type: string
+ *                 enum: [accept, decline]
+ *                 description: 用户对群组邀请的响应
+ *                 example: accept
+ *     responses:
+ *       200:
+ *         description: 操作成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 data:
+ *                   type: object
+ *                   example: null
+ *                 message:
+ *                   type: string
+ *                   example: 已成功加入群组
+ *       400:
+ *         description: 无效操作
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 无效操作
+ *       404:
+ *         description: 群组不存在或邀请已失效
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 群组不存在 / 邀请已失效
+ *       500:
+ *         description: 操作失败（服务器错误）
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 操作失败
+ */
+
+router.post(
+  '/:groupId/invitations/response',
+  authMiddleware,
+  responseToGroupInvitation
+)
+
+/**
+ * @swagger
+ * /api/groups/{groupId}:
+ *   get:
+ *     summary: 获取群组详情（成员列表）
+ *     description: 获取指定群组的详细信息，包括所有成员。仅群组成员可查看。
+ *     tags:
+ *       - Group
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: groupId
+ *         in: path
+ *         required: true
+ *         description: 群组ID
+ *         schema:
+ *           type: string
+ *           example: 60f5a3c2e4b0a51234567890
+ *     responses:
+ *       200:
+ *         description: 获取成功，返回群组及其成员信息
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "60f5a3c2e4b0a51234567890"
+ *                     name:
+ *                       type: string
+ *                       example: "我的游戏组"
+ *                     members:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: "60f5a3c2e4b0a51234567891"
+ *                           username:
+ *                             type: string
+ *                             example: "player01"
+ *                           avatar:
+ *                             type: string
+ *                             example: "/avatars/avatar01.png"
+ *                 message:
+ *                   type: string
+ *                   example: 获取群组详情成功
+ *       403:
+ *         description: 当前用户不是群组成员，无法访问
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 你不是该群组成员，无权查看
+ *       404:
+ *         description: 群组不存在
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 群组不存在
+ *       500:
+ *         description: 服务器内部错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 获取群组详情失败
+ */
+
+router.get('/:groupId', authMiddleware, getGroupDetails)
 
 module.exports = router

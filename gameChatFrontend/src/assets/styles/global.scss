@@ -1,18 +1,3 @@
-$text-color: #FFFFFF;
-$background-color: #1E1E1E;
-$link-hover-color: #FF9100;
-$link-hover-background-color: rgba(255, 145, 0, 0.1);
-:root {
-  --link-hover-color: #FF9100;
-  --link-hover-background-color: rgba(255, 145, 0, 0.1);
-  --background-color: #1E1E1E;
-  --el-menu-hover-bg-color: #FF9100;
-  --icons-color: #FF9100;
-  --primary-text-color: #FF9100;
-  --secondary-text-color: #ffffff;
-  --login-background-color: #e09028;
-}
-
 * {
   margin: 0;
   padding: 0;
@@ -57,3 +42,17 @@ button, input, select, textarea {
   outline: none;
 }
 
+// $text-color: #FFFFFF;
+// $background-color: #1E1E1E;
+// $link-hover-color: #FF9100;
+// $link-hover-background-color: rgba(255, 145, 0, 0.1);
+// :root {
+//   --link-hover-color: #FF9100;
+//   --link-hover-background-color: rgba(255, 145, 0, 0.1);
+//   --background-color: #1E1E1E;
+//   --el-menu-hover-bg-color: #FF9100;
+//   --icons-color: #FF9100;
+//   --primary-text-color: #FF9100;
+//   --secondary-text-color: #ffffff;
+//   --login-background-color: #e09028;
+// }

@@ -7,7 +7,7 @@ const authMiddleware = require('../middlewares/authMiddleware')
 
 /**
  * @swagger
- * /api/users/me/password:
+ * /api/auth/users/me/password:
  *   put:
  *     summary: "重设密码"
  *     description: "重设密码。需要在请求头 `Authorization` 中携带 Token。"
@@ -22,19 +22,23 @@ const authMiddleware = require('../middlewares/authMiddleware')
  *           schema:
  *             type: object
  *             required:
- *               - oldPwd
  *               - newPwd
+ *               - phoneNumber
+ *               - code
  *             properties:
- *               oldPwd:
- *                 type: string
- *                 format: password
- *                 description: "旧密码"
- *                 example: "strongpassword123"
  *               newPwd:
  *                 type: string
  *                 format: password
  *                 description: "新密码"
  *                 example: "strongpassword123"
+ *               phoneNumber:
+ *                 type: string
+ *                 description: "手机号码"
+ *                 example: "13849508394"
+ *               code:
+ *                 type: string
+ *                 description: "手机验证码"
+ *                 example: "123456"
  *     responses:
  *       200:
  *         description: "密码重置成功"
@@ -48,7 +52,7 @@ const authMiddleware = require('../middlewares/authMiddleware')
  *                     message:
  *                       example: "密码重置成功"
  *       400:
- *         description: "请求错误，包括用户不存在/旧密码不正确"
+ *         description: "请求错误，包括用户不存在"
  *         content:
  *           application/json:
  *             schema:
@@ -57,7 +61,7 @@ const authMiddleware = require('../middlewares/authMiddleware')
  *                 - type: object
  *                   properties:
  *                     message:
- *                       example: "用户不存在/旧密码不正确"
+ *                       example: "用户不存在"
  */
 
 router.put(

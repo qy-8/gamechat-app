@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores'
 import Home from '@/views/Home.vue'
 import Chat from '@/views/Chat.vue'
+import FriendList from '@/components/FriendList.vue'
+import ChannelList from '@/components/ChannelList.vue'
 
 // 首页和聊天界面正常加载，其余不常用的页面懒加载
 const routes = [
@@ -19,6 +21,18 @@ const routes = [
     path: '/chat',
     component: Chat,
     name: 'Chat',
+    children: [
+      {
+        path: '',
+        name: 'ChannelList',
+        component: ChannelList
+      },
+      {
+        path: 'friends',
+        name: 'FriendList',
+        component: FriendList
+      }
+    ],
     meta: { requiresAuth: true }
   }
 ]

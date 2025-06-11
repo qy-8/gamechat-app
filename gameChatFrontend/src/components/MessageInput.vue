@@ -1,5 +1,27 @@
 <script setup>
 // 消息输入框组件（MessageInput）：用户输入消息的地方。支持文本输入、表情符号、附件上传等功能。
+import { ref } from 'vue'
+import { useChatStore } from '../stores'
+import { sendMessage } from '../api/chat'
+
+const messageInput = ref('')
+const messageType = ref('text')
+const chatStore = useChatStore()
+
+const sendInputMessage = async () => {
+  const input = messageInput.value
+  messageInput.value = ''
+  try {
+    const response = await sendMessage({
+      conversationId: chatStore.activeConversationId,
+      content: input,
+      messageType: messageType.value
+    })
+    console.log(response)
+  } catch (error) {
+    console.error(error)
+  }
+}
 </script>
 <template>
   <div class="message-input-container">
@@ -11,7 +33,11 @@
     </div>
     <div class="message-container">
       <div class="text-input">
-        <el-input placeholder="发送消息" />
+        <el-input
+          v-model="messageInput"
+          placeholder="发送消息"
+          @keyup.enter="sendInputMessage"
+        />
       </div>
       <div class="input-tools">
         <div class="emoji icon">
@@ -77,6 +103,13 @@
 // 使输入框背景透明
 ::v-deep(.el-input__wrapper) {
   background-color: transparent;
+  box-shadow: none;
+}
+
+::v-deep(.el-input__wrapper):hover {
+  box-shadow: none;
+}
+::v-deep(.el-input__wrapper:focus-within) {
   box-shadow: none;
 }
 

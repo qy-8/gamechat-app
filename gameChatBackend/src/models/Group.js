@@ -16,7 +16,28 @@ const groupSchema = new mongoose.Schema(
       }
     ], // 群组成员，关联 User
     avatar: { type: String, default: '' }, // 群组头像路径
-    status: { type: Number, enum: [0, 1], default: 1 } // 0: 禁用, 1: 正常
+    status: { type: Number, enum: [0, 1], default: 1 }, // 0: 禁用, 1: 正常
+    pendingInvitations: [
+      {
+        inviter: {
+          // 谁发起的邀请
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true
+        },
+        invitee: {
+          // 邀请了谁
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true
+        },
+        createdAt: {
+          // 邀请的创建时间
+          type: Date,
+          default: Date.now
+        }
+      }
+    ]
   },
   { timestamps: true } // 自动添加 createdAt 和 updatedAt
 )

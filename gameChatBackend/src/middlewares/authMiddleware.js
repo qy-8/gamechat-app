@@ -12,7 +12,7 @@ const authMiddleware = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     req.user = decoded // 将解码后的信息存储到req.user
-    console.log(decoded)
+    // console.log(decoded)
     next() // 验证成功
   } catch (err) {
     return response.error(res, '令牌不正确或登陆已过期', 401)

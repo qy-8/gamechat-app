@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import ChatIcon from '../components/GameChatIcon.vue'
 import { useThemeStore } from '@/stores/modules/themeStore'
 import ThemeSwitch from '@/components/ThemeToggle.vue'
+import router from '@/router'
 
 const themeStore = useThemeStore()
 // 初始化主题
@@ -67,8 +68,4 @@ themeStore.initTheme()
     background-color: transparent;
   }
 }
-
-/* TODO: 颜色，字体，背景，圆角按键signin背景等 */
-/* 1. 点击gc回到home
-2.  背景+文字*/
 </style>

@@ -373,7 +373,7 @@ router.get('/info', authMiddleware, getUserInfo)
 /**
  * @swagger
  * /api/auth/update:
- *   post:
+ *   put:
  *     summary: "更新用户信息"
  *     description: "更新用户个人信息，包括用户名,手机号码。需要在请求头 `Authorization` 中携带 Token。"
  *     tags:
@@ -431,9 +431,84 @@ router.put(
   updateUserInfo
 )
 
-// 上面和下面都被更改为put，未测试
+/**
+ * @swagger
+ * /api/auth/me/avatar:
+ *   put:
+ *     summary: "上传或更新用户头像"
+ *     description: "用户上传头像图片，将图片上传至 OSS 并更新数据库中的头像地址。需要在请求头携带 Token。"
+ *     tags:
+ *       - User
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - avatar
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: 用户头像文件
+ *     responses:
+ *       200:
+ *         description: "头像上传成功"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: "#/components/schemas/SuccessResponse"
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: object
+ *                       properties:
+ *                         avatarUrl:
+ *                           type: string
+ *                           example: "https://bucket.oss.x.com/avatar/x.png"
+ *                     message:
+ *                       example: "个人头像更新成功"
+ *       400:
+ *         description: "上传失败，缺少文件或 userId"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: "#/components/schemas/ErrorResponse"
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "个人头像上传失败"
+ *       404:
+ *         description: "用户不存在"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: "#/components/schemas/ErrorResponse"
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "用户不存在，头像信息未更新"
+ *       500:
+ *         description: "服务器内部错误"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: "#/components/schemas/ErrorResponse"
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: "服务器内部错误: 上传个人头像失败"
+ */
 
-router.put('/me/avatar', upload.single('avatar'), uploadAvatar)
+router.put('/me/avatar', upload.single('avatar'), authMiddleware, uploadAvatar)
+
 /**
  * @swagger
  * /api/auth/delete:

@@ -5,7 +5,7 @@ const joi = require('joi')
 // 用户名，字母/数字，3-15 位字符
 const username = joi
   .string()
-  .alphanum()
+  .pattern(/^[\u4e00-\u9fa5a-zA-Z0-9]{3,15}$/)
   .min(3)
   .max(15)
   .required()
@@ -65,15 +65,15 @@ exports.regSchema = {
 
 exports.resetPasswordSchema = {
   body: {
-    oldPwd: password,
-    newPwd: joi.not(joi.ref('oldPwd')).concat(password)
+    newPwd: joi.not(joi.ref('oldPwd')).concat(password),
+    phoneNumber,
+    code
   }
 }
 
 exports.updateUserSchema = {
   body: {
     username,
-    avatar,
     phoneNumber
   }
 }

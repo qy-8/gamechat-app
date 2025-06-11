@@ -17,6 +17,7 @@ const onSubmit = () => {
     :model-value="visible"
     @update:model-value="emit('update:visible', $event)"
     center
+    width="440px"
   >
     <template #header>
       <div class="dialog-title">
@@ -56,12 +57,14 @@ const onSubmit = () => {
   justify-content: center;
   color: var(--el-text-color-secondary);
   font-size: large;
-  padding-left: 52px;
+  // padding-left: 52px;
+  padding-left: 28px;
 }
 
 .dialog-content {
   display: flex;
   justify-content: center;
+  align-items: center;
   padding-top: 10px;
   width: 100%;
 }

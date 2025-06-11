@@ -24,3 +24,21 @@ export const getChannelList = (groupId) => {
 export const deleteChannel = (channelId) => {
   return request.delete(`/api/groups/channel/${channelId}`)
 }
+
+// 上传群组头像
+export const uploadGroupAvatar = (data) => {
+  const { groupId, avatar } = data
+  return request.post(`api/groups/${groupId}/avatar`, avatar)
+}
+
+// 获取用户所属群组的所有用户
+export const getGroupMembers = (groupId) => {
+  return request.get(`/api/groups/${groupId}`)
+}
+
+// 批量邀请用户加入群组
+export const sendGroupInvitation = (data) => {
+  const { groupId, inviteeIds } = data
+  console.log(groupId, inviteeIds)
+  return request.post(`/api/groups/${groupId}/invitations`, { inviteeIds })
+}

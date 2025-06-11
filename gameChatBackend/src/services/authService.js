@@ -12,7 +12,7 @@ const generateToken = (user) => {
       favoriteGames: user.favoriteGames
     },
     process.env.JWT_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: '144h' }
   )
 }
 

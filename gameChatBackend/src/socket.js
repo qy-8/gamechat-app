@@ -1,67 +1,57 @@
-const onlineUsers = {} // 在线用户列表, socket.id 作为 key，用户数据作为 value
-const messageCooldowns = {} // 每个用户的消息冷却时间
+const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose')
+const { addUserSocket, removeUserSocket } = require('./utils/socketManager')
 
-const setupSocket = (io) => {
-  // io 为 socket.io 的服务器实例，监听 connection 事件，当用户连接到服务器时触发
-  // socket 为当前连接用户，唯一且有 socket.id 标识
-  io.on('connection', (socket) => {
-    console.log(`用户连接: ${socket.id}`)
+function setupSocket(io) {
+  // 中间件验证 token
+  io.use(async (socket, next) => {
+    const token = socket.handshake.auth.token
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const userId = decoded.userId
 
-    // 将用户添加到在线用户列表
-    onlineUsers[socket.id] = {
-      socketId: socket.id,
-      username: '' // 假设你通过登录或其他方式获取用户名
+        if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+          console.error('Socket 验证：token 中的 userId 无效')
+          return next(new Error('验证失败，token 无效'))
+        }
+        socket.userId = userId.toString()
+        next()
+      } catch (error) {
+        console.error('Socket 验证 token 时出现问题', error)
+        next(new Error('验证失败，token 无效'))
+      }
+    } else {
+      console.log('需要 token 认证 Socket')
+      next(new Error('缺少 token'))
     }
-    console.log(onlineUsers)
+  })
 
-    // 处理用户加入房间
-    socket.on('joinRoom', (room) => {
-      socket.join(room)
-      console.log(`用户 ${socket.id} 加入房间 ${room}`)
-      io.to(room).emit('message', `${socket.id} 已加入房间`)
-    })
+  io.on('connection', (socket) => {
+    const userId = socket.userId
 
-    // 处理用户离开房间
-    socket.on('leaveRoom', (room) => {
-      socket.leave(room)
-      console.log(`用户 ${socket.id} 离开房间 ${room}`)
-      io.to(room).emit('message', `${socket.id} 已离开房间`)
-    })
+    if (!userId) {
+      console.error('Socket 已连接，未提供 userId，正在断开连接')
+      socket.disconnect(true)
+      return
+    }
+    console.log('Socket 已连接')
 
-    // 限制消息发送频率，防止滥用
-    socket.on('sendMessage', (data) => {
-      const { room, message, isAnnouncement } = data
+    // 添加用户的 socket 连接记录
+    addUserSocket(userId, socket.id)
 
-      // 如果是公告消息，广播到所有房间
-      if (isAnnouncement) {
-        io.emit('announcement', message) // 广播公告给所有人
-        console.log(`广播公告: ${message}`)
-        return
+    socket.on('ping_server', (data, callback) => {
+      if (typeof callback === 'function') {
+        callback('pong from server')
       }
-
-      // 如果是房间消息，限制用户发送频率
-      if (
-        messageCooldowns[socket.id] &&
-        Date.now() - messageCooldowns[socket.id] < 1000
-      ) {
-        // 如果冷却时间未过，拒绝处理
-        socket.emit('message', '请稍等一会再发送消息')
-        return
-      }
-
-      // 更新冷却时间
-      messageCooldowns[socket.id] = Date.now()
-
-      // 向房间发送消息
-      io.to(room).emit('message', message)
-      console.log(`房间 ${room} 中发送消息: ${message}`)
     })
 
-    // 用户断开连接
-    socket.on('disconnect', () => {
-      console.log(`用户 ${socket.id} 断开连接`)
-      delete onlineUsers[socket.id] // 从在线用户列表中删除
-      delete messageCooldowns[socket.id] // 删除用户的冷却时间记录
+    socket.on('disconnect', (reason) => {
+      console.log(
+        `用户 ${userId}，Socket ID ${socket.id} 因 ${reason} 断开连接`
+      )
+      // 移除用户的 socket 连接记录
+      removeUserSocket(socket.id)
     })
   })
 }

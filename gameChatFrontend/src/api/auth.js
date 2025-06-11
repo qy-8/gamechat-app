@@ -1,3 +1,4 @@
+import { dataType } from 'element-plus/es/components/table-v2/src/common.mjs'
 import request from '../utils/request'
 
 // 获得图形验证码
@@ -19,6 +20,14 @@ export const registerUser = (data) => {
 export const loginByPhone = (data) => {
   return request.post('/api/auth/login/phone', data)
 }
+
 // 使用用户名登陆
-export const loginByUsername = (data) =>
-  request.post('/api/auth/login/username', data)
+export const loginByUsername = (data) => {
+  return request.post('/api/auth/login/username', data)
+}
+
+// 重设密码
+export const resetPassword = (data) => {
+  // console.log(data)
+  return request.put('/api/auth/users/me/password', data)
+}

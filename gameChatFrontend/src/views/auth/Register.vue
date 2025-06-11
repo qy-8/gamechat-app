@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { fetchCaptcha, sendSmsCode, registerUser } from '@/api/auth'
 import { ElMessage } from 'element-plus'
 import { useCountdown } from '@/composables/useCountdown'
+import { createConfirmPasswordValidator } from '../../utils/pwdValidators'
 
 // 控制表单提交后的loading状态
 const captchaCode = ref('')
@@ -17,18 +18,6 @@ const form = reactive({
 const loading = ref(false)
 const registerFormRef = ref(null)
 const { timeLeft, isCounting, start } = useCountdown()
-
-// 自定义校验表单中的确认密码 rePassword
-const validateConfirmPassword = (rule, value, callback) => {
-  if (value === '') {
-    callback(new Error('请在此输入密码'))
-  } else if (value !== form.password) {
-    console.log(form.password, value)
-    callback(new Error('确认密码与密码不一致'))
-  } else {
-    callback() // 校验通过
-  }
-}
 
 // 注册表单校验规则
 const rules = reactive({
@@ -72,7 +61,12 @@ const rules = reactive({
       trigger: 'blur'
     }
   ],
-  rePassword: [{ validator: validateConfirmPassword, trigger: 'blur' }]
+  rePassword: [
+    {
+      validator: createConfirmPasswordValidator(() => form.password),
+      trigger: 'blur'
+    }
+  ]
 })
 
 // 获取图形验证码

@@ -101,7 +101,7 @@ const registerClickAnimation = '/animations/register-hand.json'
   background-image: url('/images/background3.jpg');
   background-size: cover;
   background-position: center;
-  color: var(--el-color-primary);
+  color: var(--primary-text-color);
   text-align: left;
 }
 

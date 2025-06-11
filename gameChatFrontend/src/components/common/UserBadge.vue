@@ -1,0 +1,58 @@
+<template>
+  <div class="user-badge" @click="handleClick">
+    <el-avatar :size="size" :src="avatar">
+      {{ username?.charAt(0) }}
+    </el-avatar>
+    <span class="username">
+      {{ username }}
+    </span>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  avatar: {
+    type: String,
+    default: '/images/defaultUserAvatar.png'
+  },
+  username: {
+    type: String,
+    required: true
+  },
+  size: {
+    type: Number,
+    default: 40 // 默认大小为 40px
+  }
+})
+
+const emit = defineEmits(['click'])
+
+const handleClick = (event) => {
+  emit('click', event)
+}
+</script>
+
+<style scoped>
+.user-badge {
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.user-badge:hover {
+  background-color: var(--el-fill-color-light);
+}
+
+.username {
+  margin-left: 12px;
+  font-weight: 500;
+  color: var(--el-text-color-primary);
+}
+</style>

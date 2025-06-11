@@ -21,8 +21,8 @@ const createChannelRules = reactive({
   name: [
     { required: true, message: '请输入频道名称', trigger: 'blur' },
     {
-      pattern: /^[a-zA-Z0-9]{3,15}$/,
-      message: '频道名称需为3-15位字符',
+      pattern: /^[\u4e00-\u9fa5a-zA-Z0-9]{2,15}$/,
+      message: '频道名称需为2-15位字符',
       trigger: 'blur'
     }
   ]

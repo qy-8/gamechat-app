@@ -15,6 +15,7 @@ client.on('error', (err) => console.error('Redis Error: ', err))
 
 // 发送短信验证码，在发送验证码之前先检测图形验证码是否正确
 const sendSmsCode = (req) => {
+  // console.log(req)
   const { phoneNumber, captcha } = req.body
   if (!captchaHandler.verifyCaptcha(req, captcha)) {
     throw new Error('图形验证码错误')
@@ -41,6 +42,7 @@ const storeSmsCode = (phoneNumber, code) => {
 
 // 从 Redis 拿到 code 和客户端的输入进行对比
 const verifySmsCode = async (req, res) => {
+  console.log(req.body)
   const { phoneNumber, code } = req.body
 
   try {

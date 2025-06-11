@@ -103,17 +103,25 @@ const getCode = async () => {
 }
 
 const login = async () => {
-  try {
-    const result = await loginByPhone(phoneForm)
-    const token = result.data
-    localStorage.setItem('token', token)
-    const userStore = useUserStore()
-    userStore.setToken(token)
-    ElMessage({ message: result.message, type: 'success' })
-    router.push('/chat')
-  } catch (error) {
-    console.error(error)
-  }
+  userFormRef.value.validate(async (valid) => {
+    if (!valid) {
+      loading.value = false // 关闭 loading
+      console.log('验证失败')
+      // TODO: login page
+      return
+    }
+    try {
+      const result = await loginByPhone(phoneForm)
+      const token = result.data
+      localStorage.setItem('token', token)
+      const userStore = useUserStore()
+      userStore.setToken(token)
+      ElMessage({ message: result.message, type: 'success' })
+      router.push('/chat')
+    } catch (error) {
+      console.error(error)
+    }
+  })
 }
 </script>
 
