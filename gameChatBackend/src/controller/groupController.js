@@ -5,6 +5,7 @@ const Channel = require('../models/Channel')
 const ossClient = require('../utils/ossClient')
 const path = require('path')
 const fs = require('fs')
+const { getUserSockets } = require('../utils/socketManager')
 
 // 创建群组
 const createGroup = async (req, res) => {
@@ -35,11 +36,13 @@ const createGroup = async (req, res) => {
 const getUserGroups = async (req, res) => {
   try {
     const userId = req.user.userId
-    const groups = await Group.find({ members: userId }).populate(
-      'members',
-      'username avatar'
+    // const groups = await Group.find({ members: userId }).populate(
+    //   'members',
+    //   'username avatar'
+    // )
+    const groups = await Group.find({ members: userId }).select(
+      'name avatar description type'
     )
-
     response.success(res, groups, '获取群组信息成功')
   } catch (err) {
     response.error(res, '获取群组信息失败', 400)
@@ -96,6 +99,26 @@ const sendGroupInvitation = async (req, res) => {
 
     await group.save()
 
+    const io = req.app.get('io')
+
+    const inviterInfo = await User.findById(inviterId)
+      .select('username avatar')
+      .lean()
+    const groupInfo = { _id: group._id, name: group.name, avatar: group.avatar }
+
+    for (const inviteeId of inviteeIds) {
+      const recipientSockets = getUserSockets(inviteeId.toString())
+      if (recipientSockets && recipientSockets.size > 0) {
+        const invitationPayload = {
+          group: groupInfo,
+          inviter: inviterInfo
+        }
+        // 向该用户的所有打开的客户端发送事件
+        recipientSockets.forEach((socketId) => {
+          io.to(socketId).emit('new_group_invitation', invitationPayload)
+        })
+      }
+    }
     // 返回成功响应
     response.success(res, {}, '邀请成功')
   } catch (err) {
@@ -319,13 +342,13 @@ const responseToGroupInvitation = async (req, res) => {
       group.pendingInvitations.pull(invitation._id)
 
       await group.save()
-      return response.success(res, null, '已成功加入群组')
+      return response.success(res, group, '已成功加入群组')
     } else {
       group.pendingInvitations.pull(invitation._id)
       await group.save()
       return response.success(res, null, '已拒绝群组邀请')
     }
-  } catch {
+  } catch (error) {
     console.error(error)
     response.error(res, '操作失败')
   }
@@ -359,6 +382,135 @@ const getGroupDetails = async (req, res) => {
   }
 }
 
+const searchGroupMembers = async (req, res) => {
+  try {
+    const { groupId } = req.params
+    const { q: searchTerm, page = 1, limit = 5 } = req.query
+    const currentUserId = req.user.userId
+
+    if (!searchTerm) {
+      return response.success(
+        res,
+        {
+          members: [],
+          currentPage: 1,
+          totalPages: 0,
+          totalMembers: 0
+        },
+        '请输入搜索关键词'
+      )
+    }
+
+    const group = await Group.findById(groupId).select('members')
+
+    if (!group) {
+      response.error(res, '群组不存在', 400)
+    }
+
+    const isMember = group.members.some((memberId) =>
+      memberId.equals(currentUserId)
+    )
+
+    if (!isMember) {
+      response.error(res, '您不是群组成员，无权限搜索群组成员', 403)
+    }
+
+    const searchRegex = new RegExp(searchTerm, 'i')
+    // 搜索条件：
+    // 1. _id 在群组的 members 中
+    // 2. username 必须匹配搜索词
+    const queryConditions = {
+      _id: { $in: group.members },
+      username: { $regex: searchRegex }
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit)
+    const [foundMembers, totalMembers] = await Promise.all([
+      User.find(queryConditions)
+        .select('username avatar _id')
+        .skip(skip)
+        .limit(parseInt(limit)),
+      User.countDocuments(queryConditions)
+    ])
+    const totalPages = Math.ceil(totalMembers / parseInt(limit))
+
+    const responseData = {
+      members: foundMembers,
+      currentPage: parseInt(page),
+      totalPages: totalPages,
+      totalMembers: totalMembers
+    }
+    response.success(res, responseData, '成员搜索成功')
+  } catch (error) {
+    console.error(error)
+    response.error(res, '搜索失败，服务器内部错误', 500)
+  }
+}
+
+const getPendingGroupInvitations = async (req, res) => {
+  try {
+    const currentUserId = req.user.userId
+
+    const groupsWithMyInvites = await Group.find({
+      'pendingInvitations.invitee': currentUserId
+    })
+      .select('name avatar createdBy pendingInvitations')
+      .populate('pendingInvitations.inviter', 'username avatar')
+
+    const myInvitations = groupsWithMyInvites.flatMap((group) =>
+      group.pendingInvitations
+        .filter((invitation) => invitation.invitee.equals(currentUserId))
+        .map((invitation) => ({
+          _id: invitation._id,
+          group: {
+            _id: group._id,
+            name: group.name,
+            avatar: group.avatar
+          },
+          inviter: invitation.inviter,
+          createdAt: invitation.createdAt
+        }))
+    )
+    myInvitations.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+
+    response.success(res, myInvitations, '获取待处理的群组邀请成功')
+  } catch (err) {
+    console.error('获取群组邀请失败:', err)
+    response.error(res, '获取邀请失败，服务器内部错误')
+  }
+}
+
+const kickGroupMember = async (req, res) => {
+  try {
+    const { groupId, memberId } = req.params
+    const currentUserId = req.user.userId
+
+    const group = await Group.findById(groupId)
+    if (!group) {
+      return response.error(res, '未找到对应群组', 404)
+    }
+    if (group.createdBy.toString() !== currentUserId) {
+      return response.error(res, '您没有权限执行此操作', 403)
+    }
+    if (memberId === currentUserId) {
+      return response.error(res, '群主不能将自己移出群组', 400)
+    }
+    const isMember = group.members.some((id) => id.equals(memberId))
+    if (!isMember) {
+      return response.error(res, '该用户不是群组成员', 404)
+    }
+
+    await Group.updateOne({ _id: groupId }, { $pull: { members: memberId } })
+
+    await User.updateOne({ _id: memberId }, { $pull: { groups: groupId } })
+
+    return response.success(res, null, '移除成功')
+  } catch (error) {
+    console.error(error)
+    return response.error(res, '踢出群组成员失败')
+  }
+}
+
 module.exports = {
   createGroup,
   getUserGroups,
@@ -369,5 +521,8 @@ module.exports = {
   deleteChannel,
   getChannels,
   responseToGroupInvitation,
-  getGroupDetails
+  getGroupDetails,
+  searchGroupMembers,
+  getPendingGroupInvitations,
+  kickGroupMember
 }

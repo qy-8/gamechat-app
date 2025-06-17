@@ -10,7 +10,10 @@ const {
   deleteChannel,
   getChannels,
   responseToGroupInvitation,
-  getGroupDetails
+  getGroupDetails,
+  searchGroupMembers,
+  getPendingGroupInvitations,
+  kickGroupMember
 } = require('../controller/groupController')
 const authMiddleware = require('../middlewares/authMiddleware')
 const upload = require('../middlewares/upload')
@@ -733,5 +736,256 @@ router.post(
  */
 
 router.get('/:groupId', authMiddleware, getGroupDetails)
+
+/**
+ * @swagger
+ * /api/groups/{groupId}/members:
+ *   get:
+ *     summary: 搜索群组成员
+ *     description: 在指定群组中根据用户名搜索群组成员。仅群组成员可访问。支持分页。
+ *     tags:
+ *       - Group
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: groupId
+ *         in: path
+ *         required: true
+ *         description: 群组ID
+ *         schema:
+ *           type: string
+ *           example: 60f5a3c2e4b0a51234567890
+ *       - name: q
+ *         in: query
+ *         required: true
+ *         description: 搜索关键字（匹配用户名）
+ *         schema:
+ *           type: string
+ *           example: 小明
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: 当前页码（默认为 1）
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: 每页返回数量（默认为 20）
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *     responses:
+ *       200:
+ *         description: 成员搜索成功或无搜索词返回空列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     members:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 60f5a3c2e4b0a51234567891
+ *                           username:
+ *                             type: string
+ *                             example: 小明
+ *                           avatar:
+ *                             type: string
+ *                             example: /uploads/avatar1.png
+ *                     currentPage:
+ *                       type: integer
+ *                       example: 1
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 5
+ *                     totalMembers:
+ *                       type: integer
+ *                       example: 43
+ *                 message:
+ *                   type: string
+ *                   example: 成员搜索成功
+ *       400:
+ *         description: 群组不存在
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: 当前用户不是群组成员
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.get('/:groupId/members', authMiddleware, searchGroupMembers)
+
+/**
+ * @swagger
+ * /api/groups/invitations/pending:
+ *   get:
+ *     summary: 获取当前用户的待处理群组邀请
+ *     description: 返回当前登录用户尚未响应的群组邀请信息，需要携带 Bearer Token。
+ *     tags:
+ *       - Group
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 成功获取待处理的邀请列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 data:
+ *                   type: array
+ *                   description: 待处理的邀请列表
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         description: 邀请记录的 ID
+ *                         example: 662f0c9fd203d5a8b4f3a123
+ *                       group:
+ *                         type: object
+ *                         description: 邀请所属的群组信息
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 663fae123fc6d803a8d38a77
+ *                           name:
+ *                             type: string
+ *                             example: 狼人杀爱好者
+ *                           avatar:
+ *                             type: string
+ *                             example: /uploads/group_avatar.png
+ *                       inviter:
+ *                         type: object
+ *                         description: 邀请人信息
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 663fae123fc6d803a8d38a78
+ *                           username:
+ *                             type: string
+ *                             example: Henry
+ *                           avatar:
+ *                             type: string
+ *                             example: /uploads/user_avatar.jpg
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2025-06-08T12:34:56.789Z
+ *                 message:
+ *                   type: string
+ *                   example: 获取待处理的群组邀请成功
+ *       401:
+ *         description: 未登录或 token 无效
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.get('/invitations/pending', authMiddleware, getPendingGroupInvitations)
+
+/**
+ * @swagger
+ * /api/groups/{groupId}/members/{memberId}:
+ *   delete:
+ *     summary: 移除群组成员
+ *     description: 群主可以将群组中的其他成员移出群组，不能移除自己。
+ *     tags:
+ *       - Group
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: groupId
+ *         in: path
+ *         required: true
+ *         description: 群组 ID
+ *         schema:
+ *           type: string
+ *           example: 6640ab1234cf8a0012c88ef9
+ *       - name: memberId
+ *         in: path
+ *         required: true
+ *         description: 要移除的用户 ID
+ *         schema:
+ *           type: string
+ *           example: 6640ab1234cf8a0012c88efa
+ *     responses:
+ *       200:
+ *         description: 成员移除成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 data:
+ *                   type: object
+ *                   example: {}
+ *                 message:
+ *                   type: string
+ *                   example: 移除成功
+ *       400:
+ *         description: 请求无效（如尝试移除自己）
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: 没有权限
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: 群组或用户未找到
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.delete('/:groupId/members/:memberId', authMiddleware, kickGroupMember)
 
 module.exports = router

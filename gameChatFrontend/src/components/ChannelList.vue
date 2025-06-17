@@ -2,51 +2,45 @@
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ref, onMounted, watch } from 'vue'
 import CreateChannelDialog from './CreateChannelDialog.vue'
-import { useGroupStore } from '@/stores'
-import { deleteChannel, getChannelList } from '../api/group'
+import { useGroupStore, useChannelStore } from '@/stores'
+
 import { DeleteFilled } from '@element-plus/icons-vue'
 // import { changeGlobalNodesTarget } from 'element-plus/es/utils/index.mjs'
 import UploadGroupAvatarDialog from './UploadGroupAvatarDialog.vue'
 import { useDraggableWidth } from '../composables/useDraggableWidth'
+import { storeToRefs } from 'pinia'
 
 const activeIndex = ref('1')
 // let isDragging = false
 const groupInfo = ref(null)
 // let startX = 0
 // let startWidth = 0
+const channelStore = useChannelStore(0)
 const showCreateChannelDialog = ref(false)
 const groupStore = useGroupStore()
-let channelList = ref(null)
+let { channelList } = storeToRefs(channelStore)
 const showDeleteIcon = ref(false)
 const showUploadGroupAvatarDialog = ref(null)
 const groupBackgroundUrl = ref(null)
 const loading = ref(false)
 
 const getChannels = async () => {
-  try {
-    const response = await getChannelList(groupStore.activeGroup._id)
-    channelList.value = response.data
-  } catch (error) {
-    console.error('获取频道列表失败:', error)
-  }
+  channelStore.getGroupChannels(groupStore.activeGroup._id)
 }
 
 onMounted(() => {
   getChannels()
-  // handleUploadSuccess()
 })
 
 // TODO: 在删除前检测是否为群主，不然不让删除
 const deleteSelectedChannel = async (channelId) => {
-  loading.value = true
   try {
-    const response = await deleteChannel(channelId)
-    getChannels()
-    showDeleteIcon.value = false
+    await channelStore.deleteGroupChannel(channelId)
   } catch (error) {
-    console.error('获取频道列表失败:', error)
+    console.error('在组件层面捕获到删除失败:', error)
   } finally {
     loading.value = false
+    showDeleteIcon.value = false
   }
 }
 
@@ -67,6 +61,10 @@ const { startDragging } = useDraggableWidth(groupInfo, {
   minWidth: 200,
   maxWidth: 500
 })
+
+const handleClickChannel = (currentChannel) => {
+  channelStore.setActiveChannel(currentChannel)
+}
 </script>
 
 <template>
@@ -118,6 +116,7 @@ const { startDragging } = useDraggableWidth(groupInfo, {
         :key="item._id"
         :index="item._id"
         class="panel-item"
+        @click="handleClickChannel(item)"
         ><span>{{ item.name }}</span>
         <div class="new-announcements" v-if="!showDeleteIcon">3</div>
         <el-icon

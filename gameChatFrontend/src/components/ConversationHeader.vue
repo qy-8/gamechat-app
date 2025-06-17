@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { useChatStore, useGroupStore } from '@/stores'
 import UserAvatar from './common/UserAvatar.vue'
@@ -11,40 +11,34 @@ const emit = defineEmits(['open-member-drawer'])
 const searchInputShow = ref(false)
 const chatStore = useChatStore()
 const groupStore = useGroupStore()
+// const { headerInfo } = storeToRefs(chatStore)
 const { isGroupActive } = storeToRefs(groupStore)
+
+const currentHeader = computed(() => {
+  if (isGroupActive.value) {
+    return groupStore.activeGroup
+  } else {
+    return chatStore.activeConversationPartner
+  }
+})
 
 const handleOpenDrawer = () => {
   emit('open-member-drawer')
 }
-
-const currentHeader = computed(() => {
-  console.log('--- Header 正在重新计算 ---')
-  console.log('isGroupActive 的值是:', isGroupActive.value)
-  console.log(
-    'groupStore.activeGroup 的值是:',
-    JSON.parse(JSON.stringify(groupStore.activeGroup))
-  )
-  console.log(
-    'chatStore.activeConversationPartner 的值是:',
-    JSON.parse(JSON.stringify(chatStore.activeConversationPartner))
-  )
-  return isGroupActive.value
-    ? groupStore.activeGroup
-    : chatStore.activeConversationPartner
-})
 </script>
 
 <template>
   <div class="container">
-    <div class="header-container">
-      <UserAvatar
+    <div class="header-container" @click="console.log(headerInfo)">
+      <GroupAvatar
         :src="currentHeader.avatar"
         alt="头像"
-        size="30"
-        v-if="!isGroupActive"
+        :size="30"
+        v-if="isGroupActive === true"
       />
-      <GroupAvatar :src="currentHeader.avatar" alt="头像" size="30" v-else />
-      <div class="friend-name">
+      <UserAvatar :src="currentHeader.avatar" alt="头像" :size="30" v-else />
+
+      <div class="name">
         {{ currentHeader.name || currentHeader.username }}
       </div>
     </div>
@@ -55,7 +49,7 @@ const currentHeader = computed(() => {
           ><Search
         /></el-icon>
       </div>
-      <div class="group-members icon" v-if="isGroupActive">
+      <div class="group-members icon" v-if="isGroupActive === true">
         <IconMdiAccountMultiple class="icon" @click="handleOpenDrawer" />
       </div>
       <div class="notifications-off icon">
@@ -84,7 +78,7 @@ div.container {
   object-fit: cover;
 }
 
-.header-container .friend-name {
+.header-container .name {
   padding-left: 6px;
   font-size: 12px;
 }

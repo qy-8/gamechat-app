@@ -13,7 +13,7 @@ const sendInputMessage = async () => {
   messageInput.value = ''
   try {
     const response = await sendMessage({
-      conversationId: chatStore.activeConversationId,
+      conversationId: chatStore.activeConversation._id,
       content: input,
       messageType: messageType.value
     })
@@ -42,7 +42,6 @@ const sendInputMessage = async () => {
       <div class="input-tools">
         <div class="emoji icon">
           <IconMdiEmoticonHappyOutline />
-          <Icon icon="mdi:emotzicon-happy-outline" />
         </div>
         <div class="image-upload icon">
           <IconMdiFileImageOutline />

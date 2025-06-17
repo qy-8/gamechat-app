@@ -36,6 +36,7 @@ onMounted(() => {
   const socket = getSocket()
   if (socket) {
     socket.on('new-friend-request', handleNewFriendRequest)
+    socket.on('new_group_invitation', handleNewGroupInvitation)
   }
 })
 
@@ -43,6 +44,7 @@ onUnmounted(() => {
   const socket = getSocket()
   if (socket) {
     socket.off('new_friend_request', handleNewFriendRequest)
+    socket.off('new_group_invitation', handleNewGroupInvitation)
   }
 })
 
@@ -55,9 +57,32 @@ const handleNewFriendRequest = (requestData) => {
     message: h(
       'span',
       null,
-      `用户${requestData.requester.username} 想添加你为好友。`
+      `用户 ${requestData.requester.username} 想添加你为好友。`
     ),
-    duration: 100000, // 5秒后自动关闭 (如果想不自动关闭设为 0)
+    duration: 5000, // 5秒后自动关闭
+    position: 'top-right'
+  })
+}
+
+onUnmounted(() => {
+  const socket = getSocket()
+  if (socket) {
+    socket.off('new_friend_request', handleNewFriendRequest)
+  }
+})
+
+const handleNewGroupInvitation = (requestData) => {
+  console.log('Socket 收到新的群聊邀请，准备更新 store:', requestData)
+  groupStore.handleNewRequest(requestData)
+
+  ElNotification({
+    title: '新的好友请求',
+    message: h(
+      'span',
+      null,
+      `用户 ${requestData.inviter.username} 邀请您加入群聊 ${requestData.group.name}。`
+    ),
+    duration: 5000, // 5秒后自动关闭
     position: 'top-right'
   })
 }

@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getFriendRequestList, getFriendList } from '../../api/friend'
+import {
+  getFriendRequestList,
+  getFriendList,
+  deleteFriend as apiDeleteFriend
+} from '../../api/friend'
+import { ElMessage } from 'element-plus'
 
 export const useFriendStore = defineStore('friend', () => {
   const friendList = ref([])
@@ -36,6 +41,22 @@ export const useFriendStore = defineStore('friend', () => {
     unreadRequestCount.value++
   }
 
+  const addNewFriend = (newFriend) => {
+    if (!friendList.value.some((f) => f._id === newFriend._id)) {
+      friendList.value.unshift(newFriend)
+    }
+  }
+
+  const deleteFriend = async (friendId) => {
+    try {
+      await apiDeleteFriend(friendId)
+      friendList.value = friendList.value.filter((f) => f._id !== friendId)
+      ElMessage.success('删除成功')
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   return {
     friendList,
     friendRequestList,
@@ -43,6 +64,8 @@ export const useFriendStore = defineStore('friend', () => {
     getList,
     getIncomingRequests,
     clearUnreadRequestCount,
-    handleNewRequest
+    handleNewRequest,
+    addNewFriend,
+    deleteFriend
   }
 })

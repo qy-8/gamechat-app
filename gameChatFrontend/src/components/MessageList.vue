@@ -11,7 +11,7 @@ const userStore = useUserStore()
 
 const {
   messages,
-  activeConversationId,
+  activeConversation,
   isLoadingMessages,
   canLoadMoreMessages,
   currentMessagePage
@@ -52,7 +52,10 @@ const loadMore = async () => {
   const oldScrollHeight = scrollWrapper ? scrollWrapper.scrollHeight : 0
 
   try {
-    await getMessages(activeConversationId.value, currentMessagePage.value + 1)
+    await chatStore.getMessages(
+      activeConversation.value._id,
+      currentMessagePage.value + 1
+    )
     await nextTick()
     if (scrollWrapper) {
       scrollWrapper.scrollTop = scrollWrapper.scrollHeight - oldScrollHeight
@@ -67,23 +70,24 @@ const loadMore = async () => {
 const debouncedLoadMore = debounce(loadMore, 200)
 
 const handleScroll = ({ scrollTop }) => {
-  if (scrollTop < 20) {
+  if (scrollTop < 300) {
     debouncedLoadMore()
   }
 }
 
 // 滚动判断：当用户切换会话，滚动到底部
 watch(
-  activeConversationId,
-  (newId) => {
-    if (newId) {
-      console.log(`会话已切换到 ${newId}，准备加载消息...`)
-      getMessages(newId, 1)
+  activeConversation,
+  (newConversation, oldConversation) => {
+    if (newConversation && newConversation._id !== oldConversation?._id) {
+      console.log(`会话已切换到 ${newConversation._id}，准备加载消息...`)
+      chatStore
+        .getMessages(newConversation._id, 1)
         .then(() => {
           scrollToBottom('auto') // 切换会话，立即滚动
         })
         .catch((err) => {
-          console.error(`加载会话 ${newId} 的消息失败:`, err)
+          console.error(`加载会话 ${newConversation._id} 的消息失败:`, err)
         })
     }
   },

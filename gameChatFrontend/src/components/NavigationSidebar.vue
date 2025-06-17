@@ -2,8 +2,8 @@
 import { CirclePlus, Setting } from '@element-plus/icons-vue'
 import ThemeSwitch from '@/components/ThemeToggle.vue'
 import CreateGroupDialog from './CreateGroupDialog.vue'
-import { ref, onMounted } from 'vue'
-import { useGroupStore, useUserStore } from '@/stores'
+import { ref, onMounted, useCssVars } from 'vue'
+import { useGroupStore, useUserStore, useChatStore } from '@/stores'
 import UploadUserAvatarDialog from './UploadUserAvatarDialog.vue'
 import ResetPwdDialog from './ResetPwdDialog.vue'
 import UpdateUserInfoDialog from './UpdateUserInfoDialog.vue'
@@ -15,6 +15,7 @@ import GroupAvatar from './common/GroupAvatar.vue'
 
 const groupStore = useGroupStore()
 const userStore = useUserStore()
+const chatStore = useChatStore()
 const { groups } = storeToRefs(groupStore)
 const showCreateGroup = ref(false)
 const props = defineProps({
@@ -27,15 +28,9 @@ const showLogoutConfirmDialog = ref(false)
 const showDeleteUserConfirmDialog = ref(false)
 
 const saveActiveGroup = (group) => {
-  console.log(
-    '1. [点击群组] 准备设置的 group 对象:',
-    JSON.parse(JSON.stringify(group))
-  )
   groupStore.setActiveGroup(group)
-  console.log(
-    '2. [点击群组] 设置后，groupStore.activeGroup 是:',
-    JSON.parse(JSON.stringify(groupStore.activeGroup))
-  )
+  chatStore.clearActiveConversation()
+  // chatStore.selectGroupChannelToChat(group)
   router.push('/chat')
 }
 
@@ -44,6 +39,8 @@ const handleUploadSuccess = (data) => {
 }
 
 const showFriendList = () => {
+  groupStore.clearActiveGroup()
+  chatStore.clearActiveConversation()
   router.push('/chat/friends')
 }
 </script>

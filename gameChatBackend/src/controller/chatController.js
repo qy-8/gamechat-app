@@ -17,51 +17,36 @@ const getOrCreateConversation = async (req, res) => {
       return response.error(res, '不能和自己创建会话', 400)
     }
 
-    let currentUserIdObjectId = null
-    let targetUserIdObjectId = null
-
-    // 将用户和目标用户 id 转换为 objectId
-    try {
-      currentUserIdObjectId = new mongoose.Types.ObjectId(currentUserId)
-      targetUserIdObjectId = new mongoose.Types.ObjectId(targetUserId)
-    } catch (error) {
-      return response.error(res, '用户 id 或目标用户 id 无效', 400)
-    }
-
-    let participantsArray = [currentUserIdObjectId, targetUserIdObjectId]
-
-    if (participantsArray[0].toString() > participantsArray[1].toString()) {
-      // 解构赋值交换
-      ;[participantsArray[0], participantsArray[1]] = [
-        participantsArray[1],
-        participantsArray[0]
-      ]
-    }
+    const participants = [
+      new mongoose.Types.ObjectId(currentUserId),
+      new mongoose.Types.ObjectId(targetUserId)
+    ]
 
     let conversation = await Conversation.findOne({
-      participants: { $all: participantsArray, $size: 2 },
+      participants: { $all: participants },
       type: 'private'
-    }).populate('participants', 'username avatar')
+    })
 
     let wasCreated = false
 
     // 如果会话不存在就创建新会话
     if (!conversation) {
-      conversation = new Conversation({
-        participants: participantsArray,
+      const newConversation = new Conversation({
+        participants,
         lastMessageAt: Date.now(),
         type: 'private'
       })
-      await conversation.save()
-      conversation = await Conversation.findById(conversation._id).populate(
-        'participants',
-        'username avatar'
-      )
+      conversation = await newConversation.save()
       wasCreated = true
     }
+
+    const populateConversation = await Conversation.findById(
+      conversation._id
+    ).populate('participants', 'username avatar')
+
     const successMessage = wasCreated ? '会话创建成功' : '会话获取成功'
 
-    const conversationObject = conversation.toObject()
+    const conversationObject = populateConversation.toObject()
 
     conversationObject.targetParticipant = conversationObject.participants.find(
       (p) => p._id.toString() !== currentUserId
@@ -79,7 +64,8 @@ const getUserConversations = async (req, res) => {
     const currentUserId = req.user.userId
 
     const conversations = await Conversation.find({
-      participants: currentUserId
+      participants: currentUserId,
+      type: 'private'
     })
       .populate({
         path: 'participants',
@@ -109,6 +95,7 @@ const getUserConversations = async (req, res) => {
 
         return {
           _id: conv._id,
+          type: 'private',
           targetParticipant: targetParticipant
             ? {
                 _id: targetParticipant._id,

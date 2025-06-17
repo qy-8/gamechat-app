@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useUserStore } from '@/stores'
 import {
   getMessagesForConversation,
@@ -13,9 +13,8 @@ export const useChatStore = defineStore(
   () => {
     // 会话列表
     const conversations = ref([])
-    // 打开的会话 Id
-    const activeConversationId = ref(null)
     const messages = ref([])
+    const activeConversation = ref(null)
     const userStore = useUserStore()
     const isLoadingConversations = ref(false)
     const currentMessagePage = ref(1)
@@ -23,17 +22,38 @@ export const useChatStore = defineStore(
     const canLoadMoreMessages = ref(false)
     const isLoadingMessages = ref(false)
     const messageLimitPerPage = ref(20)
+    // 打开的会话 Id
+    // const activeConversationId = ref(null)
     const activeConversationPartner = ref({
       _id: '',
-      username: '我的好友',
+      username: '你的好友',
       avatar: '/images/defaultUserAvatar.png'
     })
+
+    // const headerInfo = computed(() => {
+    //   if (!activeConversation.value) {
+    //     return { name: '', avatar: '', type: null }
+    //   }
+    //   if (activeConversation.value.type === 'group') {
+    //     return {
+    //       name: activeConversation.value.name || '',
+    //       avatar: activeConversation.value.avatar || '',
+    //       type: 'group'
+    //     }
+    //   } else {
+    //     return {
+    //       name: activeConversation.value.targetParticipant?.username || '',
+    //       avatar: activeConversation.value.targetParticipant?.avatar || '',
+    //       type: 'private'
+    //     }
+    //   }
+    // })
 
     const handleNewRealTimeMessage = (newMessage) => {
       console.log('正在处理新的实时消息：', newMessage)
 
       // 传进来的消息必须要是当前打开的会话
-      if (newMessage.conversationId === activeConversationId.value) {
+      if (newMessage.conversationId === activeConversation.value?._id) {
         // 检测是否有一样 id 的信息
         const exists = messages.value.some((m) => m._id === newMessage._id)
 
@@ -60,7 +80,7 @@ export const useChatStore = defineStore(
 
         // 判断当前消息是否属于当前打开的会话和是否为当前用户发送的，以决定是否需要增加未读消息计数
         if (
-          newMessage.conversationId !== activeConversationId.value &&
+          newMessage.conversationId !== activeConversation.value?._id &&
           newMessage.sender._id !== userStore.userInfo.userId
         ) {
           updatedConversation.unreadCount =
@@ -129,37 +149,34 @@ export const useChatStore = defineStore(
       }
     }
 
-    const setActiveConversation = async (conversationId) => {
+    const setActiveConversation = async (conversation) => {
       // 点击已激活会话不重复加载
-      if (conversationId === activeConversationId.value || !conversationId) {
+      if (conversation._id === activeConversation.value?._id || !conversation) {
         return
       }
-      if (conversationId) {
-        activeConversationId.value = conversationId
+
+      if (conversation._id) {
+        activeConversation.value = conversation
         messages.value = []
         currentMessagePage.value = 1
         totalMessagePages.value = 1
         canLoadMoreMessages.value = false
         isLoadingMessages.value = true
       }
-      // 清除未读数
-      const convIndex = conversations.value.findIndex(
-        (c) => c._id === conversationId
-      )
-      console.log(11111)
-      if (convIndex !== -1 && conversations.value[convIndex].unreadCount > 0) {
-        console.log(
-          `${conversationId} 有 ${conversations.value[convIndex].unreadCount} 未读`
-        )
-        conversations.value[convIndex].unreadCount = 0 // 在前端UI上清除未读消息标志
 
-        markAsRead(conversationId).catch((err) => {
-          console.error('在后台标记已读失败:', err)
+      // 清除未读数
+      const convInList = conversations.value.find(
+        (c) => c._id === conversation._id
+      )
+      if (convInList && convInList.unreadCount > 0) {
+        convInList.unreadCount = 0 // 在前端UI上清除未读消息标志
+        markAsRead(conversation._id).catch((err) => {
+          console.error('标记已读失败:', err)
         })
       }
 
       try {
-        await getMessages(conversationId, 1)
+        await getMessages(conversation._id, 1)
       } catch (error) {
         console.error(error)
       } finally {
@@ -167,60 +184,149 @@ export const useChatStore = defineStore(
       }
     }
 
-    const setActiveFriend = async (friend) => {
+    // const setActiveConversation = async (conversationId) => {
+    //   // 点击已激活会话不重复加载
+    //   if (conversationId === activeConversationId.value || !conversationId) {
+    //     return
+    //   }
+    //   if (conversationId) {
+    //     activeConversationId.value = conversationId
+    //     messages.value = []
+    //     currentMessagePage.value = 1
+    //     totalMessagePages.value = 1
+    //     canLoadMoreMessages.value = false
+    //     isLoadingMessages.value = true
+    //   }
+    //   // 清除未读数
+    //   const convIndex = conversations.value.findIndex(
+    //     (c) => c._id === conversationId
+    //   )
+    //   console.log(11111)
+    //   if (convIndex !== -1 &&
+    // conversations.value[convIndex].unreadCount > 0) {
+    //     console.log(
+    //       `${conversationId} 有
+    //  ${conversations.value[convIndex].unreadCount} 未读`
+    //     )
+    //     conversations.value[convIndex].unreadCount = 0 // 在前端UI上清除未读消息标志
+
+    //     markAsRead(conversationId).catch((err) => {
+    //       console.error('在后台标记已读失败:', err)
+    //     })
+    //   }
+
+    //   try {
+    //     await getMessages(conversationId, 1)
+    //   } catch (error) {
+    //     console.error(error)
+    //   } finally {
+    //     isLoadingMessages.value = false
+    //   }
+    // }
+
+    // const setActiveFriend = async (friend) => {
+    //   if (!friend || !friend._id) {
+    //     return
+    //   }
+
+    //   if (
+    //     activeConversationPartner.value &&
+    //     activeConversationPartner.value._id === friend._id
+    //   ) {
+    //     return
+    //   }
+
+    //   try {
+    //     const response = await getOrCreateConversation(friend._id)
+    //     const { _id: conversationId } = response.data
+
+    //     activeConversationId.value = conversationId
+    //     activeConversationPartner.value = {
+    //       _id: friend._id,
+    //       username: friend.username,
+    //       avatar: friend.avatar
+    //     }
+    //     messages.value = []
+    //     currentMessagePage.value = 1
+    //     totalMessagePages.value = 1
+    //     canLoadMoreMessages.value = false
+
+    //     const convIndex = conversations.value.findIndex(
+    //       (c) => c._id === conversationId
+    //     )
+
+    //     if (
+    //       convIndex !== -1 &&
+    //       conversations.value[convIndex].unreadCount > 0
+    //     ) {
+    //       conversations.value[convIndex].unreadCount = 0
+    //       try {
+    //         const response = await markAsRead(conversationId)
+    //         console.log(response)
+    //       } catch (error) {
+    //         console.error('后台标记已读失败:', error)
+    //       }
+    //     }
+
+    //     // 加载该会话的第一页消息
+    //     await getMessages(conversationId, 1)
+    //   } catch (error) {
+    //     console.error(error)
+    //   }
+    // }
+
+    const selectFriendToChat = async (friend) => {
       if (!friend || !friend._id) {
         return
       }
 
-      if (
-        activeConversationPartner.value &&
-        activeConversationPartner.value._id === friend._id
-      ) {
+      if (activeConversation.value?.targetParticipant?._id === friend._id) {
         return
       }
 
       try {
         const response = await getOrCreateConversation(friend._id)
-        const { _id: conversationId } = response.data
+        const newConversation = response.data
 
-        activeConversationId.value = conversationId
-        activeConversationPartner.value = {
-          _id: friend._id,
-          username: friend.username,
-          avatar: friend.avatar
-        }
-        messages.value = []
-        currentMessagePage.value = 1
-        totalMessagePages.value = 1
-        canLoadMoreMessages.value = false
-
-        const convIndex = conversations.value.findIndex(
-          (c) => c._id === conversationId
+        const existInList = conversations.value.some(
+          (c) => c._id === newConversation._id
         )
-
-        if (
-          convIndex !== -1 &&
-          conversations.value[convIndex].unreadCount > 0
-        ) {
-          conversations.value[convIndex].unreadCount = 0
-          try {
-            const response = await markAsRead(conversationId)
-            console.log(response)
-          } catch (error) {
-            console.error('后台标记已读失败:', error)
-          }
+        if (!existInList) {
+          conversations.value.unshift(newConversation)
         }
-
-        // 加载该会话的第一页消息
-        await getMessages(conversationId, 1)
+        await setActiveConversation(newConversation)
       } catch (error) {
         console.error(error)
       }
     }
 
+    const selectGroupChannelToChat = async (channel) => {
+      if (!channel || !channel._id) {
+        return
+      }
+      if (activeConversation.value?._id === channel._id) {
+        return
+      }
+
+      const channelConversation = { ...channel, type: 'group' }
+      await setActiveConversation(channelConversation)
+    }
+
+    const clearActiveConversation = () => {
+      activeConversation.value = null
+    }
+
+    const setActiveFriend = (friend) => {
+      activeConversationPartner.value = {
+        _id: friend._id,
+        username: friend.username,
+        avatar: friend.avatar
+      }
+    }
+
     return {
       conversations,
-      activeConversationId,
+      activeConversation,
       messages,
       isLoadingConversations,
       currentMessagePage,
@@ -232,12 +338,15 @@ export const useChatStore = defineStore(
       getConversations,
       getMessages,
       setActiveConversation,
+      selectFriendToChat,
+      selectGroupChannelToChat,
+      clearActiveConversation,
       setActiveFriend
     }
   },
   {
     persist: {
-      paths: ['activeConversationId']
+      paths: ['activeConversation']
     }
   }
 )

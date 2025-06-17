@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import ConversationHeader from './ConversationHeader.vue'
 import MessageList from './MessageList.vue'
 import MessageInput from './MessageInput.vue'
 import SearchInput from './common/SearchInput.vue'
-import { getGroupMembers, sendGroupInvitation } from '../api/group'
+import { sendGroupInvitation, searchGroupMembers } from '../api/group'
 import { useGroupStore, useFriendStore } from '../stores'
 import UserBadge from './common/UserBadge.vue'
 import { storeToRefs } from 'pinia'
@@ -15,9 +15,15 @@ const memberDrawerVisible = ref(false)
 const loading = ref(false)
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
-const groupMembers = ref([])
+const { groupMembers } = storeToRefs(groupStore)
 const { friendList } = storeToRefs(friendStore)
 const selectedFriendIds = ref([])
+const isSearching = ref(false)
+const searchResults = ref([])
+const currentSearchTerm = ref('')
+const currentSearchPage = ref(1)
+const totalSearchPages = ref(1)
+const isLoadingMore = ref(false)
 
 onMounted(() => {
   friendStore.getList()
@@ -25,14 +31,11 @@ onMounted(() => {
 
 const fetchMembers = async () => {
   loading.value = true
-  try {
-    const response = await getGroupMembers(groupStore.activeGroupId)
-    groupMembers.value = response.data.members
-  } catch (error) {
-    console.error(error)
-  } finally {
-    loading.value = false
-  }
+  isSearching.value = false
+  searchResults.value = []
+  currentSearchTerm.value = ''
+  groupStore.fetchGroupMembers()
+  loading.value = false
 }
 
 // 切换选中好友
@@ -60,6 +63,68 @@ const handleSendInvitations = async () => {
     selectedFriendIds.value = []
   }
 }
+
+const handleSearch = async (searchTerm) => {
+  if (!searchTerm) {
+    searchResults.value = []
+    return
+  }
+  currentSearchTerm.value = searchTerm
+  isSearching.value = true
+  loading.value = true
+  try {
+    currentSearchPage.value = 1
+    const response = await searchGroupMembers({
+      groupId: groupStore.activeGroupId,
+      q: searchTerm,
+      page: 1,
+      limit: 20
+    })
+    searchResults.value = response.data.members
+    totalSearchPages.value = response.data.totalPages
+  } catch (error) {
+    console.error(error)
+    searchResults.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadMoreMembers = async () => {
+  const canLoad = currentSearchPage.value < totalSearchPages.value
+
+  if (!canLoad || isLoadingMore.value) {
+    return
+  }
+
+  isLoadingMore.value = true
+  try {
+    const nextPage = currentSearchPage.value + 1
+    const response = await searchGroupMembers({
+      groupId: groupStore.activeGroupId,
+      q: currentSearchTerm.value,
+      page: nextPage
+    })
+    searchResults.value.push(...response.data.members)
+    currentSearchPage.value = response.data.currentPage
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isLoadingMore.value = false
+  }
+}
+
+const displayedMembers = computed(() => {
+  return isSearching.value ? searchResults.value : groupMembers.value
+})
+
+const canLoadMore = computed(() => {
+  return isSearching.value && currentSearchPage.value < totalSearchPages.value
+})
+
+const handleKickMember = async (memberId) => {
+  groupStore.handleKickGroupMember(memberId)
+}
 </script>
 
 <template>
@@ -68,7 +133,9 @@ const handleSendInvitations = async () => {
       class="conversation-header"
       @open-member-drawer="memberDrawerVisible = true"
     />
+
     <MessageList class="message-container" />
+
     <MessageInput class="input-container" />
 
     <el-drawer
@@ -78,17 +145,23 @@ const handleSendInvitations = async () => {
       @open="fetchMembers"
     >
       <template #header>
-        <SearchInput @search="handleSearch" class="drawer-header" />
+        <SearchInput
+          @search="handleSearch"
+          @clear="isSearching = false"
+          class="drawer-header"
+        />
       </template>
 
       <div class="drawer-content-wrapper">
         <el-popover placement="bottom" :width="280" trigger="click">
           <template #reference>
-            <el-button type="regular" class="invitation">邀请成员</el-button>
+            <el-button class="invitation">邀请成员</el-button>
           </template>
+
           <div class="invite-popover-content">
             <el-scrollbar height="300px">
               <p v-if="friendList.length === 0">暂无可邀请好友</p>
+
               <div
                 v-for="friend in friendList"
                 :key="friend._id"
@@ -101,7 +174,9 @@ const handleSendInvitations = async () => {
                 <UserBadge
                   :username="friend.username"
                   :avatar="friend.avatar"
+                  class="friend-list"
                 />
+
                 <el-icon
                   v-if="selectedFriendIds.includes(friend._id)"
                   class="selected-icon"
@@ -110,32 +185,67 @@ const handleSendInvitations = async () => {
                 </el-icon>
               </div>
             </el-scrollbar>
+
             <div class="popover-footer">
-              <el-button
-                type="regular"
-                @click="handleSendInvitations"
-                class="invitation"
-              >
+              <el-button @click="handleSendInvitations" class="invitation">
                 发送邀请 ({{ selectedFriendIds.length }})
               </el-button>
             </div>
           </div>
         </el-popover>
       </div>
-      <el-divider>群组成员 ( {{ groupMembers.length }} )</el-divider>
-      <div class="members" v-loading="loading">
-        <UserBadge
-          v-for="member in groupMembers"
-          :key="member._id"
-          :username="member.username"
-          :avatar="member.avatar"
-        />
-      </div>
+
+      <el-divider>群组成员 ({{ displayedMembers.length }})</el-divider>
+
+      <el-scrollbar
+        class="members-list-scrollbar"
+        v-infinite-scroll="loadMoreMembers"
+        :infinite-scroll-disabled="isLoadingMore || !canLoadMore"
+        :infinite-scroll-delay="300"
+        :infinite-scroll-distance="20"
+      >
+        <div class="members" v-loading="loading">
+          <div
+            class="member-item"
+            v-for="member in displayedMembers"
+            :key="member._id"
+          >
+            <UserBadge
+              :username="member.username"
+              :avatar="member.avatar"
+              class="member"
+            />
+            <div
+              class="action has-active-scale-effect"
+              @click="handleKickMember(member._id)"
+            >
+              <el-icon class="kick"><IconMdiAccountRemove /></el-icon>
+            </div>
+          </div>
+
+          <p v-if="isLoadingMore" class="loading-tip">正在加载更多...</p>
+          <p
+            v-if="isSearching && !canLoadMore && displayedMembers.length > 0"
+            class="loading-tip"
+          >
+            没有更多了
+          </p>
+
+          <el-empty
+            v-if="displayedMembers.length === 0 && !loading"
+            :description="
+              isSearching ? '没有找到相关成员' : '群组内暂无其他成员'
+            "
+          />
+        </div>
+      </el-scrollbar>
     </el-drawer>
   </div>
 </template>
 
 <style lang="scss" scoped>
+@use '@/assets/styles/ui-effects.scss' as *;
+
 .container {
   width: 100%;
   height: 100vh;
@@ -184,5 +294,46 @@ const handleSendInvitations = async () => {
   .el-icon {
     margin-left: 12px;
   }
+}
+
+.members .member,
+.friend-selectable-item .friend-list {
+  width: 100%;
+}
+
+.loading-tip {
+  padding: 20px 0;
+  color: var(--el-text-color-quoted);
+  text-align: center;
+}
+
+.members-list-scrollbar {
+  height: 78%;
+  overflow: hidden;
+}
+
+.member-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.member-item:hover {
+  background-color: var(--el-bg-color-message-item-hover);
+}
+
+.member-item .action {
+  padding: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.member-item:hover .action {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+  color: var(--primary-text-color);
 }
 </style>

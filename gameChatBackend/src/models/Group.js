@@ -37,7 +37,11 @@ const groupSchema = new mongoose.Schema(
           default: Date.now
         }
       }
-    ]
+    ],
+    type: {
+      type: String,
+      default: 'group'
+    }
   },
   { timestamps: true } // 自动添加 createdAt 和 updatedAt
 )

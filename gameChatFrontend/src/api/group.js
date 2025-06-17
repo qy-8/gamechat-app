@@ -39,6 +39,35 @@ export const getGroupMembers = (groupId) => {
 // 批量邀请用户加入群组
 export const sendGroupInvitation = (data) => {
   const { groupId, inviteeIds } = data
-  console.log(groupId, inviteeIds)
   return request.post(`/api/groups/${groupId}/invitations`, { inviteeIds })
+}
+
+// 模糊搜索群组成员
+export const searchGroupMembers = (data) => {
+  const { groupId, q, page = 1, limit = 5 } = data
+  return request.get(`/api/groups/${groupId}/members`, {
+    params: {
+      q,
+      page,
+      limit
+    }
+  })
+}
+
+// 获取当前用户的群组邀请
+export const getGroupInvitations = () => {
+  return request.get('/api/groups/invitations/pending')
+}
+
+// 响应群组邀请
+export const groupInvitationResponse = (data) => {
+  const { groupId, action } = data
+  return request.post(`/api/groups/${groupId}/invitations/response`, {
+    action
+  })
+}
+
+export const kickGroupMember = (data) => {
+  const { groupId, memberId } = data
+  return request.delete(`/api/groups/${groupId}/members/${memberId}`)
 }

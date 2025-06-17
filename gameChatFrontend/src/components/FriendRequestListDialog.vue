@@ -8,27 +8,31 @@ import dayjs from 'dayjs'
 import { ElMessage } from 'element-plus'
 import { useFriendStore } from '../stores'
 import { storeToRefs } from 'pinia'
+import RequestCard from './common/RequestCard.vue'
 
 const props = defineProps({
   visible: Boolean
 })
-const emit = defineEmits(['update:visible', 'requestHandled'])
+const emit = defineEmits(['update:visible'])
 const friendStore = useFriendStore()
 const { friendRequestList } = storeToRefs(friendStore)
 
-const formatTimeAgo = (timestamp) => {
-  if (!timestamp) {
-    return ''
-  }
-  return dayjs(timestamp).fromNow()
-}
+// const formatTimeAgo = (timestamp) => {
+//   if (!timestamp) {
+//     return ''
+//   }
+//   return dayjs(timestamp).fromNow()
+// }
 
 const handleRequestAction = async (requestId, action) => {
   if (requestId) {
     try {
       const response = await handleFriendRequest({ requestId, action })
       ElMessage.success(response.message)
-      emit('requestHandled')
+      // emit('requestHandled')
+      if (action === 'accept') {
+        friendStore.addNewFriend(response.data)
+      }
       friendStore.getIncomingRequests()
     } catch (error) {
       console.error(error)
@@ -38,14 +42,24 @@ const handleRequestAction = async (requestId, action) => {
 </script>
 
 <template>
-  <div class="create-group-dialog-container">
+  <div>
     <BaseDialog
       :model-value="visible"
       @update:model-value="emit('update:visible', $event)"
     >
       <div class="request-wrapper">
         <el-scrollbar>
-          <el-card
+          <RequestCard
+            v-if="friendRequestList.length > 0"
+            v-for="item in friendRequestList"
+            :key="item._id"
+            :avatar="item.requester.avatar"
+            :name="item.requester.username"
+            :timestamp="item.requestedAt"
+            @accept="handleRequestAction(item._id, 'accept')"
+            @decline="handleRequestAction(item._id, 'decline')"
+          />
+          <!-- <el-card
             shadow="hover"
             v-if="friendRequestList.length > 0"
             v-for="item in friendRequestList"
@@ -75,7 +89,7 @@ const handleRequestAction = async (requestId, action) => {
                 </div>
               </div>
             </div>
-          </el-card>
+          </el-card> -->
 
           <el-empty image="" description="好友请求列表为空" v-else />
         </el-scrollbar>
@@ -101,51 +115,52 @@ const handleRequestAction = async (requestId, action) => {
 .el-scrollbar {
   height: 320px;
 }
-.el-card {
-  margin-bottom: 10px;
-}
 
-.request-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+// .el-card {
+//   margin-bottom: 10px;
+// }
 
-.request-info-container {
-  width: 76%;
-}
+// .request-container {
+//   width: 100%;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+// }
 
-.user-info-container {
-  display: flex;
-  justify-content: space-between;
-}
+// .request-info-container {
+//   width: 76%;
+// }
 
-.request-container .user-avatar {
-  margin-right: 20px;
-}
+// .user-info-container {
+//   display: flex;
+//   justify-content: space-between;
+// }
 
-.username {
-  font-weight: bold;
-}
+// .request-container .user-avatar {
+//   margin-right: 20px;
+// }
 
-.option-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-top: 10px;
-}
+// .username {
+//   font-weight: bold;
+// }
 
-.option-container .el-button {
-  width: 46%;
-  height: 26px;
-}
+// .option-container {
+//   display: flex;
+//   flex-direction: row;
+//   justify-content: space-between;
+//   margin-top: 10px;
+// }
 
-.option-container .el-button:hover {
-  border: 1px solid var(--el-btn-hover-border-color);
-}
+// .option-container .el-button {
+//   width: 46%;
+//   height: 26px;
+// }
 
-.accept {
-  border: 1px solid var(--el-text-color-primary);
-}
+// .option-container .el-button:hover {
+//   border: 1px solid var(--el-btn-hover-border-color);
+// }
+
+// .accept {
+//   border: 1px solid var(--el-text-color-primary);
+// }
 </style>

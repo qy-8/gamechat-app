@@ -17,6 +17,7 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import FriendRequestListDialog from './FriendRequestListDialog.vue'
+import GroupRequestListDialog from './GroupRequestListDialog.vue'
 import { useChatStore, useFriendStore, useGroupStore } from '../stores'
 import { storeToRefs } from 'pinia'
 // import { useDraggableWidth } from '@/composables/useDraggableWidth'
@@ -24,13 +25,14 @@ import { storeToRefs } from 'pinia'
 const chatStore = useChatStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
+const { unreadGroupInvitation } = storeToRefs(groupStore)
 const form = reactive({
   username: ''
 })
 const formRef = ref(null)
 const rules = reactive({
   username: [
-    { required: true, message: '', trigger: 'blur' },
+    { message: '', trigger: 'blur' },
     {
       pattern: /^[a-zA-Z0-9\u4e00-\u9fa5]{3,15}$/,
       message: '',
@@ -45,6 +47,7 @@ const searchResult = ref({
 })
 const searchResultIsEmpty = ref(false)
 const showFriendRequestListDialog = ref(false)
+const showGroupRequestListDialog = ref(false)
 const showDeleteIcon = ref(false)
 const showBlockIcon = ref(false)
 const showBlockList = ref(false)
@@ -58,6 +61,7 @@ const { unreadRequestCount } = storeToRefs(friendStore)
 onMounted(async () => {
   friendStore.getList()
   friendStore.getIncomingRequests()
+  groupStore.getGroupInvitations()
 })
 
 const { friendList } = storeToRefs(friendStore)
@@ -116,17 +120,10 @@ const deleteSelectedFriend = async (friendId) => {
   loading.value = true
 
   if (friendId) {
-    try {
-      const response = await deleteFriend(friendId)
-      ElMessage.success('删除成功')
-      await getList()
-    } catch (error) {
-      console.error(error)
-    } finally {
-      loading.value = false
-      showDeleteIcon.value = false
-    }
+    friendStore.deleteFriend(friendId)
   }
+  loading.value = false
+  showDeleteIcon.value = false
 }
 
 const updateSelectedFriendStatus = async (friendId, status) => {
@@ -173,20 +170,9 @@ const getBlockedList = async () => {
 }
 
 const selectFriendForChat = (friend) => {
-  console.log(
-    'A. [点击好友] 准备设置的 friend 对象:',
-    JSON.parse(JSON.stringify(friend))
-  )
-  groupStore.isGroupActive = false
   chatStore.setActiveFriend(friend)
-  console.log(
-    'B. [点击好友] 设置后，chatStore.activeConversationPartner 是:',
-    JSON.parse(JSON.stringify(chatStore.activeConversationPartner))
-  )
-  console.log(
-    'C. [点击好友] 设置后，groupStore.isGroupActive 是:',
-    groupStore.isGroupActive
-  )
+  groupStore.clearActiveGroup()
+  chatStore.selectFriendToChat(friend)
 }
 
 // const { startDragging } = useDraggableWidth(friendListPanelRef, {
@@ -219,6 +205,19 @@ const selectFriendForChat = (friend) => {
                   v-if="unreadRequestCount > 0"
                 >
                   {{ unreadRequestCount }}
+                </div>
+              </el-dropdown-item>
+              <el-dropdown-item
+                divided
+                @click="
+                  showGroupRequestListDialog = !showGroupRequestListDialog
+                "
+                >收到的群组邀请
+                <div
+                  class="new-message group-invitations"
+                  v-if="unreadGroupInvitation > 0"
+                >
+                  {{ unreadGroupInvitation }}
                 </div>
               </el-dropdown-item>
               <el-dropdown-item
@@ -332,8 +331,11 @@ const selectFriendForChat = (friend) => {
   <FriendRequestListDialog
     v-model:visible="showFriendRequestListDialog"
     v-if="showFriendRequestListDialog"
-    @requestHandled="getList"
   ></FriendRequestListDialog>
+  <GroupRequestListDialog
+    v-model:visible="showGroupRequestListDialog"
+    v-if="showGroupRequestListDialog"
+  />
 </template>
 
 <style lang="scss" scoped>
@@ -474,7 +476,8 @@ const selectFriendForChat = (friend) => {
   text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.15);
 }
 
-.new-message.friend-request {
+.new-message.friend-request,
+.new-message.group-invitations {
   margin-left: 12px;
   color: var(--secondary-text-color);
 }

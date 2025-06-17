@@ -4,6 +4,7 @@
     v-model="query"
     @input="onInput"
     clearable
+    @clear="handleClear"
     :suffix-icon="Search"
   />
 </template>
@@ -19,7 +20,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['search'])
+const emit = defineEmits(['search', 'clear'])
 
 const query = ref('')
 let debounceTimer = null
@@ -35,6 +36,10 @@ const onInput = () => {
     // 用户停止输入，计时器触发，通过 emit 把最终的搜索词发送给父组件
     emit('search', query.value)
   }, 500)
+}
+
+const handleClear = () => {
+  emit('clear')
 }
 </script>
 

@@ -271,12 +271,14 @@ const handleFriendRequest = async (req, res) => {
     if (action === 'accept') {
       friendshipRequest.status = 'friends'
       friendshipRequest.acceptedAt = Date.now()
+      const newFriend = await User.findById(friendshipRequest.requester)
+      await friendshipRequest.save()
+      return response.success(res, newFriend, '操作成功')
     } else {
       friendshipRequest.status = 'declined'
+      await friendshipRequest.save()
+      return response.success(res, friendshipRequest, '操作成功')
     }
-
-    await friendshipRequest.save()
-    return response.success(res, friendshipRequest, '操作成功')
   } catch (error) {
     console.error(error)
     return response.error(res, '操作失败')
