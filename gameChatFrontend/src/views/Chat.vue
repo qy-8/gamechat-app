@@ -7,6 +7,7 @@ import { useUserStore, useFriendStore, useGroupStore } from '../stores'
 import { getSocket } from '@/services/socketService'
 import { h } from 'vue'
 import { ElNotification } from 'element-plus'
+import emitter from '../services/eventBus'
 
 const groupList = ref([])
 const userStore = useUserStore()
@@ -27,72 +28,85 @@ const getPersonalInfo = async () => {
   phoneNum.value = phoneNumber
 }
 
+// const handleNewFriendRequest = (requestData) => {
+//   console.log('Socket 收到新的好友请求，准备更新 store:', requestData)
+//   friendStore.handleNewRequest(requestData)
+
+//   ElNotification({
+//     title: '新的好友请求',
+//     message: h(
+//       'span',
+//       null,
+//       `用户 ${requestData.requester.username} 想添加你为好友。`
+//     ),
+//     duration: 5000, // 5秒后自动关闭
+//     position: 'top-right'
+//   })
+// }
+
+// const handleNewGroupInvitation = (requestData) => {
+//   console.log('Socket 收到新的群聊邀请，准备更新 store:', requestData)
+//   groupStore.handleNewRequest(requestData)
+
+//   ElNotification({
+//     title: '新的好友请求',
+//     message: h(
+//       'span',
+//       null,
+//       `用户 ${requestData.inviter.username} 邀请您加入群聊 ${requestData.group.name}。`
+//     ),
+//     duration: 5000, // 5秒后自动关闭
+//     position: 'top-right'
+//   })
+// }
+
+const showNotification = ({ title, message }) => {
+  ElNotification({
+    title,
+    dangerouslyUseHTMLString: true,
+    message: h('span', { innerHTML: message }),
+    duration: 5000, // 5秒后自动关闭
+    position: 'top-right'
+  })
+}
+
 onMounted(() => {
+  const socket = getSocket()
+
   groupStore.setGroups()
   getPersonalInfo()
-})
 
-onMounted(() => {
-  const socket = getSocket()
-  if (socket) {
-    socket.on('new-friend-request', handleNewFriendRequest)
-    socket.on('new_group_invitation', handleNewGroupInvitation)
-  }
+  // if (socket) {
+  //   socket.on('new-friend-request', handleNewFriendRequest)
+  //   socket.on('new_group_invitation', handleNewGroupInvitation)
+  // }
+
+  emitter.on('show-notification', showNotification)
 })
 
 onUnmounted(() => {
-  const socket = getSocket()
-  if (socket) {
-    socket.off('new_friend_request', handleNewFriendRequest)
-    socket.off('new_group_invitation', handleNewGroupInvitation)
-  }
+  // const socket = getSocket()
+  // if (socket) {
+  //   socket.off('new_friend_request', handleNewFriendRequest)
+  //   socket.off('new_group_invitation', handleNewGroupInvitation)
+  // }
+
+  emitter.off('show-notification', showNotification)
 })
 
-const handleNewFriendRequest = (requestData) => {
-  console.log('Socket 收到新的好友请求，准备更新 store:', requestData)
-  friendStore.handleNewRequest(requestData)
-
-  ElNotification({
-    title: '新的好友请求',
-    message: h(
-      'span',
-      null,
-      `用户 ${requestData.requester.username} 想添加你为好友。`
-    ),
-    duration: 5000, // 5秒后自动关闭
-    position: 'top-right'
-  })
-}
-
-onUnmounted(() => {
-  const socket = getSocket()
-  if (socket) {
-    socket.off('new_friend_request', handleNewFriendRequest)
-  }
-})
-
-const handleNewGroupInvitation = (requestData) => {
-  console.log('Socket 收到新的群聊邀请，准备更新 store:', requestData)
-  groupStore.handleNewRequest(requestData)
-
-  ElNotification({
-    title: '新的好友请求',
-    message: h(
-      'span',
-      null,
-      `用户 ${requestData.inviter.username} 邀请您加入群聊 ${requestData.group.name}。`
-    ),
-    duration: 5000, // 5秒后自动关闭
-    position: 'top-right'
-  })
-}
+// onUnmounted(() => {
+//   const socket = getSocket()
+//   if (socket) {
+//     socket.off('new_friend_request', handleNewFriendRequest)
+//   }
+// })
 </script>
 
 <template>
   <div class="container">
     <NavigationSidebar :phoneNum="phoneNum" />
     <router-view></router-view>
-    <ConversationView />
+    <ConversationView class="conversation-view" />
   </div>
 </template>
 
@@ -101,5 +115,10 @@ const handleNewGroupInvitation = (requestData) => {
   display: flex;
   height: 100vh;
   background-color: var(--el-bg-color-home-details-box-bgc);
+}
+
+.conversation-view {
+  flex: 1;
+  min-width: 0;
 }
 </style>

@@ -20,6 +20,8 @@ import FriendRequestListDialog from './FriendRequestListDialog.vue'
 import GroupRequestListDialog from './GroupRequestListDialog.vue'
 import { useChatStore, useFriendStore, useGroupStore } from '../stores'
 import { storeToRefs } from 'pinia'
+import UserBadge from './common/UserBadge.vue'
+
 // import { useDraggableWidth } from '@/composables/useDraggableWidth'
 
 const chatStore = useChatStore()
@@ -92,7 +94,7 @@ const friendsWithUnreadCount = computed(() => {
   const unreadMap = new Map()
   if (conversations.value && conversations.value.length > 0) {
     conversations.value.forEach((conv) => {
-      unreadMap.set(conv.targetParticipant._id, conv.unreadCount)
+      unreadMap.set(conv.targetParticipant?._id, conv.unreadCount)
     })
   }
   return friendList.value.map((friend) => {
@@ -285,7 +287,8 @@ const selectFriendForChat = (friend) => {
           :index="item._id"
           class="panel-item"
           @click="selectFriendForChat(item)"
-          ><span>{{ item.username }}</span>
+        >
+          <UserBadge :username="item.username" :avatar="item.avatar" />
           <div class="new-message" v-if="item.unreadCount > 0">
             {{ item.unreadCount }}
           </div>

@@ -6,9 +6,14 @@ const {
   getUserConversations,
   sendMessage,
   getConversationMessages,
-  markConversationAsRead
+  markConversationAsRead,
+  sendMessageInChannel,
+  searchMessagesInConversation,
+  toggleMuteConversation
 } = require('../controller/chatController')
 const validateConversation = require('../middlewares/chatAuthMiddleware')
+const { uploadChatMessageImage } = require('../controller/uploadController')
+const upload = require('../middlewares/upload')
 
 /**
  * @swagger
@@ -103,7 +108,7 @@ router.get('/conversations', authMiddleware, getUserConversations)
  * @swagger
  * /api/chat/conversations/{conversationId}/messages:
  *   post:
- *     summary: "发送消息"
+ *     summary: "发送消息到私聊"
  *     description: "在指定会话中发送一条消息。需要验证会话有效。需要在请求头中携带 Token。"
  *     tags:
  *       - Message
@@ -264,6 +269,328 @@ router.post(
   authMiddleware,
   validateConversation,
   markConversationAsRead
+)
+
+/**
+ * @swagger
+ * /api/chat/channels/{channelId}/messages:
+ *   post:
+ *     summary: 发送消息到频道
+ *     description: 群组成员可以在指定频道发送消息，支持文本和其他类型消息。
+ *     tags:
+ *       - Message
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: channelId
+ *         in: path
+ *         required: true
+ *         description: 频道 ID
+ *         schema:
+ *           type: string
+ *           example: 665ff812345678abcdef1234
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: 消息内容
+ *                 example: 这是我发的第一条消息！
+ *               messageType:
+ *                 type: string
+ *                 description: 消息类型，如 text、image 等，默认为 text
+ *                 example: text
+ *     responses:
+ *       200:
+ *         description: 消息发送成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 data:
+ *                   type: object
+ *                   description: 已发送的消息信息
+ *                 message:
+ *                   type: string
+ *                   example: 消息发送成功
+ *       400:
+ *         description: 消息内容为空
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: 频道不存在或用户不在群组中
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器错误，消息发送失败
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.post(
+  '/channels/:channelId/messages',
+  authMiddleware,
+  sendMessageInChannel
+)
+
+/**
+ * @swagger
+ * /api/chat/image/{conversationId}:
+ *   post:
+ *     summary: 上传聊天图片
+ *     description: 通过 multipart/form-data 上传聊天图片，需登录用户并提供 conversationId。文件字段名应为 `image`。
+ *     tags:
+ *       - Message
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: conversationId
+ *         in: path
+ *         required: true
+ *         description: 会话 ID（私聊或频道）
+ *         schema:
+ *           type: string
+ *           example: "665f0c6fc3123456789abcde"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: 要上传的图片文件
+ *     responses:
+ *       200:
+ *         description: 图片上传成功，返回消息对象
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: 图片上传成功
+ *                 data:
+ *                   $ref: '#/components/schemas/Message'
+ *       400:
+ *         description: 图片未上传或参数无效
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: 会话不存在或用户未加入会话
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 上传失败，服务器错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.post(
+  '/image/:conversationId',
+  authMiddleware,
+  upload.single('image'), // multer 中间件处理文件
+  uploadChatMessageImage // 你的控制器函数
+)
+
+/**
+ * @swagger
+ * /api/chat//conversations/{conversationId}/messages/search:
+ *   get:
+ *     summary: 搜索会话中的消息
+ *     description: 根据关键词搜索指定会话中的聊天消息，支持分页。
+ *     tags:
+ *       - Message
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: conversationId
+ *         in: path
+ *         required: true
+ *         description: 会话 ID
+ *         schema:
+ *           type: string
+ *           example: "6650cabc1234567890abcdef"
+ *       - name: q
+ *         in: query
+ *         required: true
+ *         description: 搜索关键词
+ *         schema:
+ *           type: string
+ *           example: "你好"
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: 当前页码（默认为 1）
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: 每页数量（默认为 20）
+ *         schema:
+ *           type: integer
+ *           example: 20
+ *     responses:
+ *       200:
+ *         description: 搜索成功，返回符合条件的消息列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: 搜索成功
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     messages:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Message'
+ *                     currentPage:
+ *                       type: integer
+ *                       example: 1
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 3
+ *                     totalResults:
+ *                       type: integer
+ *                       example: 45
+ *       400:
+ *         description: 请求缺少搜索关键词
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: 用户不是会话成员
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: 会话不存在
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器内部错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.get(
+  '/conversations/:conversationId/messages/search',
+  authMiddleware,
+  searchMessagesInConversation
+)
+
+/**
+ * @swagger
+ * /api/chat/conversations/{conversationId}/mute:
+ *   post:
+ *     summary: 设为免打扰 / 取消免打扰
+ *     description: 设置或取消对指定会话的免打扰状态。
+ *     tags:
+ *       - Conversation
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: conversationId
+ *         in: path
+ *         required: true
+ *         description: 会话 ID
+ *         schema:
+ *           type: string
+ *           example: "6650cabc1234567890abcdef"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mute
+ *             properties:
+ *               mute:
+ *                 type: boolean
+ *                 description: 是否设为免打扰（true 为设为免打扰，false 为取消）
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: 操作成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: 会话已设为免打扰
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     muted:
+ *                       type: boolean
+ *                       example: true
+ *       400:
+ *         description: 请求参数错误，例如 mute 字段不是布尔值或会话 ID 非法
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器内部错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.post(
+  '/conversations/:conversationId/mute',
+  authMiddleware,
+  toggleMuteConversation
 )
 
 module.exports = router

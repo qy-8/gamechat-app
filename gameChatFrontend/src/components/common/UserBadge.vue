@@ -1,17 +1,15 @@
 <template>
   <div class="user-badge" @click="handleClick">
-    <el-avatar :size="size" :src="avatar">
-      {{ username?.charAt(0) }}
+    <el-avatar :size="props.size" :src="props.avatar">
+      {{ props.username?.charAt(0) }}
     </el-avatar>
     <span class="username">
-      {{ username }}
+      {{ props.username }}
     </span>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-
 const props = defineProps({
   avatar: {
     type: String,

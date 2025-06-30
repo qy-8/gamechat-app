@@ -21,7 +21,7 @@ const messageSchema = new Schema(
       // 消息接收者，关联到 User 模型
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true
+      required: false
     },
     content: {
       // 消息内容
@@ -35,6 +35,12 @@ const messageSchema = new Schema(
       enum: ['text', 'image', 'file', 'system'],
       default: 'text'
     },
+    mentions: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    ],
     readAt: {
       // 接收者已读此消息的时间
       type: Date,
@@ -57,5 +63,7 @@ const messageSchema = new Schema(
 // 建立复合索引，降序排列 createdAt （消息发送时间）
 // 快速获取一个会话内的消息列表，并按照发送时间倒序排列（最新消息在前）
 messageSchema.index({ conversationId: 1, createdAt: -1 })
+// 添加文本索引
+messageSchema.index({ content: 'text' })
 
 module.exports = mongoose.model('Message', messageSchema)

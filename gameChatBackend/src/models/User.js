@@ -8,7 +8,14 @@ const userSchema = new mongoose.Schema(
     phoneNumber: { type: String, default: '' }, // 电话号码，非必填
     favoriteGames: { type: [String], default: [] }, // 喜欢的游戏列表，非必填
     status: { type: Number, enum: [0, 1], default: 1 }, // 用户状态。0注销/1正常
-    groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }] // 用户所在群组
+    groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }], // 用户所在群组
+    mutedConversations: [
+      {
+        // 存放 Conversation 的 ObjectId
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Conversation'
+      }
+    ]
   },
   { timestamps: true } // 自动添加两个字段：createdAt 和 updatedAt
 )

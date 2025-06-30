@@ -1,23 +1,23 @@
 <script setup>
 import { ref, reactive } from 'vue'
-import { createGroup } from '@/api/group.js'
+import { createChannel } from '@/api/group.js'
 import BaseDialog from './common/BaseDialog.vue'
 import { useGroupStore } from '../stores'
+import { updateGroupInfo } from '../api/group'
 
-const groupStore = useGroupStore()
 const props = defineProps({
   visible: Boolean
 })
-const emit = defineEmits(['update:visible'])
-
+const emit = defineEmits(['update:visible', 'updated'])
+const groupStore = useGroupStore()
 const form = reactive({
-  name: '',
-  description: ''
+  name: groupStore.activeGroup.name,
+  description: groupStore.activeGroup.description
 })
-const createGroupFormRef = ref(null)
+const formRef = ref(null)
 
 // 创建群聊表格规则
-const createGroupRules = reactive({
+const formRules = reactive({
   name: [
     { required: true, message: '请输入群组名称', trigger: 'blur' },
     {
@@ -38,19 +38,23 @@ const createGroupRules = reactive({
 
 const onSubmit = () => {
   // TODO: loading
-  createGroupFormRef.value.validate(async (valid) => {
+  formRef.value.validate(async (valid) => {
     if (!valid) {
       console.log('验证失败')
       return
     }
     try {
-      const response = await createGroup(form)
+      const response = await updateGroupInfo({
+        groupId: groupStore.activeGroup._id,
+        name: form.name,
+        description: form.description
+      })
       ElMessage.success(response.message)
+      groupStore.updateGroup(form.name, form.description)
       emit('update:visible', false)
-      groupStore.addNewGroup(response.data)
     } catch (error) {
-      ElMessage.closeAll()
-      ElMessage.error('群组名已存在')
+      // ElMessage.closeAll()
+      ElMessage.error('更新群组信息失败')
       console.error(error)
     }
   })
@@ -58,31 +62,33 @@ const onSubmit = () => {
 </script>
 
 <template>
-  <div class="create-group-dialog-container">
+  <div class="update-info-dialog-container">
     <BaseDialog
       :model-value="visible"
       @update:model-value="emit('update:visible', $event)"
     >
       <template #header>
-        <div class="title">创建群聊</div>
+        <div class="title">修改群组信息</div>
       </template>
 
       <el-form
         :model="form"
-        ref="createGroupFormRef"
-        :rules="createGroupRules"
+        ref="formRef"
+        :rules="formRules"
+        label-width="84px"
+        label-position="left"
         hide-required-asterisk
       >
-        <el-form-item label="群聊名称" prop="name">
+        <el-form-item label="群组名称" prop="name">
           <el-input v-model="form.name"></el-input>
         </el-form-item>
-        <el-form-item label="群聊描述" prop="description">
+        <el-form-item label="群组描述" prop="description">
           <el-input v-model="form.description"></el-input>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button type="primary" @click="onSubmit"> 确认创建 </el-button>
+        <el-button type="primary" @click="onSubmit"> 确认更新 </el-button>
       </template>
     </BaseDialog>
   </div>

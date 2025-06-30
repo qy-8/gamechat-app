@@ -37,7 +37,7 @@ const handleRequestAction = (groupId, action, invitationId) => {
               <UserBadge
                 :src="item.inviter.avatar"
                 :username="item.inviter.username"
-                :size="20"
+                size="20"
                 class="user-info"
               />
               <span>向您发送群组邀请：</span>

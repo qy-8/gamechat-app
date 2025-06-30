@@ -1,6 +1,11 @@
 import { io } from 'socket.io-client'
-import { useUserStore } from '@/stores'
-import { useChatStore } from '@/stores'
+import {
+  useUserStore,
+  useChatStore,
+  useFriendStore,
+  useGroupStore
+} from '@/stores'
+import emitter from './eventBus'
 
 let socket = null
 
@@ -48,14 +53,53 @@ export const connectSocket = () => {
     }
   })
 
-  socket.on('receive-message', (newMessage) => {
+  socket.on('new_message', (newMessage) => {
     console.log('Socket 收到新消息：', newMessage)
-    chatStore.handleNewRealTimeMessage(newMessage)
+    if (newMessage.mentions.length === 0) {
+      console.log(3333, newMessage)
+      chatStore.handleNewRealTimeMessage(newMessage)
+    } else {
+      if (newMessage.conversationId !== chatStore.activeConversation?._id) {
+        emitter.emit('show-notification', {
+          type: 'mention',
+          title: `在 #${newMessage.groupInfo.name} 中被提及`,
+          message: `${newMessage.sender.username}: ${newMessage.content}`
+        })
+      }
+    }
   })
 
   // socket.on('new-friend-request', (requestData) => {
   //   console.log('Socket 收到新的好友请求：', requestData)
   //   console.log('正在发消息通知')
+  // })
+
+  // 新好友请求
+  socket.on('new_friend_request', (requestData) => {
+    console.log('[Socket Service] 收到 new_friend_request:', requestData)
+    const friendStore = useFriendStore()
+    friendStore.handleNewRequest(requestData)
+  })
+
+  // 新群组邀请
+  socket.on('new_group_invitation', (invitationData) => {
+    console.log('[Socket Service] 收到 new_group_invitation:', invitationData)
+    const groupStore = useGroupStore()
+    groupStore.handleNewRequest(invitationData)
+  })
+
+  // socket.on('you_were_mentioned', (notificationData) => {
+  //   console.log(notificationData)
+  //   if (
+  //     notificationData.message.conversationId !==
+  //     chatStore.activeConversation?._id
+  //   ) {
+  //     emitter.emit('show-notification', {
+  //       type: 'mention',
+  //       title: `在 #${notificationData.group.name} 中被提及`,
+  //       message: `${notificationData.mentionedBy.username}: ${notificationData.message.content}`
+  //     })
+  //   }
   // })
 
   return socket

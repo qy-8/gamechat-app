@@ -6,6 +6,7 @@ import {
   deleteFriend as apiDeleteFriend
 } from '../../api/friend'
 import { ElMessage } from 'element-plus'
+import emitter from '../../services/eventBus'
 
 export const useFriendStore = defineStore('friend', () => {
   const friendList = ref([])
@@ -39,6 +40,12 @@ export const useFriendStore = defineStore('friend', () => {
   const handleNewRequest = (newRequestData) => {
     friendRequestList.value.unshift(newRequestData)
     unreadRequestCount.value++
+
+    // 发出全局事件
+    emitter.emit('show-notification', {
+      title: '新的好友请求',
+      message: `用户 ${newRequestData.requester.username} 想添加你为好友`
+    })
   }
 
   const addNewFriend = (newFriend) => {

@@ -32,6 +32,15 @@ const conversationSchema = new Schema(
       // 最后一条消息的发送时间
       type: Date,
       default: Date.now
+    },
+    name: {
+      // 频道名
+      type: String
+    },
+    groupId: {
+      // 所属群组的ID
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Group'
     }
   },
   {
@@ -42,19 +51,24 @@ const conversationSchema = new Schema(
 // 在执行 save 操作执行之前，确保参与者只有两位
 // 在 save 执行前按照id排序参与者的 ID 以确保其唯一性，A - B / B - A 是同一个会话，然后创建复合唯一索引
 conversationSchema.pre('save', function (next) {
-  if (this.participants && this.participants.length === 2) {
-    // 将ObjectId转换为字符串进行比较和排序
-    const participantIdsAsString = this.participants.map((id) => id.toString())
-    participantIdsAsString.sort()
-    // 将排序后的字符串ID转换回ObjectId
-    this.participants = participantIdsAsString.map(
-      (idStr) => new mongoose.Types.ObjectId(idStr)
-    )
-  } else if (this.isNew) {
-    // 强制校验参与者数量
-    // 当this为新建文档且参与人数不足两人，中断并传递 error 对象
-    return next(new Error('会话参与者必须是两位。'))
+  if (this.type === 'private') {
+    if (this.participants && this.participants.length === 2) {
+      // 将ObjectId转换为字符串进行比较和排序
+      const participantIdsAsString = this.participants.map((id) =>
+        id.toString()
+      )
+      participantIdsAsString.sort()
+      // 将排序后的字符串ID转换回ObjectId
+      this.participants = participantIdsAsString.map(
+        (idStr) => new mongoose.Types.ObjectId(idStr)
+      )
+    } else if (this.isNew) {
+      // 强制校验参与者数量
+      // 当this为新建文档且参与人数不足两人，中断并传递 error 对象
+      return next(new Error('会话参与者必须是两位。'))
+    }
   }
+
   next()
 })
 

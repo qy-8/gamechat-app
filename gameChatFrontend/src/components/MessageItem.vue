@@ -2,9 +2,12 @@
 // 消息项组件 - 单条消息的展示组件。包括用户头像、用户名、时间戳等信息，消息内容可以是文本或其他类型。
 import UserAvatar from './common/UserAvatar.vue'
 import dayjs from 'dayjs'
-import { useUserStore } from '@/stores'
+import { useUserStore, useChatStore } from '@/stores'
+import { computed, ref } from 'vue'
 
 const userStore = useUserStore()
+const chatStore = useChatStore()
+const showActions = ref(false)
 const props = defineProps({
   message: {
     type: Object,
@@ -20,10 +23,11 @@ const props = defineProps({
   }
 })
 
-const newMessageSent =
-  props.message.isSentByMe === true ||
-  (props.message.newMessageSent &&
-    props.message.sender._id === userStore.userInfo.userId)
+const newMessageSent = computed(
+  () =>
+    props.message.isSentByMe === true ||
+    props.message.sender._id === userStore.userInfo.userId
+)
 
 const formatTimeAgo = (timestamp) => {
   if (!timestamp) {
@@ -31,18 +35,34 @@ const formatTimeAgo = (timestamp) => {
   }
   return dayjs(timestamp).format('YYYY/MM/DD HH:mm')
 }
+
+const previewImage = (imageUrl) => {
+  if (imageUrl) {
+    window.open(imageUrl, '_blank')
+  }
+}
+
+const handleReply = () => {
+  chatStore.setReplyingTo(props.message)
+}
 </script>
 
 <template>
-  <div class="container">
+  <div
+    class="container"
+    :class="{ 'is-sent-by-me': newMessageSent }"
+    @mouseenter="showActions = true"
+    @mouseleave="showActions = false"
+  >
     <!-- 引用消息 -->
-    <div class="quoted-message-box" v-if="props.message.repliedTo.senderId">
-      <IconMdiArrowRightTop class="icon" />
+    <div class="quoted-message-box" v-if="props.message?.repliedTo?.senderId">
+      <IconMdiArrowRightTop class="icon" v-if="!newMessageSent" />
+      <IconMdiArrowLeftTop v-else class="icon icon--sent" />  
       <div class="quoted-avatar-container">
         <UserAvatar
-          :src="props.message.sender.avatar"
+          :src="props.message.repliedTo.senderAvatar"
           alt="用户头像"
-          size="20"
+          :size="20"
         />
       </div>
       <div class="quoted-info">
@@ -50,7 +70,7 @@ const formatTimeAgo = (timestamp) => {
           @<span>{{ props.message.repliedTo.senderUsername }}</span>
         </div>
         <div class="quoted-message">
-          {{ props.message.repliedTo.senderSnippet }}
+          {{ props.message.repliedTo.contentSnippet }}
         </div>
       </div>
     </div>
@@ -101,8 +121,29 @@ const formatTimeAgo = (timestamp) => {
             'message--sent': newMessageSent === true
           }"
         >
-          {{ props.message.content }}
+          <div class="message-content-wrapper">
+            <div
+              class="text-content"
+              v-if="props.message.messageType === 'text'"
+            >
+              {{ props.message.content }}
+            </div>
+            <div
+              class="image-content"
+              v-else-if="props.message.messageType === 'image'"
+              @click="previewImage(props.message.content)"
+            >
+              <img :src="props.message.content" alt="聊天图片" />
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="message-actions" v-show="showActions">
+        <el-tooltip content="回复" placement="top">
+          <div class="action-icon" @click="handleReply">
+            <IconMdiReply />
+          </div>
+        </el-tooltip>
       </div>
     </div>
   </div>
@@ -110,8 +151,10 @@ const formatTimeAgo = (timestamp) => {
 
 <style lang="scss" scoped>
 .container {
-  padding: 2px 0;
-  margin: 20px 0;
+  position: relative;
+  max-width: 100%;
+  padding: 2px 0 4px 0;
+  margin: 30px 0;
 }
 
 .container:hover {
@@ -175,10 +218,11 @@ const formatTimeAgo = (timestamp) => {
   align-items: center;
   padding-left: 4px;
   color: var(--el-text-color-regular);
+  min-width: 0;
 }
 
 .quoted-message {
-  max-width: 290px;
+  max-width: 80%;
   padding-left: 4px;
   color: var(--el-text-color-quoted);
   white-space: nowrap; // 不换行
@@ -193,8 +237,25 @@ const formatTimeAgo = (timestamp) => {
   color: var(--el-text-color-quoted);
 }
 
+.container.is-sent-by-me .quoted-message-box,
+.container.is-sent-by-me .quoted-info {
+  flex-direction: row-reverse;
+}
+
+.container.is-sent-by-me .quoted-username {
+  margin-right: 4px;
+}
+
+.icon.icon--sent {
+  margin: 0px 46px 4px 2px;
+}
+
 .message-container--sent {
   flex-direction: row-reverse;
+}
+
+.container.is-sent-by-me .quoted-message-box .quoted-message {
+  padding: 0 4px 0 0;
 }
 
 .message-container .message-meta--sent {
@@ -202,9 +263,17 @@ const formatTimeAgo = (timestamp) => {
   justify-content: flex-end;
 }
 
+.message-content-wrapper {
+  max-width: 95%;
+}
+
 .message--sent {
   display: flex;
   justify-content: flex-end;
+  max-width: 100%;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .img-container .user-avatar--sent {
@@ -213,5 +282,49 @@ const formatTimeAgo = (timestamp) => {
 
 .message-meta--received .message-timestamp--sent {
   padding-top: 2px;
+}
+
+.image-content {
+  max-width: 180px;
+  max-height: 180px;
+  cursor: pointer;
+}
+
+.image-content img {
+  border-radius: 20px;
+  object-fit: cover;
+}
+
+.message-actions {
+  position: absolute;
+  top: -20px;
+  right: 32px;
+
+  // display: flex;
+  // gap: 8px;
+
+  background-color: var(--el-bg-color-overlay);
+  padding: 8px 8px 4px 8px;
+  border-radius: 6px;
+  box-shadow: var(--el-box-shadow-light);
+  border: 1px solid var(--el-border-color-lighter);
+
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.action-icon {
+  cursor: pointer;
+  color: var(--el-text-color-secondary);
+  font-size: 18px;
+}
+
+.action-icon:hover {
+  color: var(--el-text-color-primary);
+}
+
+.container.is-sent-by-me .message-actions {
+  right: auto;
+  left: 32px;
 }
 </style>

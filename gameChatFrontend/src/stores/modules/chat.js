@@ -4,9 +4,11 @@ import { useUserStore } from '@/stores'
 import {
   getMessagesForConversation,
   getUserConversations,
-  markAsRead
+  markAsRead,
+  searchMessage
 } from '../../api/chat'
 import { getOrCreateConversation } from '../../api/chat'
+import emitter from '../../services/eventBus'
 
 export const useChatStore = defineStore(
   'chat',
@@ -22,6 +24,14 @@ export const useChatStore = defineStore(
     const canLoadMoreMessages = ref(false)
     const isLoadingMessages = ref(false)
     const messageLimitPerPage = ref(20)
+    const replyingToMessage = ref(null) // 准备恢复的消息内容
+    const searchResults = ref([])
+    const isSearchingMessages = ref(false)
+    const currentSearchPage = ref(1)
+    const totalSearchPages = ref(1)
+    const canLoadMoreSearchResults = ref(false)
+    const currentSearchTerm = ref('')
+
     // 打开的会话 Id
     // const activeConversationId = ref(null)
     const activeConversationPartner = ref({
@@ -30,28 +40,14 @@ export const useChatStore = defineStore(
       avatar: '/images/defaultUserAvatar.png'
     })
 
-    // const headerInfo = computed(() => {
-    //   if (!activeConversation.value) {
-    //     return { name: '', avatar: '', type: null }
-    //   }
-    //   if (activeConversation.value.type === 'group') {
-    //     return {
-    //       name: activeConversation.value.name || '',
-    //       avatar: activeConversation.value.avatar || '',
-    //       type: 'group'
-    //     }
-    //   } else {
-    //     return {
-    //       name: activeConversation.value.targetParticipant?.username || '',
-    //       avatar: activeConversation.value.targetParticipant?.avatar || '',
-    //       type: 'private'
-    //     }
-    //   }
-    // })
-
     const handleNewRealTimeMessage = (newMessage) => {
       console.log('正在处理新的实时消息：', newMessage)
 
+      console.log(
+        11111,
+        newMessage.conversationId,
+        activeConversation.value?._id
+      )
       // 传进来的消息必须要是当前打开的会话
       if (newMessage.conversationId === activeConversation.value?._id) {
         // 检测是否有一样 id 的信息
@@ -65,6 +61,7 @@ export const useChatStore = defineStore(
       const conversationIndex = conversations.value.findIndex(
         (c) => c._id === newMessage.conversationId
       )
+      // console.log('我的---------', conversationIndex)
       if (conversationIndex !== -1) {
         // 拿到新消息所在的 conversation
         const updatedConversation = {
@@ -78,6 +75,23 @@ export const useChatStore = defineStore(
             : newMessage.content
         updatedConversation.lastMessageAt = newMessage.createdAt
 
+        let notificationTitle = ''
+        let notificationMessage = ''
+
+        // 对于私聊和群聊两种消息类型做不同的通知处理
+        if (newMessage.conversationType === 'group') {
+          notificationTitle = `群组 [${newMessage.groupInfo?.name}] 有新消息，来自 ${newMessage.sender.username}`
+        } else {
+          notificationTitle = `有来自 ${newMessage.sender.username} 的新消息`
+        }
+
+        // 对于 image 和 text 两种消息类型做不同的通知处理
+        if (newMessage.messageType === 'image') {
+          notificationMessage = '[图片]'
+        } else {
+          notificationMessage = newMessage.content
+        }
+
         // 判断当前消息是否属于当前打开的会话和是否为当前用户发送的，以决定是否需要增加未读消息计数
         if (
           newMessage.conversationId !== activeConversation.value?._id &&
@@ -85,10 +99,28 @@ export const useChatStore = defineStore(
         ) {
           updatedConversation.unreadCount =
             (updatedConversation.unreadCount || 0) + 1
+          if (!userStore.isMuted(newMessage.conversationId)) {
+            console.log('--- 准备发出通知 ---', {
+              title: `来自 ${newMessage.sender.username} 的新消息`,
+              message: newMessage.content
+            })
+            emitter.emit('show-notification', {
+              title: notificationTitle,
+              message: notificationMessage
+            })
+          }
+        } else {
+          console.log('--- 通知条件未满足 ---', {
+            isSameConversation:
+              newMessage.conversationId.toString() ===
+              activeConversation.value?._id?.toString(),
+            isMyOwnMessage:
+              newMessage.sender._id.toString() ===
+              userStore.userInfo.userId.toString()
+          })
         }
 
         // 移除新消息所在的会话然后把更新的对话放在数组最前面（消息列表按新 -> 旧顺序排列）
-        // 这里减少了性能开销：从之前的根据 lastMessageAt 来排序整个数组改成删除新消息所在会话再添加
         conversations.value.splice(conversationIndex, 1)
         conversations.value.unshift(updatedConversation)
       } else {
@@ -184,97 +216,6 @@ export const useChatStore = defineStore(
       }
     }
 
-    // const setActiveConversation = async (conversationId) => {
-    //   // 点击已激活会话不重复加载
-    //   if (conversationId === activeConversationId.value || !conversationId) {
-    //     return
-    //   }
-    //   if (conversationId) {
-    //     activeConversationId.value = conversationId
-    //     messages.value = []
-    //     currentMessagePage.value = 1
-    //     totalMessagePages.value = 1
-    //     canLoadMoreMessages.value = false
-    //     isLoadingMessages.value = true
-    //   }
-    //   // 清除未读数
-    //   const convIndex = conversations.value.findIndex(
-    //     (c) => c._id === conversationId
-    //   )
-    //   console.log(11111)
-    //   if (convIndex !== -1 &&
-    // conversations.value[convIndex].unreadCount > 0) {
-    //     console.log(
-    //       `${conversationId} 有
-    //  ${conversations.value[convIndex].unreadCount} 未读`
-    //     )
-    //     conversations.value[convIndex].unreadCount = 0 // 在前端UI上清除未读消息标志
-
-    //     markAsRead(conversationId).catch((err) => {
-    //       console.error('在后台标记已读失败:', err)
-    //     })
-    //   }
-
-    //   try {
-    //     await getMessages(conversationId, 1)
-    //   } catch (error) {
-    //     console.error(error)
-    //   } finally {
-    //     isLoadingMessages.value = false
-    //   }
-    // }
-
-    // const setActiveFriend = async (friend) => {
-    //   if (!friend || !friend._id) {
-    //     return
-    //   }
-
-    //   if (
-    //     activeConversationPartner.value &&
-    //     activeConversationPartner.value._id === friend._id
-    //   ) {
-    //     return
-    //   }
-
-    //   try {
-    //     const response = await getOrCreateConversation(friend._id)
-    //     const { _id: conversationId } = response.data
-
-    //     activeConversationId.value = conversationId
-    //     activeConversationPartner.value = {
-    //       _id: friend._id,
-    //       username: friend.username,
-    //       avatar: friend.avatar
-    //     }
-    //     messages.value = []
-    //     currentMessagePage.value = 1
-    //     totalMessagePages.value = 1
-    //     canLoadMoreMessages.value = false
-
-    //     const convIndex = conversations.value.findIndex(
-    //       (c) => c._id === conversationId
-    //     )
-
-    //     if (
-    //       convIndex !== -1 &&
-    //       conversations.value[convIndex].unreadCount > 0
-    //     ) {
-    //       conversations.value[convIndex].unreadCount = 0
-    //       try {
-    //         const response = await markAsRead(conversationId)
-    //         console.log(response)
-    //       } catch (error) {
-    //         console.error('后台标记已读失败:', error)
-    //       }
-    //     }
-
-    //     // 加载该会话的第一页消息
-    //     await getMessages(conversationId, 1)
-    //   } catch (error) {
-    //     console.error(error)
-    //   }
-    // }
-
     const selectFriendToChat = async (friend) => {
       if (!friend || !friend._id) {
         return
@@ -324,6 +265,88 @@ export const useChatStore = defineStore(
       }
     }
 
+    const setReplyingTo = (message) => {
+      console.log(message)
+      console.log('准备引用消息', message)
+      replyingToMessage.value = message
+    }
+
+    const clearReplyingTo = () => {
+      console.log('正在清除引用消息')
+      replyingToMessage.value = null
+    }
+
+    const searchMessagesInConversation = async (
+      conversationId,
+      searchTerm,
+      page = 1
+    ) => {
+      if (!conversationId) {
+        console.warn('会话 ID 不能为空')
+      }
+      if (!searchTerm || searchTerm.trim() === '') {
+        searchResults.value = []
+        currentSearchPage.value = 1
+        totalSearchPages.value = 1
+        canLoadMoreSearchResults.value = false
+        isSearchingMessages.value = false
+        currentSearchTerm.value = ''
+        return
+      }
+
+      isSearchingMessages.value = true
+      currentSearchTerm.value = searchTerm // 更新搜索词
+
+      try {
+        const response = await searchMessage({
+          conversationId,
+          searchTerm,
+          page
+        })
+
+        if (page === 1) {
+          // 如果是第一页，替换所有结果
+          searchResults.value = response.data.messages
+        } else {
+          // 如果是加载更多，追加结果
+          searchResults.value.push(...response.data.messages)
+        }
+
+        currentSearchPage.value = response.data.currentPage
+        totalSearchPages.value = response.data.totalPages
+        canLoadMoreSearchResults.value =
+          response.data.currentPage < response.data.totalPages
+      } catch (error) {
+        console.error('搜索消息失败:', error)
+        searchResults.value = [] // 清空结果
+        currentSearchPage.value = 1
+        totalSearchPages.value = 1
+        canLoadMoreSearchResults.value = false
+      } finally {
+        isSearchingMessages.value = false
+      }
+    }
+
+    const loadMoreSearchResults = async (conversationId, searchTerm) => {
+      if (!canLoadMoreSearchResults.value || isSearchingMessages.value) {
+        return
+      }
+      await searchMessagesInConversation(
+        conversationId,
+        searchTerm,
+        currentSearchPage.value + 1
+      )
+    }
+
+    const clearSearchResults = () => {
+      searchResults.value = []
+      isSearchingMessages.value = false
+      currentSearchPage.value = 1
+      totalSearchPages.value = 1
+      canLoadMoreSearchResults.value = false
+      currentSearchTerm.value = ''
+    }
+
     return {
       conversations,
       activeConversation,
@@ -334,6 +357,13 @@ export const useChatStore = defineStore(
       canLoadMoreMessages,
       isLoadingMessages,
       activeConversationPartner,
+      replyingToMessage,
+      searchResults,
+      isSearchingMessages,
+      currentSearchPage,
+      totalSearchPages,
+      canLoadMoreSearchResults,
+      currentSearchTerm,
       handleNewRealTimeMessage,
       getConversations,
       getMessages,
@@ -341,7 +371,12 @@ export const useChatStore = defineStore(
       selectFriendToChat,
       selectGroupChannelToChat,
       clearActiveConversation,
-      setActiveFriend
+      setActiveFriend,
+      setReplyingTo,
+      clearReplyingTo,
+      searchMessagesInConversation,
+      loadMoreSearchResults,
+      clearSearchResults
     }
   },
   {

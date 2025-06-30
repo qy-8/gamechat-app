@@ -68,4 +68,10 @@ themeStore.initTheme()
     background-color: transparent;
   }
 }
+
+// .container .el-menu--horizontal .el-menu-item:hover,
+// .container .el-menu--horizontal .el-menu-item:active {
+//   color: var(--primary-text-color);
+//   background-color: transparent;
+// }
 </style>

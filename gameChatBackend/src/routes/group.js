@@ -13,7 +13,9 @@ const {
   getGroupDetails,
   searchGroupMembers,
   getPendingGroupInvitations,
-  kickGroupMember
+  kickGroupMember,
+  updateGroupInfo,
+  disbandGroup
 } = require('../controller/groupController')
 const authMiddleware = require('../middlewares/authMiddleware')
 const upload = require('../middlewares/upload')
@@ -987,5 +989,144 @@ router.get('/invitations/pending', authMiddleware, getPendingGroupInvitations)
  */
 
 router.delete('/:groupId/members/:memberId', authMiddleware, kickGroupMember)
+
+/**
+ * @swagger
+ * /api/groups/{groupId}/info:
+ *   patch:
+ *     summary: 修改群组信息（群名与群描述）
+ *     description: 只有群主可以修改群组名称和描述，名称最长 10 个字符，描述最长 15 个字符。
+ *     tags:
+ *       - Group
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: groupId
+ *         in: path
+ *         required: true
+ *         description: 群组 ID
+ *         schema:
+ *           type: string
+ *           example: 6650cabc1234567890abcdef
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: 新的群组名称（最长 10 个字符）
+ *                 example: 游戏开发组
+ *               description:
+ *                 type: string
+ *                 description: 群组简介（最长 15 个字符）
+ *                 example: 我们热爱 Indie Game
+ *     responses:
+ *       200:
+ *         description: 群组信息修改成功或无变动
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: 群组信息更新成功
+ *                 data:
+ *                   $ref: '#/components/schemas/Group'
+ *       400:
+ *         description: 请求数据无效，如名称为空、超长等
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: 未提供有效身份信息
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: 非群主无权操作
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: 群组不存在
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       409:
+ *         description: 群组名称已被占用
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.patch('/:groupId/info', authMiddleware, updateGroupInfo)
+
+/**
+ * @swagger
+ * /api/groups/{groupId}:
+ *   delete:
+ *     summary: 解散群组
+ *     description: 仅群主可以解散群组。该操作会移除所有成员的群组关联，并解绑该群组下所有频道。
+ *     tags:
+ *       - Group
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: groupId
+ *         in: path
+ *         required: true
+ *         description: 要解散的群组 ID
+ *         schema:
+ *           type: string
+ *           example: 6650cabc1234567890abcdef
+ *     responses:
+ *       200:
+ *         description: 群组成功解散
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: 群组已成功解散
+ *                 data:
+ *                   $ref: '#/components/schemas/Group'
+ *       403:
+ *         description: 非群主无权限解散群组
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: 群组不存在
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器内部错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.delete('/:groupId', authMiddleware, disbandGroup)
 
 module.exports = router

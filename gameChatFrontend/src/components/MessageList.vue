@@ -18,7 +18,7 @@ const {
 } = storeToRefs(chatStore)
 const { getMessages } = chatStore
 const currentUserId = userStore.userInfo.userId
-
+const isSwitchingConversation = ref(false)
 const scrollbarRef = ref(null)
 const isInitialLoadForCurrentConversation = ref(true)
 const localLoadingMore = ref(false)
@@ -30,6 +30,7 @@ const scrollToBottom = async (behavior = 'auto') => {
 
   if (scrollbarRef.value && scrollbarRef.value.wrapRef) {
     const scrollWrapper = scrollbarRef.value.wrapRef
+    await new Promise((resolve) => setTimeout(resolve, 50))
     scrollWrapper.scrollTo({
       top: scrollWrapper.scrollHeight,
       behavior: behavior
@@ -70,6 +71,9 @@ const loadMore = async () => {
 const debouncedLoadMore = debounce(loadMore, 200)
 
 const handleScroll = ({ scrollTop }) => {
+  if (isSwitchingConversation.value) {
+    return
+  }
   if (scrollTop < 300) {
     debouncedLoadMore()
   }
@@ -78,17 +82,22 @@ const handleScroll = ({ scrollTop }) => {
 // 滚动判断：当用户切换会话，滚动到底部
 watch(
   activeConversation,
-  (newConversation, oldConversation) => {
+  async (newConversation, oldConversation) => {
     if (newConversation && newConversation._id !== oldConversation?._id) {
-      console.log(`会话已切换到 ${newConversation._id}，准备加载消息...`)
-      chatStore
-        .getMessages(newConversation._id, 1)
-        .then(() => {
-          scrollToBottom('auto') // 切换会话，立即滚动
-        })
-        .catch((err) => {
-          console.error(`加载会话 ${newConversation._id} 的消息失败:`, err)
-        })
+      isSwitchingConversation.value = true
+      try {
+        console.log(`会话已切换到 ${newConversation._id}，准备加载消息...`)
+
+        await chatStore.getMessages(newConversation._id, 1)
+
+        await scrollToBottom('auto')
+      } catch (err) {
+        console.error(`加载会话 ${newConversation._id} 的消息失败:`, err)
+      } finally {
+        // 解锁
+        isSwitchingConversation.value = false
+        console.log('会话切换完成，已解锁滚动加载。')
+      }
     }
   },
   { immediate: true }
@@ -98,7 +107,8 @@ watch(
 watch(
   () => messages.value.length,
   (newLength, oldLength) => {
-    if (oldLength > 0 && newLength > oldLength) {
+    // if (oldLength > 0 && newLength > oldLength) {
+    if (newLength === oldLength + 1) {
       console.log('当前会话有新消息加入，平滑滚动到底部。')
       scrollToBottom('smooth')
     }

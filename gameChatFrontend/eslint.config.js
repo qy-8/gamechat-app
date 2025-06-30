@@ -19,7 +19,7 @@ export default [
       semi: ['error', 'never'],
       quotes: ['error', 'single'],
       'comma-dangle': ['error', 'never'],
-      'max-len': ['error', { code: 80 }],
+      'max-len': ['error', { code: 120 }],
       'prettier/prettier': [
         'error',
         {

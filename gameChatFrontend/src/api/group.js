@@ -71,3 +71,13 @@ export const kickGroupMember = (data) => {
   const { groupId, memberId } = data
   return request.delete(`/api/groups/${groupId}/members/${memberId}`)
 }
+
+export const updateGroupInfo = (data) => {
+  const { groupId, name, description } = data
+  return request.patch(`api/groups/${groupId}/info`, { name, description })
+}
+
+export const disbandGroup = (groupId) => {
+  console.log(groupId)
+  return request.delete(`api/groups/${groupId}`)
+}

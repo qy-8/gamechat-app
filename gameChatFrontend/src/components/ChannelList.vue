@@ -2,14 +2,18 @@
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ref, onMounted, watch } from 'vue'
 import CreateChannelDialog from './CreateChannelDialog.vue'
-import { useGroupStore, useChannelStore } from '@/stores'
+import { useGroupStore, useChannelStore, useChatStore } from '@/stores'
 
 import { DeleteFilled } from '@element-plus/icons-vue'
 // import { changeGlobalNodesTarget } from 'element-plus/es/utils/index.mjs'
 import UploadGroupAvatarDialog from './UploadGroupAvatarDialog.vue'
 import { useDraggableWidth } from '../composables/useDraggableWidth'
 import { storeToRefs } from 'pinia'
+import { getSocket } from '../services/socketService'
+import UpdateGroupInfo from './UpdateGroupInfo.vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
+const socket = getSocket()
 const activeIndex = ref('1')
 // let isDragging = false
 const groupInfo = ref(null)
@@ -18,19 +22,22 @@ const groupInfo = ref(null)
 const channelStore = useChannelStore(0)
 const showCreateChannelDialog = ref(false)
 const groupStore = useGroupStore()
-let { channelList } = storeToRefs(channelStore)
+const chatStore = useChannelStore()
+const { channelList } = storeToRefs(channelStore)
+const { conversations } = storeToRefs(chatStore)
 const showDeleteIcon = ref(false)
 const showUploadGroupAvatarDialog = ref(null)
+const showUpdateGroupInfo = ref(null)
 const groupBackgroundUrl = ref(null)
 const loading = ref(false)
 
-const getChannels = async () => {
-  channelStore.getGroupChannels(groupStore.activeGroup._id)
-}
+// const getChannels = async () => {
+//   channelStore.getGroupChannels(groupStore.activeGroup._id, conversations)
+// }
 
-onMounted(() => {
-  getChannels()
-})
+// onMounted(() => {
+//   getChannels()
+// })
 
 // TODO: 在删除前检测是否为群主，不然不让删除
 const deleteSelectedChannel = async (channelId) => {
@@ -44,14 +51,14 @@ const deleteSelectedChannel = async (channelId) => {
   }
 }
 
-watch(
-  () => groupStore.activeGroup?._id,
-  async (newGroup) => {
-    if (newGroup) {
-      getChannels()
-    }
-  }
-)
+// watch(
+//   () => groupStore.activeGroup?._id,
+//   async (newGroup) => {
+//     if (newGroup) {
+//       getChannels()
+//     }
+//   }
+// )
 
 const handleUploadSuccess = (data) => {
   groupStore.activeGroup.avatar = data
@@ -64,6 +71,29 @@ const { startDragging } = useDraggableWidth(groupInfo, {
 
 const handleClickChannel = (currentChannel) => {
   channelStore.setActiveChannel(currentChannel)
+  const chatStore = useChatStore()
+  chatStore.setActiveConversation(currentChannel)
+  socket.emit('join_channel', currentChannel._id)
+}
+
+const handleDisbandGroup = async () => {
+  if (!groupStore.activeGroup) {
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      `确定要解散群组 “${groupStore.activeGroup.name}” 吗？此操作将使群组失效，群组成员将无法再访问。`,
+      '确认解散群组',
+      {
+        confirmButtonText: '确定解散',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    await groupStore.disbandGroup()
+  } catch (error) {
+    console.error(error)
+  }
 }
 </script>
 
@@ -102,9 +132,12 @@ const handleClickChannel = (currentChannel) => {
                     @click="showUploadGroupAvatarDialog = true"
                     >更换群组头像</el-dropdown-item
                   >
-                  <el-dropdown-item>修改群组名称</el-dropdown-item>
-                  <el-dropdown-item>修改群组描述</el-dropdown-item>
-                  <el-dropdown-item divided>解散群组</el-dropdown-item>
+                  <el-dropdown-item @click="showUpdateGroupInfo = true"
+                    >修改群组信息</el-dropdown-item
+                  >
+                  <el-dropdown-item divided @click="handleDisbandGroup"
+                    >解散群组</el-dropdown-item
+                  >
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -118,7 +151,9 @@ const handleClickChannel = (currentChannel) => {
         class="panel-item"
         @click="handleClickChannel(item)"
         ><span>{{ item.name }}</span>
-        <div class="new-announcements" v-if="!showDeleteIcon">3</div>
+        <div class="new-announcements" v-if="item.unreadCount > 0">
+          {{ item.unreadCount }}
+        </div>
         <el-icon
           class="deleteIcon has-active-scale-effect"
           @click="deleteSelectedChannel(item._id)"
@@ -139,6 +174,10 @@ const handleClickChannel = (currentChannel) => {
     v-if="showUploadGroupAvatarDialog"
     @upload-success="handleUploadSuccess"
   ></UploadGroupAvatarDialog>
+  <UpdateGroupInfo
+    v-model:visible="showUpdateGroupInfo"
+    v-if="showUpdateGroupInfo"
+  ></UpdateGroupInfo>
 </template>
 
 <style lang="scss" scoped>

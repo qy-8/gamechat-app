@@ -5,9 +5,11 @@ import {
   getGroupInvitations as apiGetGroupInvitations,
   groupInvitationResponse,
   kickGroupMember,
-  getGroupMembers
+  getGroupMembers,
+  disbandGroup as apiDisbandGroup
 } from '@/api/group'
 import { ElMessage } from 'element-plus'
+import emitter from '../../services/eventBus'
 
 export const useGroupStore = defineStore(
   'group',
@@ -71,6 +73,11 @@ export const useGroupStore = defineStore(
     const handleNewRequest = (newRequestData) => {
       groupInvitations.value.unshift(newRequestData)
       unreadGroupInvitation.value++
+
+      emitter.emit('show-notification', {
+        title: '新的群组邀请',
+        message: `用户 ${newRequestData.inviter.username} 邀请你加入群组 ${newRequestData.group.name}`
+      })
     }
 
     const handleKickGroupMember = async (memberId) => {
@@ -103,6 +110,40 @@ export const useGroupStore = defineStore(
       isGroupActive.value = false
     }
 
+    const addNewGroup = (newGroup) => {
+      if (newGroup) {
+        groups.value.push(newGroup)
+      }
+    }
+
+    const updateGroup = (groupName, groupDescription) => {
+      const group = groups.value.find((g) => g._id === activeGroup.value._id)
+      if (group) {
+        group.name = groupName
+        group.description = groupDescription
+      }
+      activeGroup.value.name = groupName
+      activeGroup.value.description = groupDescription
+    }
+
+    const disbandGroup = async () => {
+      try {
+        await apiDisbandGroup(activeGroup.value._id)
+        ElMessage.success('群组已成功解散！')
+        groups.value = groups.value.filter(
+          (group) => group._id !== activeGroup.value._id
+        )
+
+        // 替换当前激活群组
+        if (groups) {
+          setActiveGroup(groups.value[0])
+        }
+      } catch (error) {
+        console.error(error)
+        ElMessage.closeAll()
+        ElMessage.error('解散群组失败')
+      }
+    }
     return {
       groups,
       isGroupActive,
@@ -118,7 +159,10 @@ export const useGroupStore = defineStore(
       handleNewRequest,
       handleKickGroupMember,
       fetchGroupMembers,
-      clearActiveGroup
+      clearActiveGroup,
+      addNewGroup,
+      updateGroup,
+      disbandGroup
     }
   },
   {

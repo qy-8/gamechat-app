@@ -236,7 +236,7 @@ const sendFriendRequest = async (req, res) => {
       const recipientSockets = getUserSockets(receiverId)
       if (recipientSockets && recipientSockets.size > 0) {
         recipientSockets.forEach((socketId) => {
-          io.to(socketId).emit('new-friend-request', populatedRequest)
+          io.to(socketId).emit('new_friend_request', populatedRequest)
         })
         return response.success(res, populatedRequest, '申请成功')
       }

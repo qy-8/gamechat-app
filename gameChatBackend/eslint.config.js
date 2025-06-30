@@ -16,7 +16,7 @@ module.exports = [
       semi: ['error', 'never'], // 禁止分号
       quotes: ['error', 'single'], // 使用单引号
       'comma-dangle': ['error', 'never'], // 禁止对象和数组最后一个属性的逗号
-      'max-len': ['error', { code: 80 }], // 最大行宽
+      'max-len': ['error', { code: 100 }], // 最大行宽
       'prettier/prettier': [
         'error',
         {

@@ -256,15 +256,19 @@ const handleKickMember = async (memberId) => {
 
 .conversation-header {
   max-height: 40px;
+  flex-shrink: 0;
 }
 
 .message-container {
   width: 100%;
-  flex: 1;
+  // flex: 1;
+  flex-grow: 1;
 }
 
 .input-container {
-  height: 100px;
+  // height: 100px;
+  height: auto;
+  flex-shrink: 0;
 }
 
 :deep(.el-drawer__close-btn) {

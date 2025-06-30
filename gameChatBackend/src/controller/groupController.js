@@ -1,7 +1,7 @@
 const Group = require('../models/Group')
 const User = require('../models/User')
+const Conversation = require('../models/Conversation')
 const response = require('../utils/response')
-const Channel = require('../models/Channel')
 const ossClient = require('../utils/ossClient')
 const path = require('path')
 const fs = require('fs')
@@ -24,6 +24,25 @@ const createGroup = async (req, res) => {
     await User.findByIdAndUpdate(userId, {
       $addToSet: { groups: group._id } // 避免重复
     })
+
+    // 创建默认频道
+    const defaultChannels = [
+      {
+        name: '通用',
+        groupId: group._id,
+        type: 'group',
+        participants: group.members
+      },
+      {
+        name: '公告',
+        groupId: group._id,
+        type: 'group',
+        participants: group.members
+      }
+    ]
+
+    await Conversation.insertMany(defaultChannels)
+
     // 返回创建成功的群组信息
     response.success(res, group, '群组创建成功')
   } catch (err) {
@@ -40,7 +59,7 @@ const getUserGroups = async (req, res) => {
     //   'members',
     //   'username avatar'
     // )
-    const groups = await Group.find({ members: userId }).select(
+    const groups = await Group.find({ members: userId, status: 1 }).select(
       'name avatar description type'
     )
     response.success(res, groups, '获取群组信息成功')
@@ -267,10 +286,16 @@ const createChannel = async (req, res) => {
     const { name, groupId } = req.body
     const userId = req.user.userId
 
-    const newChannel = new Channel({
+    const group = await Group.findById(groupId)
+    if (!group || !group.members.includes(userId)) {
+      return response.error(res, '无权在此群组创建频道', 403)
+    }
+    const newChannel = new Conversation({
       name,
       groupId,
-      createdBy: userId
+      type: 'group',
+      participants: group.members,
+      lastMessageAt: Date.now()
     })
 
     await newChannel.save()
@@ -285,14 +310,22 @@ const createChannel = async (req, res) => {
 const deleteChannel = async (req, res) => {
   try {
     const { channelId } = req.params
+    const userId = req.user.userId
 
-    const channel = await Channel.findById(channelId)
+    const channel = await Conversation.findById(channelId).populate(
+      'groupId',
+      'createdBy'
+    )
 
-    if (!channel) {
+    if (!channel || channel.type !== 'group') {
       return response.error(res, '频道不存在', 404)
     }
 
-    await Channel.findByIdAndDelete(channelId)
+    if (channel.groupId.createdBy.toString() !== userId) {
+      return response.error(res, '只有群主才能删除频道', 403)
+    }
+
+    await Conversation.findByIdAndDelete(channelId)
 
     response.success(res, null, '频道删除成功')
   } catch (error) {
@@ -305,7 +338,10 @@ const getChannels = async (req, res) => {
   const { groupId } = req.params
 
   try {
-    const channels = await Channel.find({ groupId })
+    const channels = await Conversation.find({
+      groupId: groupId,
+      type: 'group'
+    }).sort({ createdAt: 1 }) // 使用创建时间排序
     response.success(res, channels, '获取频道成功')
   } catch (error) {
     response.error(res, '获取频道失败')
@@ -342,6 +378,23 @@ const responseToGroupInvitation = async (req, res) => {
       group.pendingInvitations.pull(invitation._id)
 
       await group.save()
+
+      // 将用户添加到所有群组频道
+      const groupChannels = await Conversation.find({
+        groupId: group._id,
+        type: 'group'
+      })
+
+      const updatePromises = groupChannels.map(async (channel) => {
+        // 检查用户是否已经在这个频道的参与者列表中，避免重复添加
+        if (!channel.participants.some((p) => p.equals(inviteeId))) {
+          channel.participants.push(inviteeId)
+          await channel.save()
+        }
+      })
+
+      await Promise.all(updatePromises)
+
       return response.success(res, group, '已成功加入群组')
     } else {
       group.pendingInvitations.pull(invitation._id)
@@ -511,6 +564,179 @@ const kickGroupMember = async (req, res) => {
   }
 }
 
+// // 发送消息到频道
+// const sendMessageInChannel = async () => {
+//   try {
+//     const { conversationId } = req.params
+//     const { channelId, content, messageType = 'text' } = req.body
+//     const senderId = req.user.userId
+
+//     if (!content || !content.trim()) {
+//       return response.error(res, '消息内容不能为空', 400)
+//     }
+
+//     // 查找频道
+//     const channel = await Channel.findById(conversationId).populate({
+//       path: 'groupId',
+//       select: 'members'
+//     })
+
+//     if (!channel || !channel.groupId) {
+//       return response.error(res, '该频道不存在', 404)
+//     }
+
+//     // 验证发送消息的人是否为群组成员
+//     const isMember = channel.groupId.members.some((id) => id.equals(senderId))
+//     if (!isMember) {
+//       return response.error(res, '用户不是群组成员', 404)
+//     }
+
+//     const newMessage = new Message({
+//       sender: senderId,
+//       channelId: channelId,
+//       conversationId: conversationId,
+//       content: content.trim(),
+//       messageType: messageType
+//     })
+
+//     await newMessage.save()
+
+//     // 更新 channel 的 lastMessageAt 时间戳，用于频道列表排序
+//     await Channel.updateOne(
+//       { _id: channelId },
+//       { lastMessageAt: newMessage.createdAt }
+//     )
+
+//     const populatedMessage = await Message.findById(newMessage._id).populate(
+//       'sender',
+//       'username avatar'
+//     )
+
+//     const io = req.app.get('io')
+
+//     io.to(channelId).emit('new_message', populatedMessage.toObject())
+//     console.log(`已向房间 ${channelId} 广播了新消息`)
+
+//     response.success(res, populatedMessage, '消息发送成功')
+//   } catch (error) {
+//     console.error(error)
+//     return response.error(res, '无法发送信息，服务器错误')
+//   }
+// }
+
+const updateGroupInfo = async (req, res) => {
+  try {
+    const { groupId } = req.params
+    const { name, description } = req.body
+    const currentUserId = req.user.userId
+
+    if (!currentUserId) {
+      return response.error(res, '请提供用户id', 401)
+    }
+
+    const group = await Group.findById(groupId)
+
+    if (!group) {
+      return response.error(res, '该群组不存在', 404)
+    }
+
+    if (group.createdBy.toString() !== currentUserId) {
+      return response.error(res, '只有群主才能修改群组信息', 403)
+    }
+
+    let isAnyFieldUpdated = false
+    if (name !== undefined && name !== null) {
+      const trimmedName = String(name).trim()
+      if (trimmedName === '') {
+        return response.error(res, '群组名称不能为空', 400)
+      }
+      if (trimmedName.length > 10) {
+        return response.error(res, '群组名称不能超过10个字符', 400)
+      }
+      if (trimmedName !== group.name) {
+        const existingGroup = await Group.findOne({ name: trimmedName })
+        if (existingGroup && existingGroup._id.toString() !== groupId) {
+          return response.error(res, '群组名称已被占用', 409)
+        }
+      }
+
+      // 修改群名
+      group.name = trimmedName
+      isAnyFieldUpdated = true
+    }
+
+    if (description !== undefined && description !== null) {
+      const trimmedDescription = String(description).trim()
+      if (trimmedDescription.length > 15) {
+        return response.error(res, '群组描述不能超过15个字符', 400)
+      }
+      group.description = trimmedDescription
+      isAnyFieldUpdated = true
+    }
+
+    // 群组信息未产生变化
+    if (!isAnyFieldUpdated) {
+      return response.success(res, group, '群组信息未发生变化', 200)
+    }
+
+    await group.save()
+    return response.success(res, group, '群组信息更新成功', 200)
+  } catch (error) {
+    console.error(error)
+    return response.error(res, '更新群组信息失败')
+  }
+}
+
+const disbandGroup = async (req, res) => {
+  const { groupId } = req.params
+  const currentUserId = req.user.userId
+
+  try {
+    const group = await Group.findById(groupId)
+
+    if (!group) {
+      return response.error(res, '该群组不存在', 404)
+    }
+
+    if (currentUserId !== group.createdBy.toString()) {
+      return response.error(res, '只有群组可以解散群聊', 403)
+    }
+
+    group.status = 0
+    await group.save()
+    const memberIds = group.members.map((id) => id.toString())
+    // 查找所有群组成员，从他们的 groups 中删除该群组 Id
+    if (memberIds.length > 0) {
+      await User.updateMany(
+        { _id: { $in: memberIds } },
+        { $pull: { groups: group._id } }
+      )
+      console.log(`已从群组成员的个人群组列表中移除群组 ${groupId}。`)
+    }
+    // 更新频道，将 groupId 设为 null
+    await Conversation.updateMany(
+      { groupId: group._id, type: 'group' },
+      { $set: { groupId: null } }
+    )
+    console.log(`已将群组 ${groupId} 下的所有频道与该群组解除关联。`)
+
+    // 清理群组头像
+    if (group.avatar) {
+      try {
+        const ossFileName = new URL(group.avatar).pathname.substring(1)
+        await ossClient.delete(ossFileName)
+        console.log(`已删除群组 ${groupId} 的 OSS 头像: ${ossFileName}`)
+      } catch (ossError) {
+        console.warn(`删除群组 ${groupId} 的 OSS 头像失败:`, ossError.message)
+      }
+    }
+    response.success(res, group, '群组已成功解散')
+  } catch (error) {
+    console.error(error)
+    return response.error(res, '解散群组失败，服务器内部错误', 500)
+  }
+}
+
 module.exports = {
   createGroup,
   getUserGroups,
@@ -524,5 +750,7 @@ module.exports = {
   getGroupDetails,
   searchGroupMembers,
   getPendingGroupInvitations,
-  kickGroupMember
+  kickGroupMember,
+  updateGroupInfo,
+  disbandGroup
 }

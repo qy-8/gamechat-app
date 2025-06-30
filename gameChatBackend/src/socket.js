@@ -46,6 +46,15 @@ function setupSocket(io) {
       }
     })
 
+    socket.on('join_channel', (channelId) => {
+      if (!channelId) {
+        return
+      }
+      console.log(`Socket ${socket.id} 正在尝试加入频道 ${channelId}`)
+
+      socket.join(channelId)
+    })
+
     socket.on('disconnect', (reason) => {
       console.log(
         `用户 ${userId}，Socket ID ${socket.id} 因 ${reason} 断开连接`
