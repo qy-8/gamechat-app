@@ -1,60 +1,85 @@
-@forward 'element-plus/theme-chalk/src/common/var.scss' with (
-  $colors: (
-    'primary': (
-      'base': #FF9100,
-    ),
-    'success': (
-      'base': #67c23a,
-    ),
-    'warning': (
-      'base': #e6a23c,
-    ),
-    'danger': (
-      'base': #D32F2F,
-    ),
-    'error': (
-      'base': #f56c6c,
-    ),
-    'info': (
-      'base': #909399,
-    ),
-  ),
-  $text-color: (
-    'primary': #FF9100, // 设置主要文字颜色
-    'regular': #000000, // 设置常规文字颜色
-    'secondary': #515151, // 次要文字颜色
-    'placeholder': #737373, // 占位符文字颜色
-    'disabled': #c0c4cc, // 禁用状态文字颜色
-    'quoted': #676666
-  ),
-  $bg-color:(
-    'login-bgc': #ff9100, // 设置login页面的背景颜色，使用：var(--el-bg-color-login-bgc)
-    'home-details-box-bgc':#e0e0e0,
-    'group-title-box-bgc': #70614e, // chat 页面 group title 背景颜色
-    'announcements': #f94141,
-    'group-list': #ebebeb,
-    'message-item-hover': #0000000D,
-    "search-user-result": #F9F9F9
-  )
-);
+// // @forward 'element-plus/theme-chalk/src/common/var.scss' with (
+// //   $colors: (
+// //     'primary': (
+// //       'base': #FF9100,
+// //     ),
+// //     'success': (
+// //       'base': #67c23a,
+// //     ),
+// //     'warning': (
+// //       'base': #e6a23c,
+// //     ),
+// //     'danger': (
+// //       'base': #D32F2F,
+// //     ),
+// //     'error': (
+// //       'base': #f56c6c,
+// //     ),
+// //     'info': (
+// //       'base': #909399,
+// //     ),
+// //   ),
+// //   $text-color: (
+// //     'primary': #FF9100, // 设置主要文字颜色
+// //     'regular': #000000, // 设置常规文字颜色
+// //     'secondary': #515151, // 次要文字颜色
+// //     'placeholder': #737373, // 占位符文字颜色
+// //     'disabled': #c0c4cc, // 禁用状态文字颜色
+// //     'quoted': #676666
+// //   ),
+// //   $bg-color:(
+// //     'login-bgc': #ff9100, // 设置login页面的背景颜色，使用：var(--el-bg-color-login-bgc)
+// //     'home-details-box-bgc':#e0e0e0,
+// //     'group-title-box-bgc': #70614e, // chat 页面 group title 背景颜色
+// //     'announcements': #f94141,
+// //     'group-list': #ebebeb,
+// //     'message-item-hover': #0000000D,
+// //     "search-user-result": #F9F9F9
+// //   )
+// // );
 
 
-:root {
-  --link-hover-color: #FF9100;
-  --link-hover-background-color: rgba(4, 3, 2, 0.1);
-  --background-color: #1E1E1E;
-  --el-menu-hover-bg-color: #FF9100;
-  --el-menu-hover-text-color: #000000;
-  --icons-color: #FF9100;
-  --primary-text-color: #FF9100;
-  --secondary-text-color: #ffffff;
-  --login-background-color: #e09028;
-  --el-text-color-regular: #000000;
-  --el-text-color-secondary: #515151;
-  --el-btn-hover-border-color: #ff9100;
-  --el-text-color-timestamp: #b0b0b0;
-  --el-webkit-scrollbar-color: #888;
-  --el-webkit-scrollbar-hover: #555;
-}
+// // :root {
+// //   --link-hover-color: #FF9100;
+// //   --link-hover-background-color: rgba(4, 3, 2, 0.1);
+// //   --background-color: #1E1E1E;
+// //   --el-menu-hover-bg-color: #FF9100;
+// //   --el-menu-hover-text-color: #000000;
+// //   --icons-color: #FF9100;
+// //   --primary-text-color: #FF9100;
+// //   --secondary-text-color: #ffffff;
+// //   --login-background-color: #e09028;
+// //   --el-text-color-regular: #000000;
+// //   --el-text-color-secondary: #515151;
+// //   --el-btn-hover-border-color: #ff9100;
+// //   --el-text-color-timestamp: #b0b0b0;
+// //   --el-webkit-scrollbar-color: #888;
+// //   --el-webkit-scrollbar-hover: #555;
+// // }
 
 
+// /* src/assets/styles/variable.scss */
+
+// // 我们只覆盖 Element Plus 的基础色板，告诉它们去读取我们的CSS变量
+// @forward 'element-plus/theme-chalk/src/common/var.scss' with (
+//   $colors: (
+//     'primary': (
+//       'base': var(--el-color-primary),
+//     ),
+//     'success': (
+//       'base': #67c23a, // 如果不希望这些颜色变化，可以保留静态值
+//     ),
+//     'warning': (
+//       'base': #e6a23c,
+//     ),
+//     'danger': (
+//       'base': var(--el-color-danger),
+//     ),
+//     'error': (
+//       'base': #f56c6c,
+//     ),
+//     'info': (
+//       'base': #909399,
+//     )
+//   )
+// );

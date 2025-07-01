@@ -28,10 +28,12 @@ themeStore.initTheme()
       </el-menu-item>
 
       <!-- 其他菜单项 -->
-      <el-menu-item index="1">探索</el-menu-item>
+      <el-menu-item index="1" @click="$router.push('/')">探索</el-menu-item>
       <el-menu-item index="2" @click="$router.push('/auth')">注册</el-menu-item>
       <el-menu-item index="3" @click="$router.push('/auth')">登陆</el-menu-item>
-      <el-menu-item index="4">个人中心</el-menu-item>
+      <el-menu-item index="4" @click="$router.push('/chat')"
+        >个人中心</el-menu-item
+      >
       <el-menu-item><ThemeSwitch /></el-menu-item>
     </el-menu>
   </div>
@@ -69,9 +71,8 @@ themeStore.initTheme()
   }
 }
 
-// .container .el-menu--horizontal .el-menu-item:hover,
-// .container .el-menu--horizontal .el-menu-item:active {
-//   color: var(--primary-text-color);
-//   background-color: transparent;
-// }
+.el-menu--horizontal .el-menu-item:not(.is-disabled):focus,
+.el-menu--horizontal .el-menu-item:not(.is-disabled):hover {
+  background: transparent;
+}
 </style>
