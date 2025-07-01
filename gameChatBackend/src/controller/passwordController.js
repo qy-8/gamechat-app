@@ -4,22 +4,17 @@ const { hashPassword } = require('../utils/crypto')
 const { verifySmsCode } = require('../services/smsService')
 
 const resetPassword = async (req, res) => {
-  const { newPwd } = req.body
-  // console.log('这个是新的密码', newPwd)
-  const userId = req.user.userId
   try {
+    const { newPwd } = req.body
+    const userId = req.user.userId
+
     const storedSmsCode = await verifySmsCode(req, res)
     if (!storedSmsCode) {
       return response.error(res, '验证码不正确', 400)
     }
-  } catch (error) {
-    console.error(error)
-  }
-
-  try {
     const user = await User.findById(userId)
     if (!user) {
-      return response.error(res, '用户不存在', 400)
+      return response.error(res, '用户不存在', 404)
     }
 
     const hashedPassword = await hashPassword(newPwd)
@@ -27,7 +22,7 @@ const resetPassword = async (req, res) => {
     await user.save()
     response.success(res, {}, '密码重置成功')
   } catch (err) {
-    response.error(res, err.message)
+    response.error(res, '密码重置失败')
   }
 }
 

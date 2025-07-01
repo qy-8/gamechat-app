@@ -283,6 +283,7 @@ const handleKickMember = async (memberId) => {
 
 .invitation:hover {
   border-color: var(--el-btn-hover-border-color);
+  background-color: transparent;
 }
 
 :deep(.el-drawer__header) {

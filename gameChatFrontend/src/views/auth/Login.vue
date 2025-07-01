@@ -93,6 +93,14 @@ const getNewCaptcha = async () => {
 
 // 点击获取验证码按钮获取短信验证码 - 测试阶段短信验证码在后端Terminal内模拟发送
 const getCode = async () => {
+  if (phoneForm.phoneNumber === '') {
+    ElMessage.error('请填写手机号码')
+    return
+  }
+  if (phoneForm.captcha === '') {
+    ElMessage.error('请填写图形验证码')
+    return
+  }
   try {
     start()
     const response = await sendSmsCode(phoneForm)
@@ -126,68 +134,71 @@ const login = async () => {
 </script>
 
 <template>
-  <el-row class="container">
-    <el-col :span="15">
-      <div class="section content">
-        <h2>用户登陆</h2>
-        <el-form
-          v-loading="loading"
-          ref="userFormRef"
-          :model="phoneForm"
-          status-icon
-          :rules="phoneFormRules"
-          hide-required-asterisk
-          label-width="auto"
-          label-position="left"
-        >
-          <el-form-item label="手机号码" prop="phoneNumber">
-            <el-input
-              v-model="phoneForm.phoneNumber"
-              placeholder="请输入手机号码"
-            ></el-input>
-          </el-form-item>
-          <div class="code-box">
-            <el-form-item label="图形验证码" prop="captcha">
-              <el-input
-                v-model="phoneForm.captcha"
-                placeholder="点击验证码更换图片"
-              ></el-input>
-            </el-form-item>
-            <div class="img-code" @click="getNewCaptcha">
-              <img :src="captchaCode" alt="验证码" />
-            </div>
-          </div>
-          <div class="code-box">
-            <el-form-item label="短信验证码" prop="code">
-              <el-input
-                v-model="phoneForm.code"
-                placeholder="请输入短信验证码"
-              ></el-input>
-            </el-form-item>
-            <el-button :disabled="isCounting" @click="getCode">{{
-              isCounting ? `${timeLeft}s 后重试` : '获取验证码'
-            }}</el-button>
-          </div>
-          <el-form-item>
-            <div class="form-button-container">
-              <el-button :disabled="loading" @click="login">登陆</el-button>
-            </div>
-          </el-form-item>
-        </el-form>
+  <!-- <el-row class="container"> -->
+  <!-- <el-col :span="15"> -->
+  <div class="section content">
+    <h2>用户登陆</h2>
+    <el-form
+      v-loading="loading"
+      ref="userFormRef"
+      :model="phoneForm"
+      status-icon
+      :rules="phoneFormRules"
+      hide-required-asterisk
+      label-width="auto"
+      label-position="left"
+    >
+      <el-form-item label="手机号码" prop="phoneNumber">
+        <el-input
+          v-model="phoneForm.phoneNumber"
+          placeholder="请输入手机号码"
+        ></el-input>
+      </el-form-item>
+      <div class="code-box">
+        <el-form-item label="图形验证码" prop="captcha">
+          <el-input
+            v-model="phoneForm.captcha"
+            placeholder="点击验证码更换图片"
+          ></el-input>
+        </el-form-item>
+        <div class="img-code" @click="getNewCaptcha">
+          <img :src="captchaCode" alt="验证码" />
+        </div>
       </div>
-    </el-col>
-    <el-col :span="9">
+      <div class="code-box">
+        <el-form-item label="短信验证码" prop="code">
+          <el-input
+            v-model="phoneForm.code"
+            placeholder="请输入短信验证码"
+          ></el-input>
+        </el-form-item>
+        <el-button :disabled="isCounting" @click="getCode">{{
+          isCounting ? `${timeLeft}s 后重试` : '获取验证码'
+        }}</el-button>
+      </div>
+      <el-form-item>
+        <div class="form-button-container">
+          <el-button :disabled="loading" @click="login">登陆</el-button>
+        </div>
+      </el-form-item>
+    </el-form>
+  </div>
+  <!-- </el-col> -->
+  <!-- <el-col :span="9">
       <div class="side-info content">
         <h2>欢迎回来，继续探索！</h2>
         <p class="welcome-text">
           ⚔️ 秀出你的高光时刻，精彩继续！ <br />🎯
           一秒进入状态，搭档们等你开场！ <br />🧩 最新 Mod
           已上线，继续你的冒险！
-        </p>
-        <el-button @click="$emit('switch')">注册</el-button>
+        </p> -->
+  <!-- <el-button @click="$emit('switch')">注册</el-button> -->
+  <!-- <router-link to="/auth/register">
+          <el-button>注册</el-button>
+        </router-link>
       </div>
-    </el-col>
-  </el-row>
+    </el-col> -->
+  <!-- </el-row> -->
 </template>
 
 <style lang="scss" scoped>

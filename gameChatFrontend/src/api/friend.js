@@ -31,7 +31,11 @@ export const deleteFriend = (friendId) => {
 
 export const updateFriendStatus = (updateInfo) => {
   const { friendId, status } = updateInfo
-  return request.put(`/api/friends/${friendId}/status`, { status })
+  return request.put(
+    `/api/friends/${friendId}/status`,
+    { status },
+    { showGlobalLoading: true }
+  )
 }
 
 export const getBlackList = () => {

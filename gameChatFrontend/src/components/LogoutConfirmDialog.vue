@@ -32,7 +32,7 @@ const logout = () => {
         <el-button type="primary" @click="emit('update:visible', false)"
           >取消</el-button
         >
-        <el-button @click="logout">退出登陆</el-button>
+        <el-button @click="logout" class="log-out-btn">退出登陆</el-button>
       </template>
     </BaseDialog>
   </div>
@@ -42,5 +42,10 @@ const logout = () => {
 .el-button {
   width: 100px;
   margin: 20px 20px 0 10px;
+}
+
+.log-out-btn:hover {
+  background-color: transparent;
+  border-color: var(--el-text-color-primary);
 }
 </style>

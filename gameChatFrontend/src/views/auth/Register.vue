@@ -88,6 +88,14 @@ const getNewCaptcha = async () => {
 
 // 点击获取验证码按钮获取短信验证码 - 测试阶段短信验证码在后端Terminal内模拟发送
 const getCode = async () => {
+  if (form.phoneNumber === '') {
+    ElMessage.error('请填写手机号码')
+    return
+  }
+  if (form.captcha === '') {
+    ElMessage.error('请填写图形验证码')
+    return
+  }
   try {
     start()
     const response = await sendSmsCode(form)
@@ -132,89 +140,92 @@ const resetForm = (registerFormRef) => {
 
 <template>
   <!-- 注册 -->
-  <el-row class="container">
-    <el-col :span="9">
+  <!-- <el-row class="container"> -->
+  <!-- <el-col :span="9">
       <div class="side-info content">
         <h2>你的游戏之旅，从这里开始！</h2>
         <p class="welcome-text">
           🤝 找到游戏搭子，一起开黑冒险！ <br />🛠️ 与游戏开发者 & Mod
           创作者互动！ <br />💬 加入专属社区，分享你的创意和想法！
-        </p>
-        <el-button @click="$emit('switch')">登陆</el-button>
+        </p> -->
+  <!-- <el-button @click="$emit('switch')">登陆</el-button> -->
+  <!-- <router-link to="/auth/login">
+          <el-button>登陆</el-button>
+        </router-link>
       </div>
-    </el-col>
-    <el-col :span="15">
-      <div class="section content">
-        <h2>注册账户</h2>
-        <!-- <p>使用电话号码注册</p> -->
+    </el-col> -->
+  <!-- <el-col :span="15"> -->
+  <div class="section content">
+    <h2>注册账户</h2>
+    <!-- <p>使用电话号码注册</p> -->
 
-        <el-form
-          v-loading="loading"
-          ref="registerFormRef"
-          :model="form"
-          status-icon
-          :rules="rules"
-          hide-required-asterisk
-          label-width="auto"
-          label-position="left"
-        >
-          <el-form-item label="手机号码" prop="phoneNumber">
-            <el-input
-              v-model="form.phoneNumber"
-              placeholder="请输入手机号码"
-            ></el-input>
-          </el-form-item>
-          <div class="code-box">
-            <el-form-item label="图形验证码" prop="captcha">
-              <el-input
-                v-model="form.captcha"
-                placeholder="点击验证码更换图片"
-              ></el-input>
-            </el-form-item>
-            <div class="img-code" @click="getNewCaptcha">
-              <img :src="captchaCode" alt="验证码" />
-            </div>
-          </div>
-          <div class="code-box">
-            <el-form-item label="短信验证码" prop="code">
-              <el-input
-                v-model="form.code"
-                placeholder="请输入短信验证码"
-              ></el-input>
-            </el-form-item>
-            <el-button :disabled="isCounting" @click="getCode">{{
-              isCounting ? `${timeLeft}s 后重试` : '获取验证码'
-            }}</el-button>
-          </div>
-          <el-form-item label="用户名" prop="username">
-            <el-input
-              v-model="form.username"
-              placeholder="请输入用户名，长度3-15个字符"
-            ></el-input>
-          </el-form-item>
-          <el-form-item label="密码" prop="password">
-            <el-input
-              v-model="form.password"
-              type="password"
-              placeholder="请输入密码，6-12个字符，区分大小写"
-            ></el-input>
-          </el-form-item>
-          <el-form-item label="确认密码" prop="rePassword">
-            <el-input
-              v-model="form.rePassword"
-              type="password"
-              placeholder="请再次输入密码"
-            ></el-input>
-          </el-form-item>
-          <el-form-item>
-            <div class="form-button-container">
-              <el-button :disabled="loading" @click="onSubmit">注册</el-button>
-            </div>
-          </el-form-item>
-        </el-form>
+    <el-form
+      v-loading="loading"
+      ref="registerFormRef"
+      :model="form"
+      status-icon
+      :rules="rules"
+      hide-required-asterisk
+      label-width="auto"
+      label-position="left"
+    >
+      <el-form-item label="手机号码" prop="phoneNumber">
+        <el-input
+          v-model="form.phoneNumber"
+          placeholder="请输入手机号码"
+        ></el-input>
+      </el-form-item>
+      <div class="code-box">
+        <el-form-item label="图形验证码" prop="captcha">
+          <el-input
+            v-model="form.captcha"
+            placeholder="点击验证码更换图片"
+          ></el-input>
+        </el-form-item>
+        <div class="img-code" @click="getNewCaptcha">
+          <img :src="captchaCode" alt="验证码" />
+        </div>
       </div>
-    </el-col>
-  </el-row>
+      <div class="code-box">
+        <el-form-item label="短信验证码" prop="code">
+          <el-input
+            v-model="form.code"
+            placeholder="请输入短信验证码"
+          ></el-input>
+        </el-form-item>
+        <el-button :disabled="isCounting" @click="getCode">{{
+          isCounting ? `${timeLeft}s 后重试` : '获取验证码'
+        }}</el-button>
+      </div>
+      <el-form-item label="用户名" prop="username">
+        <el-input
+          v-model="form.username"
+          placeholder="请输入用户名，长度3-15个字符"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="密码" prop="password">
+        <el-input
+          v-model="form.password"
+          type="password"
+          placeholder="请输入密码，6-12个字符，区分大小写"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="确认密码" prop="rePassword">
+        <el-input
+          v-model="form.rePassword"
+          type="password"
+          placeholder="请再次输入密码"
+        ></el-input>
+      </el-form-item>
+      <el-form-item>
+        <div class="form-button-container">
+          <el-button :disabled="loading" @click="onSubmit">注册</el-button>
+        </div>
+      </el-form-item>
+    </el-form>
+  </div>
+  <!-- </el-col> -->
+  <!-- </el-row> -->
 </template>
 
 <style lang="scss" scoped>

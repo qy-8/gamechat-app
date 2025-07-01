@@ -11,11 +11,11 @@ const getUserInfo = async (req, res) => {
     // 查询用户信息，排除 password
     const user = await User.findById(userId).select('-password')
     if (!user) {
-      return response(res, '用户不存在', 400)
+      return response(res, '用户不存在', 404)
     }
     response.success(res, user, '获取用户信息成功')
   } catch (err) {
-    response.error(err, err.message)
+    response.error(res, '获取用户信息失败')
   }
 }
 
@@ -37,7 +37,7 @@ const updateUserInfo = async (req, res) => {
     await user.save()
     response.success(res, {}, '用户信息更新成功')
   } catch (err) {
-    response.error(res, err.message)
+    response.error(res, '更新用户信息失败')
   }
 }
 
@@ -162,7 +162,7 @@ const deleteUser = async (req, res) => {
 
     response.success(res, {}, '用户已删除（状态设置为 0）')
   } catch (err) {
-    response.error(res, err.message)
+    response.error(res, '删除账号失败')
   }
 }
 

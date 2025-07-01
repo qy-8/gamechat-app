@@ -44,10 +44,6 @@ const handleClick = (event) => {
   border-radius: 6px;
 }
 
-.user-badge:hover {
-  background-color: var(--el-fill-color-light);
-}
-
 .username {
   margin-left: 12px;
   font-weight: 500;

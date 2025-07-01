@@ -76,7 +76,7 @@ const updateFriendshipStatus = async (req, res) => {
     return response.error(res, '不能拉黑/恢复自己', 400)
   }
   if (!status || !['friends', 'blocked'].includes(status)) {
-    return response.error(res, '未提供 status')
+    return response.error(res, '未提供 status', 400)
   }
   try {
     let friendship = await Friendship.findOne({

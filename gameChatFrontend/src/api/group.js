@@ -2,7 +2,7 @@ import request from '../utils/request'
 
 // 创建群聊
 export const createGroup = (data) => {
-  return request.post('/api/groups/', data)
+  return request.post('/api/groups/', data, { showGlobalLoading: true })
 }
 
 // 获取用户所有群组
@@ -12,7 +12,7 @@ export const getUserGroups = () => {
 
 // 创建当前群组的频道
 export const createChannel = (data) => {
-  return request.post('/api/groups/channel', data)
+  return request.post('/api/groups/channel', data, { showGlobalLoading: true })
 }
 
 // 获取当前群组的所有频道
@@ -22,13 +22,17 @@ export const getChannelList = (groupId) => {
 
 // 删除当前所选频道
 export const deleteChannel = (channelId) => {
-  return request.delete(`/api/groups/channel/${channelId}`)
+  return request.delete(`/api/groups/channel/${channelId}`, {
+    showGlobalLoading: true
+  })
 }
 
 // 上传群组头像
 export const uploadGroupAvatar = (data) => {
   const { groupId, avatar } = data
-  return request.post(`api/groups/${groupId}/avatar`, avatar)
+  return request.post(`api/groups/${groupId}/avatar`, avatar, {
+    showGlobalLoading: true
+  })
 }
 
 // 获取用户所属群组的所有用户
@@ -69,15 +73,21 @@ export const groupInvitationResponse = (data) => {
 
 export const kickGroupMember = (data) => {
   const { groupId, memberId } = data
-  return request.delete(`/api/groups/${groupId}/members/${memberId}`)
+  return request.delete(`/api/groups/${groupId}/members/${memberId}`, {
+    showGlobalLoading: true
+  })
 }
 
 export const updateGroupInfo = (data) => {
   const { groupId, name, description } = data
-  return request.patch(`api/groups/${groupId}/info`, { name, description })
+  return request.patch(
+    `api/groups/${groupId}/info`,
+    { name, description },
+    { showGlobalLoading: true }
+  )
 }
 
 export const disbandGroup = (groupId) => {
   console.log(groupId)
-  return request.delete(`api/groups/${groupId}`)
+  return request.delete(`api/groups/${groupId}`, { showGlobalLoading: true })
 }

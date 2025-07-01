@@ -25,7 +25,7 @@ export const useFriendStore = defineStore('friend', () => {
   const getIncomingRequests = async () => {
     try {
       const response = await getFriendRequestList()
-      console.log(response)
+      // console.log(response)
       friendRequestList.value = response.data
       unreadRequestCount.value = friendRequestList.value.length
     } catch (error) {

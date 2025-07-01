@@ -1,6 +1,6 @@
 import axios from 'axios'
 import router from '@/router'
-import { useUserStore } from '@/stores'
+import { useAppStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 
 const baseURL = import.meta.env.VITE_BASE_API
@@ -15,6 +15,11 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
+    const appStore = useAppStore()
+    if (config.showGlobalLoading) {
+      appStore.startLoading()
+    }
+
     const token = localStorage.getItem('token')
     // 如果有token的话，在请求头添加token
     if (token) {
@@ -22,13 +27,24 @@ request.interceptors.request.use(
     }
     return config
   },
-  (err) => Promise.reject(err)
+  (err) => {
+    const appStore = useAppStore()
+    if (err.config && err.config.showGlobalLoading) {
+      appStore.stopLoading()
+    }
+    return Promise.reject(err)
+  }
 )
 
 // 响应拦截器
 request.interceptors.response.use(
   // 成功响应
   function (response) {
+    const appStore = useAppStore()
+    if (response.config.showGlobalLoading) {
+      appStore.stopLoading()
+    }
+
     if (response.data.status === 'success') {
       return response.data
     }
@@ -37,6 +53,12 @@ request.interceptors.response.use(
     return Promise.reject(response.data)
   },
   function (error) {
+    const appStore = useAppStore()
+    if (error.config && error.config.showGlobalLoading) {
+      // 检查 error.config 是否存在
+      appStore.stopLoading()
+    }
+
     // 如果 http 响应头状态码为 401
     if (error.response?.status === 401) {
       // ElMessage.error('登录已过期，请重新登录')

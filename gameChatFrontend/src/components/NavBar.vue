@@ -13,12 +13,7 @@ themeStore.initTheme()
 <template>
   <div class="container">
     <!-- 导航栏 -->
-    <el-menu
-      class="el-menu-demo"
-      mode="horizontal"
-      :ellipsis="false"
-      @select="handleSelect"
-    >
+    <el-menu class="el-menu-demo" mode="horizontal" :ellipsis="false">
       <!-- svg logo -->
       <el-menu-item class="no-hover-bg" @click="$router.push('/')">
         <span class="logo">
@@ -29,8 +24,12 @@ themeStore.initTheme()
 
       <!-- 其他菜单项 -->
       <el-menu-item index="1" @click="$router.push('/')">探索</el-menu-item>
-      <el-menu-item index="2" @click="$router.push('/auth')">注册</el-menu-item>
-      <el-menu-item index="3" @click="$router.push('/auth')">登陆</el-menu-item>
+      <el-menu-item index="2" @click="$router.push('/auth/register')"
+        >注册</el-menu-item
+      >
+      <el-menu-item index="3" @click="$router.push('/auth/login')"
+        >登陆</el-menu-item
+      >
       <el-menu-item index="4" @click="$router.push('/chat')"
         >个人中心</el-menu-item
       >

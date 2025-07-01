@@ -64,7 +64,7 @@ const getUserGroups = async (req, res) => {
     )
     response.success(res, groups, '获取群组信息成功')
   } catch (err) {
-    response.error(res, '获取群组信息失败', 400)
+    response.error(res, '获取群组信息失败')
   }
 }
 
@@ -83,11 +83,11 @@ const sendGroupInvitation = async (req, res) => {
     const group = await Group.findById(groupId)
 
     if (!group) {
-      return response.error(res, '群组不存在', 400)
+      return response.error(res, '群组不存在', 404)
     }
     // _id 是 ObjectId
     if (group.createdBy.toString() !== inviterId.toString()) {
-      return response.error(res, '只有群主才能邀请用户', 400)
+      return response.error(res, '只有群主才能邀请用户', 403)
     }
 
     for (const inviteeId of inviteeIds) {
@@ -97,7 +97,7 @@ const sendGroupInvitation = async (req, res) => {
 
       // 检查用户是否已在该群组中
       if (group.members.some((member) => member.equals(inviteeId))) {
-        return response.error(res, '用户已在该群组中', 400)
+        return response.error(res, '用户已在该群组中', 409)
       }
       // 检查是否有待处理邀请
       const existingInvitation = group.pendingInvitations.find(
@@ -169,7 +169,7 @@ const leaveGroup = async (req, res) => {
     // 返回成功响应
     response.success(res, {}, '您已退出该群组')
   } catch (err) {
-    response.error(res, '退出群组失败', 400)
+    response.error(res, '退出群组失败')
   }
 }
 
@@ -442,22 +442,13 @@ const searchGroupMembers = async (req, res) => {
     const currentUserId = req.user.userId
 
     if (!searchTerm) {
-      return response.success(
-        res,
-        {
-          members: [],
-          currentPage: 1,
-          totalPages: 0,
-          totalMembers: 0
-        },
-        '请输入搜索关键词'
-      )
+      return response.error(res, '请输入搜索关键词', 400)
     }
 
     const group = await Group.findById(groupId).select('members')
 
     if (!group) {
-      response.error(res, '群组不存在', 400)
+      response.error(res, '群组不存在', 404)
     }
 
     const isMember = group.members.some((memberId) =>

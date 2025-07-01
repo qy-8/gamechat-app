@@ -63,6 +63,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/groups', groupRouter)
 app.use('/api/chat', chatRouter)
 app.use('/api/friends', friendRouter)
+
 // 健康检查
 app.get('/api/status', (req, res) => {
   res.json({ status: 'ok' })

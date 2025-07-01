@@ -22,9 +22,7 @@ const groupInfo = ref(null)
 const channelStore = useChannelStore(0)
 const showCreateChannelDialog = ref(false)
 const groupStore = useGroupStore()
-const chatStore = useChannelStore()
 const { channelList } = storeToRefs(channelStore)
-const { conversations } = storeToRefs(chatStore)
 const showDeleteIcon = ref(false)
 const showUploadGroupAvatarDialog = ref(null)
 const showUpdateGroupInfo = ref(null)
@@ -87,7 +85,9 @@ const handleDisbandGroup = async () => {
       {
         confirmButtonText: '确定解散',
         cancelButtonText: '取消',
-        type: 'warning'
+        type: 'warning',
+        customClass: 'disband-message-box',
+        cancelButtonClass: 'disband-cancel-btn'
       }
     )
     await groupStore.disbandGroup()
@@ -246,5 +246,16 @@ const handleDisbandGroup = async () => {
 
 .el-menu {
   border: none;
+}
+
+:deep(.el-dropdown-menu__item:not(.is-disabled):focus),
+:deep(.el-dropdown-menu__item:not(.is-disabled):hover) {
+  background-color: var(--el-dropdown-menuItem-hover);
+}
+</style>
+
+<style lang="scss">
+.disband-message-box .disband-cancel-btn:hover {
+  background-color: transparent;
 }
 </style>

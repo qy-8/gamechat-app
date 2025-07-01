@@ -16,7 +16,7 @@ const userStore = useUserStore()
 // const { headerInfo } = storeToRefs(chatStore)
 const { isGroupActive } = storeToRefs(groupStore)
 const { isMuted } = storeToRefs(userStore)
-const { toggleMute } = useUserStore
+const { toggleMute } = userStore
 const { activeConversation, searchResults } = storeToRefs(chatStore)
 const { searchMessagesInConversation, clearSearchResults } = chatStore
 

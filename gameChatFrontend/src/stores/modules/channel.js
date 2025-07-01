@@ -22,7 +22,6 @@ export const useChannelStore = defineStore('channel', () => {
     if (!activeGroup.value?._id) {
       return []
     }
-    console.log(1111111111111111, conversations.value)
     return conversations.value.filter(
       (conv) =>
         conv.type === 'group' && conv.groupInfo?._id === activeGroup.value._id

@@ -27,11 +27,13 @@ const showUpdateUserInfoDialog = ref(false)
 const showLogoutConfirmDialog = ref(false)
 const showDeleteUserConfirmDialog = ref(false)
 
-const saveActiveGroup = (group) => {
-  groupStore.setActiveGroup(group)
-  chatStore.clearActiveConversation()
-  // chatStore.selectGroupChannelToChat(group)
-  router.push('/chat')
+const saveActiveGroup = (groupId) => {
+  const group = groups.value.find((g) => g._id === groupId)
+  if (group) {
+    groupStore.setActiveGroup(group)
+    chatStore.clearActiveConversation()
+    router.push('/chat')
+  }
 }
 
 const handleUploadSuccess = (data) => {
@@ -56,12 +58,16 @@ const showFriendList = () => {
     </div>
 
     <el-scrollbar class="group-list-scrollbar">
-      <el-menu class="group-container" :collapse="true">
+      <el-menu
+        class="group-container"
+        :collapse="true"
+        @select="saveActiveGroup"
+      >
         <el-menu-item
           class="groupList"
           v-for="item in groups"
           :key="item._id"
-          @click="() => saveActiveGroup(item)"
+          :index="item._id"
         >
           <!-- <img
             :src="item.avatar || '/images/defaultGroupAvatar.png'"
@@ -132,23 +138,19 @@ const showFriendList = () => {
     v-model:visible="showUpdatePwdDialog"
     :phoneNum="phoneNum"
     v-if="showUpdatePwdDialog"
-    @upload-success="handleUploadSuccess"
   ></ResetPwdDialog>
   <UpdateUserInfoDialog
     v-model:visible="showUpdateUserInfoDialog"
     :phoneNum="phoneNum"
     v-if="showUpdateUserInfoDialog"
-    @upload-success="handleUploadSuccess"
   ></UpdateUserInfoDialog>
   <LogoutConfirmDialog
     v-model:visible="showLogoutConfirmDialog"
     v-if="showLogoutConfirmDialog"
-    @upload-success="handleUploadSuccess"
   ></LogoutConfirmDialog>
   <DeleteUserConfirmDialog
     v-model:visible="showDeleteUserConfirmDialog"
     v-if="showDeleteUserConfirmDialog"
-    @upload-success="handleUploadSuccess"
   ></DeleteUserConfirmDialog>
 </template>
 
@@ -178,6 +180,7 @@ const showFriendList = () => {
   padding-top: 20px;
   flex-direction: column;
   width: 90px;
+  background-color: var(--el-bg-color-home-details-box-bgc);
 }
 
 .group-container img {
@@ -206,6 +209,7 @@ const showFriendList = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background-color: var(--el-bg-color-home-details-box-bgc);
 }
 
 .el-menu-item .theme-switch {
@@ -220,5 +224,10 @@ const showFriendList = () => {
 
 .el-menu {
   border-right: 0;
+}
+
+:deep(.el-dropdown-menu__item:not(.is-disabled):focus),
+:deep(.el-dropdown-menu__item:not(.is-disabled):hover) {
+  background-color: var(--el-dropdown-menuItem-hover);
 }
 </style>

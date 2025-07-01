@@ -554,7 +554,7 @@ const markConversationAsRead = async (req, res) => {
         acknowledged: result.acknowledged,
         modifiedCount: result.modifiedCount
       },
-      200,
+
       '消息标记为已读'
     )
   } catch (error) {

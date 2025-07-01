@@ -18,16 +18,22 @@ export const registerUser = (data) => {
 
 // 使用手机号登陆
 export const loginByPhone = (data) => {
-  return request.post('/api/auth/login/phone', data)
+  return request.post('/api/auth/login/phone', data, {
+    showGlobalLoading: true
+  })
 }
 
 // 使用用户名登陆
 export const loginByUsername = (data) => {
-  return request.post('/api/auth/login/username', data)
+  return request.post('/api/auth/login/username', data, {
+    showGlobalLoading: true
+  })
 }
 
 // 重设密码
 export const resetPassword = (data) => {
   // console.log(data)
-  return request.put('/api/auth/users/me/password', data)
+  return request.put('/api/auth/users/me/password', data, {
+    showGlobalLoading: true
+  })
 }

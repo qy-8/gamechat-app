@@ -1,48 +1,44 @@
-/* src/assets/styles/theme.scss */
-
-/* ✅ 1. 光明模式 (默认主题) */
+// 光明模式
 :root {
-  /* 你在 variable.scss 中为 Element Plus 定义的 SASS 变量的等价 CSS 变量 */
   --el-color-primary: #FF9100;
   --el-color-success: #67c23a;
   --el-color-warning: #e6a23c;
   --el-color-danger: #D32F2F;
   --el-color-error: #f56c6c;
   --el-color-info: #909399;
-
-  /* 你在 variable.scss 中为 $text-color 定义的等价 CSS 变量 */
-  --el-text-color-primary: #FF9100; // 你把主要文字设为了品牌色
+  --el-text-color-primary: #FF9100; 
   --el-text-color-regular: #000000;
   --el-text-color-secondary: #515151;
   --el-text-color-placeholder: #737373;
   --el-text-color-disabled: #c0c4cc;
   --el-text-color-quoted: #676666;
-
-  /* 你在 variable.scss 中为 $bg-color 定义的等价 CSS 变量 */
   --el-bg-color-login-bgc: #ff9100;
   --el-bg-color-home-details-box-bgc: #e0e0e0;
-  --el-bg-color-group-title-box-bgc: #70614e;
+  --el-bg-color-group-title-box-bgc: #766c60;
   --el-bg-color-announcements: #f94141;
   --el-bg-color-group-list: #ebebeb;
   --el-bg-color-message-item-hover: #0000000D;
   --el-bg-color-search-user-result: #F9F9F9;
-
-  /* 你在 variable.scss 的 :root 中定义的其他变量 */
   --link-hover-color: #FF9100;
   --link-hover-background-color: rgba(4, 3, 2, 0.1);
   --el-menu-hover-bg-color: #FF9100;
   --el-menu-hover-text-color: #000000;
+  --el-dropdown-menuItem-hover: #0000000D;
   --icons-color: #FF9100;
   --primary-text-color: #FF9100;
-  --secondary-text-color: #ffffff; // 注意：这个颜色在光明模式下可能是白色，需要确认
+  --secondary-text-color: #ffffff; 
   --el-btn-hover-border-color: #ff9100;
   --el-text-color-timestamp: #b0b0b0;
   --el-webkit-scrollbar-color: #888;
   --el-webkit-scrollbar-hover: #555;
+  --el-button-hover-bg-color: #FFB547;
+  --el-color-primary-light-3: #FFB547;
+  --el-color-primary-dark-2: #CC7300;
+  --el-color-primary-light-5: #FFB547;
+  
 }
 
-/* ✅ 2. 黑暗模式 */
-/* 我们把你 dark.scss 里的所有内容原封不动地搬到这里 */
+// 黑暗模式
 html.dark {
   --el-color-primary: #FF9100;
   --el-color-primary-light-9: #FFFFFF0D;
@@ -62,6 +58,7 @@ html.dark {
   --el-bg-color-announcements: #DA3E44;
   --el-bg-color-group-list: #1e1e1e;
   --el-bg-color-message-item-hover: #FFFFFF0D;
+  --el-dropdown-menuItem-hover: #FFFFFF0D;
   --el-menu-hover-text-color: #ffffff;
   --el-bg-color-search-user-result: #2D2D2D;
   --el-btn-hover-border-color: #ff9100;
