@@ -1,11 +1,6 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { createGroup } from '@/api/group.js'
 import BaseDialog from './common/BaseDialog.vue'
-import { getFriendRequestList, handleFriendRequest } from '../api/friend'
 import UserBadge from './common/UserBadge.vue'
-import dayjs from 'dayjs'
-import { ElMessage } from 'element-plus'
 import { useGroupStore } from '../stores'
 import { storeToRefs } from 'pinia'
 import RequestCard from './common/RequestCard.vue'

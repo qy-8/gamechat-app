@@ -1,7 +1,21 @@
+/**
+ * @file _shared-chat-layout.scss
+ * @description 聊天界面共享布局和基础样式定义。
+ * @module ChatLayout
+ */
+
+/* ------------------------------------*\
+  # 整体容器布局（好友列表+频道列表）
+\*------------------------------------ */
+
 .container {
-  display: flex;
   position: relative;
+  display: flex;
 }
+
+/* ------------------------------------*\
+  # 主面板和菜单栏
+\*------------------------------------ */
 
 .panel, .title-menu-container {
   width: 250px;
@@ -11,7 +25,7 @@
 
 .panel .el-menu-item.title-box, .search-and-result-container {
   height: 120px;
-  padding: 0 0 0 0;
+  padding: 0;
   border-bottom: 1px solid;
 }
 
@@ -25,29 +39,37 @@
   font-size: 16px;
 }
 
+/* ------------------------------------*\
+  # 群组标题和搜索容器
+\*------------------------------------ */
+
 .container .title-box:hover {
   background-color: transparent;
 }
 
 .group-title, .title-and-search-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   padding: 0 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  color: var(--el-text-color-primary);
+  text-shadow: 2px 2px 8px rgb(0 0 0 / 90%);
   background: linear-gradient(
     to bottom,
     var(--el-bg-color-group-title-box-bgc),
     transparent
   );
-  border-radius: 20px 20px 0 0;
-  color: var(--el-text-color-primary);
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9); //突出文字
+  border-radius: 20px 20px 0 0; //突出文字
 }
 
 .group-title .el-icon, .title-and-search-container .el-icon {
-  margin-right: 0px;
+  margin-right: 0;
 }
+
+/* ------------------------------------*\
+  # Element Plus 组件样式覆盖/定制
+\*------------------------------------ */
 
 .el-dropdown .el-icon {
   font-size: 20px;

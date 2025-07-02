@@ -13,6 +13,10 @@ const props = defineProps({
   size: {
     type: Number,
     default: 50
+  },
+  lazy: {
+    type: Boolean,
+    default: false // 默认不懒加载
   }
 })
 
@@ -42,6 +46,7 @@ const handleImageError = () => {
       :alt="alt"
       class="avatar-image"
       @error="handleImageError"
+      :loading="lazy ? 'lazy' : 'eager'"
     />
   </div>
 </template>
@@ -50,7 +55,6 @@ const handleImageError = () => {
 .avatar-container {
   border-radius: 10px;
   overflow: hidden;
-  // display: inline-block;
   background-color: #eee;
 }
 

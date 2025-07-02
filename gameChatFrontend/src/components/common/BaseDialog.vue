@@ -1,14 +1,8 @@
 <script setup>
-import { ref, reactive } from 'vue'
-
 const props = defineProps({
   visible: Boolean
 })
 const emit = defineEmits(['update:visible'])
-
-const onSubmit = () => {
-  // 告知父组件提交事件
-}
 </script>
 
 <template>
@@ -57,7 +51,6 @@ const onSubmit = () => {
   justify-content: center;
   color: var(--el-text-color-secondary);
   font-size: large;
-  // padding-left: 52px;
   padding-left: 28px;
 }
 

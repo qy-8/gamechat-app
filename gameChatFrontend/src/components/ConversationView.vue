@@ -261,12 +261,10 @@ const handleKickMember = async (memberId) => {
 
 .message-container {
   width: 100%;
-  // flex: 1;
   flex-grow: 1;
 }
 
 .input-container {
-  // height: 100px;
   height: auto;
   flex-shrink: 0;
 }

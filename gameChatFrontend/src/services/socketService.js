@@ -14,7 +14,6 @@ export const connectSocket = () => {
   const chatStore = useChatStore()
 
   if (socket && socket.connected) {
-    console.log('Socket.IO: 已连接')
     return socket
   }
 
@@ -37,8 +36,6 @@ export const connectSocket = () => {
   })
 
   socket.on('disconnect', (reason) => {
-    console.log(`Socket 连接已断开， 原因：${reason}`)
-
     if (reason === 'io server disconnect') {
       socket.connect() // 尝试重连
     }
@@ -54,9 +51,7 @@ export const connectSocket = () => {
   })
 
   socket.on('new_message', (newMessage) => {
-    console.log('Socket 收到新消息：', newMessage)
     if (newMessage.mentions.length === 0) {
-      console.log(3333, newMessage)
       chatStore.handleNewRealTimeMessage(newMessage)
     } else {
       if (newMessage.conversationId !== chatStore.activeConversation?._id) {
@@ -69,38 +64,17 @@ export const connectSocket = () => {
     }
   })
 
-  // socket.on('new-friend-request', (requestData) => {
-  //   console.log('Socket 收到新的好友请求：', requestData)
-  //   console.log('正在发消息通知')
-  // })
-
   // 新好友请求
   socket.on('new_friend_request', (requestData) => {
-    console.log('[Socket Service] 收到 new_friend_request:', requestData)
     const friendStore = useFriendStore()
     friendStore.handleNewRequest(requestData)
   })
 
   // 新群组邀请
   socket.on('new_group_invitation', (invitationData) => {
-    console.log('[Socket Service] 收到 new_group_invitation:', invitationData)
     const groupStore = useGroupStore()
     groupStore.handleNewRequest(invitationData)
   })
-
-  // socket.on('you_were_mentioned', (notificationData) => {
-  //   console.log(notificationData)
-  //   if (
-  //     notificationData.message.conversationId !==
-  //     chatStore.activeConversation?._id
-  //   ) {
-  //     emitter.emit('show-notification', {
-  //       type: 'mention',
-  //       title: `在 #${notificationData.group.name} 中被提及`,
-  //       message: `${notificationData.mentionedBy.username}: ${notificationData.message.content}`
-  //     })
-  //   }
-  // })
 
   return socket
 }
@@ -109,11 +83,10 @@ export const disconnectSocket = () => {
   if (socket) {
     socket.disconnect()
     socket = null
-    console.log('Socket 已断开连接')
   }
 }
 
 export const getSocket = () => {
-  // 这个函数只是简单地返回当前模块中存储的 socket 实例
+  // 返回当前模块中存储的 socket 实例
   return socket
 }

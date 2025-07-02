@@ -60,13 +60,10 @@ const getOrCreateConversation = async (req, res) => {
   }
 }
 
-// controller/chatController.js
-
 const getUserConversations = async (req, res) => {
   try {
     const currentUserId = req.user.userId
 
-    // 1. 保持你原来的初始查询，它已经能拿到所有需要的数据
     const conversations = await Conversation.find({
       participants: currentUserId
     })
@@ -87,9 +84,6 @@ const getUserConversations = async (req, res) => {
 
     const processedConversations = await Promise.all(
       conversations.map(async (conv) => {
-        // 2. ✅ 【核心】先将所有你希望返回的、公共的字段准备好
-
-        // a. 保持你原来的 unreadCount 计算逻辑
         const unreadCount = await Message.countDocuments({
           conversationId: conv._id,
           receiver: currentUserId,
@@ -97,7 +91,6 @@ const getUserConversations = async (req, res) => {
           readAt: null
         })
 
-        // b. 准备好 lastMessage 对象，包含你计算的 isReadByCurrentUser
         const lastMessage = conv.lastMessage
           ? {
               _id: conv.lastMessage._id,
@@ -112,7 +105,6 @@ const getUserConversations = async (req, res) => {
             }
           : null
 
-        // c. 把所有通用的字段组合成一个基础对象
         const baseConversation = {
           _id: conv._id,
           lastMessage,
@@ -121,8 +113,6 @@ const getUserConversations = async (req, res) => {
           updatedAt: conv.updatedAt,
           unreadCount
         }
-
-        // 3. ✅ 现在，只在 if/else if 中处理【有差异】的字段
 
         if (conv.type === 'private') {
           const targetParticipant = conv.participants.find(
@@ -166,289 +156,6 @@ const getUserConversations = async (req, res) => {
     response.error(res, '获取会话列表失败')
   }
 }
-
-// // 获取当前用户的会话列表
-// const getUserConversations = async (req, res) => {
-//   try {
-//     const currentUserId = req.user.userId
-
-//     const conversations = await Conversation.find({
-//       participants: currentUserId
-//     })
-//       .populate({
-//         path: 'participants',
-//         select: 'username avatar'
-//       }) // conversations 是包含了两个参与者的数组 - 私信
-//       .populate({
-//         path: 'lastMessage',
-//         select: 'content sender createdAt messageType readAt',
-//         populate: {
-//           path: 'sender',
-//           select: 'username avatar'
-//         }
-//       })
-//       .populate('groupId', 'name avatar') // 群组
-//       .sort({ lastMessageAt: -1 }) // 按照发送消息时间倒序排列（最新会话在前）
-
-//     const processedConversations = await Promise.all(
-//       conversations.map(async (conv) => {
-//         const unreadCount = await Message.countDocuments({
-//           conversationId: conv._id,
-//           receiver: currentUserId, // 消息的接收者是当前用户
-//           sender: { $ne: currentUserId },
-//           readAt: null
-//         })
-
-//         const convObject = conv.toObject()
-
-//         if (conv.type === 'private') {
-//           const targetParticipant = conv.participants.find(
-//             (p) => p && p._id && p._id.toString() !== currentUserId
-//           )
-
-//           return {
-//             _id: conv._id,
-//             type: 'private',
-//             targetParticipant: targetParticipant
-//               ? {
-//                   _id: targetParticipant._id,
-//                   username: targetParticipant.username,
-//                   avatar: targetParticipant.avatar
-//                 }
-//               : null,
-//             lastMessage: conv.lastMessage
-//               ? {
-//                   _id: conv.lastMessage._id,
-//                   content: conv.lastMessage.content,
-//                   sender: conv.lastMessage.sender,
-//                   createdAt: conv.lastMessage.createdAt,
-//                   messageType: conv.lastMessage.messageType,
-//                   isReadByCurrentUser:
-//                     conv.lastMessage.sender._id.toString() === currentUserId
-//                       ? true
-//                       : conv.lastMessage.readAt
-//                         ? true
-//                         : false
-//                 }
-//               : null,
-//             lastMessageContentSnippet: conv.lastMessageContentSnippet,
-//             lastMessageAt: conv.lastMessageAt,
-//             updatedAt: conv.updatedAt,
-//             unreadCount
-//           }
-//         } else if (conv.type === 'group') {
-//           return {
-//             _id: conv._id,
-//             type: 'group',
-//             lastMessage: conv.lastMessage
-//               ? {
-//                   _id: conv.lastMessage._id,
-//                   content: conv.lastMessage.content,
-//                   sender: conv.lastMessage.sender,
-//                   createdAt: conv.lastMessage.createdAt,
-//                   messageType: conv.lastMessage.messageType,
-//                   isReadByCurrentUser:
-//                     conv.lastMessage.sender._id.toString() === currentUserId
-//                       ? true
-//                       : conv.lastMessage.readAt
-//                         ? true
-//                         : false
-//                 }
-//               : null,
-//             lastMessageContentSnippet: conv.lastMessageContentSnippet,
-//             lastMessageAt: conv.lastMessageAt,
-//             updatedAt: conv.updatedAt,
-//             unreadCount,
-//             name: convObject.name,
-//             avatar: convObject.groupId?.avatar,
-//             groupInfo: convObject.groupId
-//           }
-//         }
-//       })
-//     )
-//     response.success(res, processedConversations, '获取会话列表成功')
-//   } catch (error) {
-//     console.error('获取会话列表失败', error)
-//     response.error(res, '获取会话列表失败')
-//   }
-// }
-
-// // 获取当前用户的会话列表
-// const getUserConversations = async (req, res) => {
-//   try {
-//     const currentUserId = req.user.userId
-
-//     const conversations = await Conversation.find({
-//       participants: currentUserId
-//     })
-//       .populate({
-//         path: 'participants',
-//         select: 'username avatar'
-//       }) // conversations 是包含了两个参与者的数组 - 私信
-//       .populate({
-//         path: 'lastMessage',
-//         select: 'content sender createdAt messageType readAt',
-//         populate: {
-//           path: 'sender',
-//           select: 'username avatar'
-//         }
-//       })
-//       .populate('groupId', 'name avatar') // 群组
-//       .sort({ lastMessageAt: -1 }) // 按照发送消息时间倒序排列（最新会话在前）
-
-//     const processedConversations = await Promise.all(
-//       conversations.map(async (conv) => {
-//         if (conv.type === 'private') {
-//           const targetParticipant = conv.participants.find(
-//             (p) => p && p._id && p._id.toString() !== currentUserId
-//           )
-//           const unreadCount = await Message.countDocuments({
-//             conversationId: conv._id,
-//             receiver: currentUserId, // 消息的接收者是当前用户
-//             sender: { $ne: currentUserId },
-//             readAt: null
-//           })
-
-//           return {
-//             _id: conv._id,
-//             type: 'private',
-//             targetParticipant: targetParticipant
-//               ? {
-//                   _id: targetParticipant._id,
-//                   username: targetParticipant.username,
-//                   avatar: targetParticipant.avatar
-//                 }
-//               : null,
-//             lastMessage: conv.lastMessage
-//               ? {
-//                   _id: conv.lastMessage._id,
-//                   content: conv.lastMessage.content,
-//                   sender: conv.lastMessage.sender,
-//                   createdAt: conv.lastMessage.createdAt,
-//                   messageType: conv.lastMessage.messageType,
-//                   isReadByCurrentUser:
-//                     conv.lastMessage.sender._id.toString() === currentUserId
-//                       ? true
-//                       : conv.lastMessage.readAt
-//                         ? true
-//                         : false
-//                 }
-//               : null,
-//             lastMessageContentSnippet: conv.lastMessageContentSnippet,
-//             lastMessageAt: conv.lastMessageAt,
-//             updatedAt: conv.updatedAt,
-//             unreadCount
-//           }
-//         } else if (conv.type === 'group') {
-//           return {
-//             _id: conv._id,
-//             type: 'group',
-//             lastMessage: conv.lastMessage
-//               ? {
-//                   _id: conv.lastMessage._id,
-//                   content: conv.lastMessage.content,
-//                   sender: conv.lastMessage.sender,
-//                   createdAt: conv.lastMessage.createdAt,
-//                   messageType: conv.lastMessage.messageType,
-//                   isReadByCurrentUser:
-//                     conv.lastMessage.sender._id.toString() === currentUserId
-//                       ? true
-//                       : conv.lastMessage.readAt
-//                         ? true
-//                         : false
-//                 }
-//               : null,
-//             lastMessageContentSnippet: conv.lastMessageContentSnippet,
-//             lastMessageAt: conv.lastMessageAt,
-//             updatedAt: conv.updatedAt,
-//             unreadCount,
-//             name: convObject.name,
-//             avatar: convObject.groupId?.avatar,
-//             groupInfo: convObject.groupId
-//           }
-//         }
-//       })
-//     )
-//     response.success(res, processedConversations, '获取会话列表成功')
-//   } catch (error) {
-//     console.error('获取会话列表失败', error)
-//     response.error(res, '获取会话列表失败')
-//   }
-// }
-
-// // 获取当前用户的会话列表
-// const getUserConversations = async (req, res) => {
-//   try {
-//     const currentUserId = req.user.userId
-
-//     const conversations = await Conversation.find({
-//       participants: currentUserId,
-//       type: 'private'
-//     })
-//       .populate({
-//         path: 'participants',
-//         select: 'username avatar'
-//       }) // conversations 是包含了两个参与者的数组
-//       .populate({
-//         path: 'lastMessage',
-//         select: 'content sender createdAt messageType readAt',
-//         populate: {
-//           path: 'sender',
-//           select: 'username avatar'
-//         }
-//       })
-//       .sort({ lastMessageAt: -1 }) // 按照发送消息时间倒序排列（最新会话在前）
-
-//     const processedConversations = await Promise.all(
-//       conversations.map(async (conv) => {
-//         const targetParticipant = conv.participants.find(
-//           (p) => p && p._id && p._id.toString() !== currentUserId
-//         )
-//         const unreadCount = await Message.countDocuments({
-//           conversationId: conv._id,
-//           receiver: currentUserId, // 消息的接收者是当前用户
-//           sender: { $ne: currentUserId },
-//           readAt: null
-//         })
-
-//         return {
-//           _id: conv._id,
-//           type: 'private',
-//           targetParticipant: targetParticipant
-//             ? {
-//                 _id: targetParticipant._id,
-//                 username: targetParticipant.username,
-//                 avatar: targetParticipant.avatar
-//               }
-//             : null,
-//           lastMessage: conv.lastMessage
-//             ? {
-//                 _id: conv.lastMessage._id,
-//                 content: conv.lastMessage.content,
-//                 sender: conv.lastMessage.sender,
-//                 createdAt: conv.lastMessage.createdAt,
-//                 messageType: conv.lastMessage.messageType,
-//                 isReadByCurrentUser:
-//                   conv.lastMessage.sender._id.toString() === currentUserId
-//                     ? true
-//                     : conv.lastMessage.readAt
-//                       ? true
-//                       : false
-//               }
-//             : null,
-//           lastMessageContentSnippet: conv.lastMessageContentSnippet,
-//           lastMessageAt: conv.lastMessageAt,
-//           updatedAt: conv.updatedAt,
-//           unreadCount
-//         }
-//       })
-//     )
-//     response.success(res, processedConversations, '获取会话列表成功')
-//   } catch (error) {
-//     console.error('获取会话列表失败', error)
-//     response.error(res, '获取会话列表失败')
-//   }
-// }
 
 // 在指定会话中发送消息
 const sendMessage = async (req, res) => {

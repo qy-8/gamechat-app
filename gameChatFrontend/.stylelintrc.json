@@ -1,0 +1,14 @@
+
+{
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-recess-order" 
+  ],
+  "plugins": [
+    "stylelint-order" 
+  ],
+  "rules": {
+    "no-empty-source": null,
+    "function-no-unknown": null
+  }
+}

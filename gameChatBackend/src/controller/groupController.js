@@ -55,10 +55,7 @@ const createGroup = async (req, res) => {
 const getUserGroups = async (req, res) => {
   try {
     const userId = req.user.userId
-    // const groups = await Group.find({ members: userId }).populate(
-    //   'members',
-    //   'username avatar'
-    // )
+
     const groups = await Group.find({ members: userId, status: 1 }).select(
       'name avatar description type'
     )
@@ -225,9 +222,7 @@ const uploadGroupAvatar = async (req, res) => {
       )
       // 删除OSS上的孤儿文件
       try {
-        // ***************************************************************
         // ** 尝试删除已上传到 OSS 的文件，因为数据库未找到对应群组 **
-        // ***************************************************************
         await ossClient.delete(ossFileName)
         console.log(`OSS上的孤儿文件 ${ossFileName} 删除成功。`)
       } catch (ossDeleteError) {
@@ -554,66 +549,6 @@ const kickGroupMember = async (req, res) => {
     return response.error(res, '踢出群组成员失败')
   }
 }
-
-// // 发送消息到频道
-// const sendMessageInChannel = async () => {
-//   try {
-//     const { conversationId } = req.params
-//     const { channelId, content, messageType = 'text' } = req.body
-//     const senderId = req.user.userId
-
-//     if (!content || !content.trim()) {
-//       return response.error(res, '消息内容不能为空', 400)
-//     }
-
-//     // 查找频道
-//     const channel = await Channel.findById(conversationId).populate({
-//       path: 'groupId',
-//       select: 'members'
-//     })
-
-//     if (!channel || !channel.groupId) {
-//       return response.error(res, '该频道不存在', 404)
-//     }
-
-//     // 验证发送消息的人是否为群组成员
-//     const isMember = channel.groupId.members.some((id) => id.equals(senderId))
-//     if (!isMember) {
-//       return response.error(res, '用户不是群组成员', 404)
-//     }
-
-//     const newMessage = new Message({
-//       sender: senderId,
-//       channelId: channelId,
-//       conversationId: conversationId,
-//       content: content.trim(),
-//       messageType: messageType
-//     })
-
-//     await newMessage.save()
-
-//     // 更新 channel 的 lastMessageAt 时间戳，用于频道列表排序
-//     await Channel.updateOne(
-//       { _id: channelId },
-//       { lastMessageAt: newMessage.createdAt }
-//     )
-
-//     const populatedMessage = await Message.findById(newMessage._id).populate(
-//       'sender',
-//       'username avatar'
-//     )
-
-//     const io = req.app.get('io')
-
-//     io.to(channelId).emit('new_message', populatedMessage.toObject())
-//     console.log(`已向房间 ${channelId} 广播了新消息`)
-
-//     response.success(res, populatedMessage, '消息发送成功')
-//   } catch (error) {
-//     console.error(error)
-//     return response.error(res, '无法发送信息，服务器错误')
-//   }
-// }
 
 const updateGroupInfo = async (req, res) => {
   try {

@@ -8,15 +8,7 @@ export const useChannelStore = defineStore('channel', () => {
   const groupStore = useGroupStore()
   const chatStore = useChatStore()
   const { activeGroup } = storeToRefs(groupStore)
-  const { conversations, activeConversation } = storeToRefs(chatStore)
-  // const getGroupChannels = async (groupId) => {
-  //   try {
-  //     const response = await getChannelList(groupId)
-  //     channelList.value = response.data
-  //   } catch (error) {
-  //     console.error('获取频道列表失败:', error)
-  //   }
-  // }
+  const { conversations } = storeToRefs(chatStore)
 
   const channelList = computed(() => {
     if (!activeGroup.value?._id) {
@@ -38,20 +30,6 @@ export const useChannelStore = defineStore('channel', () => {
     },
     { deep: true, immediate: true }
   )
-
-  // watch(channelList, (newChannelList) => {
-  //   if (newChannelList.length > 0) {
-  //     const isActiveChannelInList = newChannelList.some(
-  //       (c) => c._id === activeConversation.value?._id
-  //     )
-
-  //     // 刚切换群组或新页面时选择第一个频道作为新的激活会话
-  //     if (!isActiveChannelInList) {
-  //       console.log('检测到频道列表变化，将自动激活第一个频道...')
-  //       chatStore.setActiveConversation(newChannelList[0])
-  //     }
-  //   }
-  // })
 
   const deleteGroupChannel = async (channelId) => {
     try {

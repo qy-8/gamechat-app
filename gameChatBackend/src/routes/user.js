@@ -1,5 +1,4 @@
 const express = require('express')
-// const { swaggerDocs } = require('../swagger')
 const router = express.Router()
 const expressJoi = require('@escook/express-joi')
 const authMiddleware = require('../middlewares/authMiddleware')

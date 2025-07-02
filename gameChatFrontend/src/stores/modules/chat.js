@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useUserStore } from '@/stores'
 import {
   getMessagesForConversation,
@@ -41,13 +41,6 @@ export const useChatStore = defineStore(
     })
 
     const handleNewRealTimeMessage = (newMessage) => {
-      console.log('正在处理新的实时消息：', newMessage)
-
-      console.log(
-        11111,
-        newMessage.conversationId,
-        activeConversation.value?._id
-      )
       // 传进来的消息必须要是当前打开的会话
       if (newMessage.conversationId === activeConversation.value?._id) {
         // 检测是否有一样 id 的信息
@@ -61,7 +54,6 @@ export const useChatStore = defineStore(
       const conversationIndex = conversations.value.findIndex(
         (c) => c._id === newMessage.conversationId
       )
-      // console.log('我的---------', conversationIndex)
       if (conversationIndex !== -1) {
         // 拿到新消息所在的 conversation
         const updatedConversation = {
@@ -100,24 +92,11 @@ export const useChatStore = defineStore(
           updatedConversation.unreadCount =
             (updatedConversation.unreadCount || 0) + 1
           if (!userStore.isMuted(newMessage.conversationId)) {
-            console.log('--- 准备发出通知 ---', {
-              title: `来自 ${newMessage.sender.username} 的新消息`,
-              message: newMessage.content
-            })
             emitter.emit('show-notification', {
               title: notificationTitle,
               message: notificationMessage
             })
           }
-        } else {
-          console.log('--- 通知条件未满足 ---', {
-            isSameConversation:
-              newMessage.conversationId.toString() ===
-              activeConversation.value?._id?.toString(),
-            isMyOwnMessage:
-              newMessage.sender._id.toString() ===
-              userStore.userInfo.userId.toString()
-          })
         }
 
         // 移除新消息所在的会话然后把更新的对话放在数组最前面（消息列表按新 -> 旧顺序排列）
@@ -132,14 +111,12 @@ export const useChatStore = defineStore(
 
     const getConversations = async () => {
       if (!userStore.isLoggedIn) {
-        console.log('用户未登录，请重新登录')
         conversations.value = []
         return
       }
       isLoadingConversations.value = true
       try {
         const response = await getUserConversations()
-        // console.log(response.data)
         conversations.value = response.data
       } catch (error) {
         console.error(error)
@@ -172,7 +149,6 @@ export const useChatStore = defineStore(
         canLoadMoreMessages.value =
           response.data.currentPage < response.data.totalPages
       } catch (error) {
-        console.log(error)
         if (pageToLoad === 1) {
           messages.value = []
         }
@@ -266,13 +242,10 @@ export const useChatStore = defineStore(
     }
 
     const setReplyingTo = (message) => {
-      console.log(message)
-      console.log('准备引用消息', message)
       replyingToMessage.value = message
     }
 
     const clearReplyingTo = () => {
-      console.log('正在清除引用消息')
       replyingToMessage.value = null
     }
 

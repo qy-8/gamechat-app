@@ -1,5 +1,4 @@
 <script setup>
-// 消息项组件 - 单条消息的展示组件。包括用户头像、用户名、时间戳等信息，消息内容可以是文本或其他类型。
 import UserAvatar from './common/UserAvatar.vue'
 import dayjs from 'dayjs'
 import { useUserStore, useChatStore } from '@/stores'
@@ -133,7 +132,12 @@ const handleReply = () => {
               v-else-if="props.message.messageType === 'image'"
               @click="previewImage(props.message.content)"
             >
-              <img :src="props.message.content" alt="聊天图片" />
+              <img
+                :src="props.message.content"
+                alt="聊天图片"
+                loading="lazy"
+                @load="$emit('image-loaded')"
+              />
             </div>
           </div>
         </div>
@@ -225,9 +229,9 @@ const handleReply = () => {
   max-width: 80%;
   padding-left: 4px;
   color: var(--el-text-color-quoted);
-  white-space: nowrap; // 不换行
-  overflow: hidden; // 隐藏溢出
-  text-overflow: ellipsis; // 显示省略号
+  white-space: nowrap; /* 不换行 */
+  overflow: hidden; /* 隐藏溢出 */
+  text-overflow: ellipsis; /* 显示省略号 */
 }
 
 .quoted-message-box .icon {
@@ -259,7 +263,6 @@ const handleReply = () => {
 }
 
 .message-container .message-meta--sent {
-  // flex-direction: row-reverse;
   justify-content: flex-end;
 }
 
@@ -299,10 +302,6 @@ const handleReply = () => {
   position: absolute;
   top: -20px;
   right: 32px;
-
-  // display: flex;
-  // gap: 8px;
-
   background-color: var(--el-bg-color-overlay);
   padding: 8px 8px 4px 8px;
   border-radius: 6px;

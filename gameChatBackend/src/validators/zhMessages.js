@@ -20,12 +20,6 @@ module.exports = {
     'any.required': '请输入昵称',
     'string.empty': '昵称不能为空'
   },
-  // id: {
-  //   'number.base': '用户 ID 应该是数字',
-  //   'number.integer': '用户 ID 应该是整数',
-  //   'number.min': '用户 ID 应该是正整数',
-  //   'any.required': '用户 ID 是必填项'
-  // },
   avatar: {
     'string.base': '头像格式不正确',
     'string.dataUri': '头像数据格式不正确，请上传正确的图片',

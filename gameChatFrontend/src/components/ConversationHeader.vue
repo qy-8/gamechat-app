@@ -13,7 +13,6 @@ const searchTerm = ref(null)
 const chatStore = useChatStore()
 const groupStore = useGroupStore()
 const userStore = useUserStore()
-// const { headerInfo } = storeToRefs(chatStore)
 const { isGroupActive } = storeToRefs(groupStore)
 const { isMuted } = storeToRefs(userStore)
 const { toggleMute } = userStore
@@ -62,16 +61,11 @@ const handleSearchMessages = async () => {
     searchTerm.value
   )
 }
-
-// 用户搜索调用 handleSearchMessages
-// const onSearchInputEnter = () => {
-//   handleSearchMessages()
-// }
 </script>
 
 <template>
   <div class="container">
-    <div class="header-container" @click="console.log(headerInfo)">
+    <div class="header-container">
       <GroupAvatar
         :src="currentHeader.avatar"
         alt="头像"
@@ -163,7 +157,7 @@ div.icon-container {
   line-height: 10px;
 }
 
-// 输入框背景透明
+/* 输入框背景透明 */
 ::v-deep(.el-input__wrapper) {
   background-color: transparent;
 }

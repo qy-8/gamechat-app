@@ -91,9 +91,7 @@ const uploadAvatar = async (req, res) => {
       )
       // 删除OSS上的孤儿文件
       try {
-        // ***************************************************************
-        // ** 尝试删除已上传到 OSS 的文件，因为数据库未找到对应用户 **
-        // ***************************************************************
+        // 尝试删除已上传到 OSS 的文件，因为数据库未找到对应用户
         await ossClient.delete(ossFileName)
         console.log(`OSS上的孤儿文件 ${ossFileName} 删除成功。`)
       } catch (ossDeleteError) {

@@ -2,7 +2,7 @@
 import { CirclePlus, Setting } from '@element-plus/icons-vue'
 import ThemeSwitch from '@/components/ThemeToggle.vue'
 import CreateGroupDialog from './CreateGroupDialog.vue'
-import { ref, onMounted, useCssVars } from 'vue'
+import { ref } from 'vue'
 import { useGroupStore, useUserStore, useChatStore } from '@/stores'
 import UploadUserAvatarDialog from './UploadUserAvatarDialog.vue'
 import ResetPwdDialog from './ResetPwdDialog.vue'
@@ -69,15 +69,10 @@ const showFriendList = () => {
           :key="item._id"
           :index="item._id"
         >
-          <!-- <img
-            :src="item.avatar || '/images/defaultGroupAvatar.png'"
-            :alt="item.name"
-            class="direct-message-image has-active-scale-effect"
-          /> -->
           <GroupAvatar
             :src="item.avatar || '/images/defaultGroupAvatar.png'"
             :alt="item.name"
-            s
+            :lazy="true"
           />
           <template #title>{{ item.name || '群组' }}</template>
         </el-menu-item>
@@ -228,6 +223,6 @@ const showFriendList = () => {
 
 :deep(.el-dropdown-menu__item:not(.is-disabled):focus),
 :deep(.el-dropdown-menu__item:not(.is-disabled):hover) {
-  background-color: var(--el-dropdown-menuItem-hover);
+  background-color: var(--el-dropdown-menu-item-hover);
 }
 </style>

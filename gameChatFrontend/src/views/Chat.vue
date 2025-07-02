@@ -17,7 +17,6 @@ const phoneNum = ref('')
 
 const getPersonalInfo = async () => {
   const response = await getUserInfo()
-  // console.log(response)
   const { username, _id, avatar, phoneNumber } = response.data
   const necessaryData = {
     username,
@@ -27,38 +26,6 @@ const getPersonalInfo = async () => {
   userStore.setUserInfo(necessaryData)
   phoneNum.value = phoneNumber
 }
-
-// const handleNewFriendRequest = (requestData) => {
-//   console.log('Socket 收到新的好友请求，准备更新 store:', requestData)
-//   friendStore.handleNewRequest(requestData)
-
-//   ElNotification({
-//     title: '新的好友请求',
-//     message: h(
-//       'span',
-//       null,
-//       `用户 ${requestData.requester.username} 想添加你为好友。`
-//     ),
-//     duration: 5000, // 5秒后自动关闭
-//     position: 'top-right'
-//   })
-// }
-
-// const handleNewGroupInvitation = (requestData) => {
-//   console.log('Socket 收到新的群聊邀请，准备更新 store:', requestData)
-//   groupStore.handleNewRequest(requestData)
-
-//   ElNotification({
-//     title: '新的好友请求',
-//     message: h(
-//       'span',
-//       null,
-//       `用户 ${requestData.inviter.username} 邀请您加入群聊 ${requestData.group.name}。`
-//     ),
-//     duration: 5000, // 5秒后自动关闭
-//     position: 'top-right'
-//   })
-// }
 
 const showNotification = ({ title, message }) => {
   ElNotification({
@@ -76,30 +43,12 @@ onMounted(() => {
   groupStore.setGroups()
   getPersonalInfo()
 
-  // if (socket) {
-  //   socket.on('new-friend-request', handleNewFriendRequest)
-  //   socket.on('new_group_invitation', handleNewGroupInvitation)
-  // }
-
   emitter.on('show-notification', showNotification)
 })
 
 onUnmounted(() => {
-  // const socket = getSocket()
-  // if (socket) {
-  //   socket.off('new_friend_request', handleNewFriendRequest)
-  //   socket.off('new_group_invitation', handleNewGroupInvitation)
-  // }
-
   emitter.off('show-notification', showNotification)
 })
-
-// onUnmounted(() => {
-//   const socket = getSocket()
-//   if (socket) {
-//     socket.off('new_friend_request', handleNewFriendRequest)
-//   }
-// })
 </script>
 
 <template>

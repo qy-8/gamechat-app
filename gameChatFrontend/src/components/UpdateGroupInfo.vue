@@ -1,6 +1,5 @@
 <script setup>
 import { ref, reactive } from 'vue'
-import { createChannel } from '@/api/group.js'
 import BaseDialog from './common/BaseDialog.vue'
 import { useGroupStore } from '../stores'
 import { updateGroupInfo } from '../api/group'
@@ -37,10 +36,8 @@ const formRules = reactive({
 })
 
 const onSubmit = () => {
-  // TODO: loading
   formRef.value.validate(async (valid) => {
     if (!valid) {
-      console.log('验证失败')
       return
     }
     try {
@@ -53,7 +50,6 @@ const onSubmit = () => {
       groupStore.updateGroup(form.name, form.description)
       emit('update:visible', false)
     } catch (error) {
-      // ElMessage.closeAll()
       ElMessage.error('更新群组信息失败')
       console.error(error)
     }

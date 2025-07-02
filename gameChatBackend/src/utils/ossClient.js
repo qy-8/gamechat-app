@@ -5,7 +5,6 @@ const path = require('path')
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') })
 
 // 确认环境变量是否加载
-// console.log('OSS_CLIENT: ALI_SDK_REGION:', process.env.ALI_SDK_REGION)
 console.log('OSS_CLIENT: ALI_SDK_BUCKET_NAME:', process.env.ALI_SDK_BUCKET_NAME)
 console.log(
   'OSS_CLIENT: ALI_SDK_ACCESS_KEY_ID loaded:',
@@ -21,7 +20,6 @@ if (
   console.error(
     '错误：OSS 客户端配置所需的环境变量不完整！请检查 .env 文件以及路径是否正确。'
   )
-  // throw new Error('OSS 客户端配置环境变量不完整');
 }
 
 const client = new OSS({

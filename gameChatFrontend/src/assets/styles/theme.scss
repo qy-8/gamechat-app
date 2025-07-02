@@ -1,4 +1,4 @@
-// 光明模式
+/* 光明模式 */
 :root {
   --el-color-primary: #FF9100;
   --el-color-success: #67c23a;
@@ -7,7 +7,7 @@
   --el-color-error: #f56c6c;
   --el-color-info: #909399;
   --el-text-color-primary: #FF9100; 
-  --el-text-color-regular: #000000;
+  --el-text-color-regular: #000;
   --el-text-color-secondary: #515151;
   --el-text-color-placeholder: #737373;
   --el-text-color-disabled: #c0c4cc;
@@ -20,13 +20,13 @@
   --el-bg-color-message-item-hover: #0000000D;
   --el-bg-color-search-user-result: #F9F9F9;
   --link-hover-color: #FF9100;
-  --link-hover-background-color: rgba(4, 3, 2, 0.1);
+  --link-hover-background-color: rgb(4 3 2 / 10%);
   --el-menu-hover-bg-color: #FF9100;
-  --el-menu-hover-text-color: #000000;
-  --el-dropdown-menuItem-hover: #0000000D;
+  --el-menu-hover-text-color: #000;
+  --el-dropdown-menu-item-hover: #0000000D;
   --icons-color: #FF9100;
   --primary-text-color: #FF9100;
-  --secondary-text-color: #ffffff; 
+  --secondary-text-color: #fff; 
   --el-btn-hover-border-color: #ff9100;
   --el-text-color-timestamp: #b0b0b0;
   --el-webkit-scrollbar-color: #888;
@@ -38,7 +38,7 @@
   
 }
 
-// 黑暗模式
+/* 黑暗模式 */
 html.dark {
   --el-color-primary: #FF9100;
   --el-color-primary-light-9: #FFFFFF0D;
@@ -47,7 +47,7 @@ html.dark {
   --el-color-primary-light-5: #FFB547;
   --el-color-danger: #D32F2F;
   --el-text-color-primary: #FF9100;
-  --el-text-color-regular: #ffffff;
+  --el-text-color-regular: #fff;
   --el-text-color-secondary: #E0E0E0;
   --el-text-color-quoted: #c0bebe;
   --primary-text-color: #FF9100;
@@ -58,8 +58,8 @@ html.dark {
   --el-bg-color-announcements: #DA3E44;
   --el-bg-color-group-list: #1e1e1e;
   --el-bg-color-message-item-hover: #FFFFFF0D;
-  --el-dropdown-menuItem-hover: #FFFFFF0D;
-  --el-menu-hover-text-color: #ffffff;
+  --el-dropdown-menu-item-hover: #FFFFFF0D;
+  --el-menu-hover-text-color: #fff;
   --el-bg-color-search-user-result: #2D2D2D;
   --el-btn-hover-border-color: #ff9100;
   --el-text-color-timestamp: #b0b0b0;

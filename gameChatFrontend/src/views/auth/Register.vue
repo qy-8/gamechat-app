@@ -99,7 +99,6 @@ const getCode = async () => {
   try {
     start()
     const response = await sendSmsCode(form)
-    console.log('验证码已发送（开发阶段打印）')
   } catch (error) {
     console.error('获取短信验证码失败:', error)
   }
@@ -111,14 +110,11 @@ const onSubmit = () => {
   registerFormRef.value.validate(async (valid) => {
     if (!valid) {
       loading.value = false // 关闭 loading
-      console.log('验证失败')
-      // TODO: login page
       return
     }
     try {
       const response = await registerUser(form)
       ElMessage({ message: '注册成功', type: 'success' })
-      console.log('注册成功')
       resetForm(registerFormRef)
     } catch (error) {
       console.error('提交失败，结果：', error)
@@ -139,25 +135,8 @@ const resetForm = (registerFormRef) => {
 </script>
 
 <template>
-  <!-- 注册 -->
-  <!-- <el-row class="container"> -->
-  <!-- <el-col :span="9">
-      <div class="side-info content">
-        <h2>你的游戏之旅，从这里开始！</h2>
-        <p class="welcome-text">
-          🤝 找到游戏搭子，一起开黑冒险！ <br />🛠️ 与游戏开发者 & Mod
-          创作者互动！ <br />💬 加入专属社区，分享你的创意和想法！
-        </p> -->
-  <!-- <el-button @click="$emit('switch')">登陆</el-button> -->
-  <!-- <router-link to="/auth/login">
-          <el-button>登陆</el-button>
-        </router-link>
-      </div>
-    </el-col> -->
-  <!-- <el-col :span="15"> -->
   <div class="section content">
     <h2>注册账户</h2>
-    <!-- <p>使用电话号码注册</p> -->
 
     <el-form
       v-loading="loading"

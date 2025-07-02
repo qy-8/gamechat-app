@@ -55,7 +55,7 @@ onUnmounted(() => {
   }
 })
 
-// 🔁 监听 animationData 变化（如果你后续可能动态切换动画）
+// 监听 animationData 变化
 watch(
   () => props.animationData,
   () => {

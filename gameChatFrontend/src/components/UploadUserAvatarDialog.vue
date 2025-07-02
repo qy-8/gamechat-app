@@ -35,7 +35,6 @@ const handleFileChangeForUpload = (uploadFile) => {
     return
   }
   const file = uploadFile.raw
-  console.log('文件已选择或被替换，下一步将进行校验:', file)
   // 判断是否是允许的文件类型
   const allowedTypes = ['image/jpeg', 'image/png']
   if (!allowedTypes.includes(file.type)) {
@@ -47,7 +46,6 @@ const handleFileChangeForUpload = (uploadFile) => {
     hasImage.value = false
     return
   }
-  console.log('文件类型校验通过:', file.type)
 
   if (file.size > MAX_FILE_SIZE_BYTES_FRONTEND) {
     ElMessage.warning(
@@ -57,7 +55,6 @@ const handleFileChangeForUpload = (uploadFile) => {
     hasImage.value = false
     return
   }
-  console.log('文件大小校验通过:', file.size)
 
   const reader = new FileReader()
   reader.onload = (e) => {
@@ -66,8 +63,6 @@ const handleFileChangeForUpload = (uploadFile) => {
     uploadImage.value = file
   }
   reader.readAsDataURL(file)
-
-  console.log('文件校验通过，准备进行下一步操作:', file)
 }
 
 const onSubmit = async () => {
@@ -76,13 +71,11 @@ const onSubmit = async () => {
     const formData = new FormData()
     formData.append('avatar', uploadImage.value)
     const response = await uploadUserAvatar(formData)
-    console.log('返回的结果是（上传头像）', response)
     if (response.status === 'success') {
       // 根据你的后端响应结构调整
       ElMessage.success('头像更换成功！')
       emit('upload-success', response.data.avatarUrl)
       emit('update:visible', false)
-      console.log('上传成功，服务器响应:', response.data)
     } else {
       ElMessage.error(`上传失败：${response.message || '未知错误'}`)
       console.error('上传失败，服务器响应:', response)

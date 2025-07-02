@@ -1,11 +1,9 @@
 <script setup>
 import { ArrowDown } from '@element-plus/icons-vue'
-import { ref, onMounted, watch } from 'vue'
+import { ref } from 'vue'
 import CreateChannelDialog from './CreateChannelDialog.vue'
 import { useGroupStore, useChannelStore, useChatStore } from '@/stores'
-
 import { DeleteFilled } from '@element-plus/icons-vue'
-// import { changeGlobalNodesTarget } from 'element-plus/es/utils/index.mjs'
 import UploadGroupAvatarDialog from './UploadGroupAvatarDialog.vue'
 import { useDraggableWidth } from '../composables/useDraggableWidth'
 import { storeToRefs } from 'pinia'
@@ -15,10 +13,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 const socket = getSocket()
 const activeIndex = ref('1')
-// let isDragging = false
 const groupInfo = ref(null)
-// let startX = 0
-// let startWidth = 0
 const channelStore = useChannelStore(0)
 const showCreateChannelDialog = ref(false)
 const groupStore = useGroupStore()
@@ -29,15 +24,6 @@ const showUpdateGroupInfo = ref(null)
 const groupBackgroundUrl = ref(null)
 const loading = ref(false)
 
-// const getChannels = async () => {
-//   channelStore.getGroupChannels(groupStore.activeGroup._id, conversations)
-// }
-
-// onMounted(() => {
-//   getChannels()
-// })
-
-// TODO: 在删除前检测是否为群主，不然不让删除
 const deleteSelectedChannel = async (channelId) => {
   try {
     await channelStore.deleteGroupChannel(channelId)
@@ -48,15 +34,6 @@ const deleteSelectedChannel = async (channelId) => {
     showDeleteIcon.value = false
   }
 }
-
-// watch(
-//   () => groupStore.activeGroup?._id,
-//   async (newGroup) => {
-//     if (newGroup) {
-//       getChannels()
-//     }
-//   }
-// )
 
 const handleUploadSuccess = (data) => {
   groupStore.activeGroup.avatar = data
@@ -189,7 +166,7 @@ const handleDisbandGroup = async () => {
   height: 100%;
   display: flex;
   align-items: flex-start;
-  background-image: url('/images/background1.avif');
+
   background-position: center;
   background-size: cover;
   font-size: 20px;
@@ -250,7 +227,7 @@ const handleDisbandGroup = async () => {
 
 :deep(.el-dropdown-menu__item:not(.is-disabled):focus),
 :deep(.el-dropdown-menu__item:not(.is-disabled):hover) {
-  background-color: var(--el-dropdown-menuItem-hover);
+  background-color: var(--el-dropdown-menu-item-hover);
 }
 </style>
 

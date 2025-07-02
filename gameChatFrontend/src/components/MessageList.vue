@@ -3,7 +3,6 @@ import MessageItem from '@/components/MessageItem.vue'
 import { useChatStore, useUserStore } from '@/stores'
 import { ref, watch, nextTick, onUnmounted, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { getMessagesForConversation } from '../api/chat'
 import { debounce } from 'lodash-es'
 
 const chatStore = useChatStore()
@@ -16,13 +15,8 @@ const {
   canLoadMoreMessages,
   currentMessagePage
 } = storeToRefs(chatStore)
-const { getMessages } = chatStore
-const currentUserId = userStore.userInfo.userId
 const isSwitchingConversation = ref(false)
 const scrollbarRef = ref(null)
-const isInitialLoadForCurrentConversation = ref(true)
-const localLoadingMore = ref(false)
-const scrollHeightBeforeLoad = ref(0)
 const isLoadingMore = ref(false)
 
 const scrollToBottom = async (behavior = 'auto') => {
@@ -86,8 +80,6 @@ watch(
     if (newConversation && newConversation._id !== oldConversation?._id) {
       isSwitchingConversation.value = true
       try {
-        console.log(`会话已切换到 ${newConversation._id}，准备加载消息...`)
-
         await chatStore.getMessages(newConversation._id, 1)
 
         await scrollToBottom('auto')
@@ -96,7 +88,6 @@ watch(
       } finally {
         // 解锁
         isSwitchingConversation.value = false
-        console.log('会话切换完成，已解锁滚动加载。')
       }
     }
   },
@@ -109,7 +100,6 @@ watch(
   (newLength, oldLength) => {
     // if (oldLength > 0 && newLength > oldLength) {
     if (newLength === oldLength + 1) {
-      console.log('当前会话有新消息加入，平滑滚动到底部。')
       scrollToBottom('smooth')
     }
   },

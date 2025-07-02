@@ -71,13 +71,14 @@ const resetPwdFormRules = reactive({
     }
   ]
 })
+
 // 获取图形验证码
 const captcha = async () => {
   try {
     const response = await fetchCaptcha()
     captchaCode.value = response.data
   } catch (error) {
-    console.error('获取验证码失败:', error) // 捕获异常并打印错误
+    console.error('获取验证码失败:', error)
   }
 }
 
@@ -91,10 +92,8 @@ onMounted(() => {
 })
 
 const onSubmit = () => {
-  // TODO: loading
   resetPwdFormRef.value.validate(async (valid) => {
     if (!valid) {
-      console.log('验证失败')
       return
     }
     try {

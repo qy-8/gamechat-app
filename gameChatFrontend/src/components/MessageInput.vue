@@ -1,5 +1,4 @@
 <script setup>
-// 消息输入框组件（MessageInput）：用户输入消息的地方。支持文本输入、表情符号、附件上传等功能。
 import { computed, ref } from 'vue'
 import {
   useChatStore,
@@ -17,12 +16,10 @@ import EmojiPicker from 'vue3-emoji-picker'
 import 'vue3-emoji-picker/css'
 import { ElMessage } from 'element-plus'
 import { storeToRefs } from 'pinia'
-import UserBadge from './common/UserBadge.vue'
 
 const messageInput = ref('')
 const messageType = ref('text')
 const chatStore = useChatStore()
-const channelStore = useChannelStore()
 const showEmojiPicker = ref(false)
 const themeStore = useThemeStore()
 const emojiPickerRef = ref(null)
@@ -74,7 +71,6 @@ const handleUpload = async (options) => {
       file: file
     })
 
-    // const imageUrl = uploadResponse.data.imageUrl
     options.onSuccess(uploadResponse.data)
     loadingInstance.close()
   } catch (error) {
@@ -85,45 +81,6 @@ const handleUpload = async (options) => {
     loadingInstance.close()
   }
 }
-
-// const sendInputMessage = async () => {
-//   const content = messageInput.value.trim()
-
-//   if (!content) {
-//     return
-//   }
-
-//   messageInput.value = ''
-
-//   if (chatStore.activeConversation?.type === 'private') {
-//     try {
-//       const response = await sendPrivateMessage({
-//         conversationId: chatStore.activeConversation._id,
-//         content,
-//         messageType: messageType.value
-//       })
-//       console.log(response)
-//     } catch (error) {
-//       console.error(error)
-//     }
-//   } else if (chatStore.activeConversation?.type === 'group') {
-//     try {
-//       const mentionIds = Array.from(mentionedUsers.value.values())
-//       console.log(mentionedUsers.value.values(), mentionIds)
-//       mentionedUsers.value.clear()
-
-//       const response = await sendMessageInChannel({
-//         channelId: chatStore.activeConversation._id,
-//         content,
-//         messageType: messageType.value,
-//         mentionIds
-//       })
-//       console.log(response)
-//     } catch (error) {
-//       console.error(error)
-//     }
-//   }
-// }
 
 const sendInputMessage = async () => {
   const content = messageInput.value.trim()
@@ -150,20 +107,17 @@ const sendInputMessage = async () => {
       : null
   }
 
-  console.log(messagePayload)
   if (chatStore.activeConversation?.type === 'private') {
     try {
       const response = await sendPrivateMessage({
         ...messagePayload
       })
-      console.log(response)
     } catch (error) {
       console.error(error)
     }
   } else if (chatStore.activeConversation?.type === 'group') {
     try {
       const mentionIds = Array.from(mentionedUsers.value.values())
-      console.log(mentionedUsers.value.values(), mentionIds)
       mentionedUsers.value.clear()
       chatStore.clearReplyingTo()
       const response = await sendMessageInChannel({
@@ -171,7 +125,6 @@ const sendInputMessage = async () => {
         channelId: chatStore.activeConversation._id,
         mentionIds
       })
-      console.log(response)
     } catch (error) {
       console.error(error)
     }
@@ -185,7 +138,6 @@ const onSelectEmoji = (emoji) => {
 
 const onMentionSelect = (option) => {
   mentionedUsers.value.set(option.value, option.id)
-  console.log('已提及用户:', mentionedUsers.value)
 }
 
 const clearRepliedToMessage = () => {
@@ -243,16 +195,6 @@ const clearRepliedToMessage = () => {
             <IconMdiFileImageOutline />
           </div>
         </el-upload>
-
-        <!-- <div
-          class="mention-user icon"
-          v-if="chatStore.activeConversation.type === 'group'"
-        >
-          <IconMdiAt />
-        </div> -->
-        <!-- <div class="markdown-editor icon">
-          <IconMdiLanguageMarkdown />
-        </div> -->
       </div>
     </div>
     <EmojiPicker
@@ -284,7 +226,6 @@ const clearRepliedToMessage = () => {
 
 .message-container {
   min-height: 50px;
-  // max-height: 60px;
   padding: 8px 0;
   height: auto;
   display: flex;
@@ -325,7 +266,7 @@ const clearRepliedToMessage = () => {
   text-overflow: ellipsis;
 }
 
-// 使输入框背景透明
+/* 使输入框背景透明 */
 ::v-deep(.el-input__wrapper) {
   background-color: transparent;
   box-shadow: none;
@@ -347,19 +288,19 @@ const clearRepliedToMessage = () => {
     width: 4px;
   }
 
-  // 滚动条轨道
+  /* 滚动条轨道 */
   &::-webkit-scrollbar-track {
     background: transparent;
     border-radius: 3px;
   }
 
-  // 滚动条滑块
+  /* 滚动条滑块 */
   &::-webkit-scrollbar-thumb {
     background: var(--el-webkit-scrollbar-color);
     border-radius: 3px;
   }
 
-  // 悬浮在滑块上时
+  /* 悬浮在滑块上时 */
   &::-webkit-scrollbar-thumb:hover {
     background: var(--el-webkit-scrollbar-hover);
   }
@@ -405,20 +346,20 @@ const clearRepliedToMessage = () => {
 .reply-fade-enter-from,
 .reply-fade-leave-to {
   opacity: 0;
-  transform: translateY(-10px); // 向上移动
+  transform: translateY(-10px); /* 向上移动 */
 }
 
 .reply-fade-enter-active,
 .reply-fade-leave-active {
   transition:
     opacity 0.3s ease,
-    transform 0.3s ease; // 0.3秒的透明度和位移过渡
+    transform 0.3s ease; /* 0.3秒的透明度和位移过渡 */
 }
 
-// 过渡结束状态，以及离开过渡的开始状态
+/* 过渡结束状态，以及离开过渡的开始状态 */
 .reply-fade-enter-to,
 .reply-fade-leave-from {
   opacity: 1;
-  transform: translateY(0); // 恢复到原始位置
+  transform: translateY(0); /* 恢复到原始位置 */
 }
 </style>

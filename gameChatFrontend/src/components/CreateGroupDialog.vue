@@ -37,10 +37,8 @@ const createGroupRules = reactive({
 })
 
 const onSubmit = () => {
-  // TODO: loading
   createGroupFormRef.value.validate(async (valid) => {
     if (!valid) {
-      console.log('验证失败')
       return
     }
     try {

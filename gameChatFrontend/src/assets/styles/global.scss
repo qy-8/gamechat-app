@@ -1,7 +1,18 @@
+/**
+ * @file global.scss
+ * @description 全局样式重置、基础排版及通用元素默认样式定义。
+ * @module BaseStyles
+ */
+
+ /* ------------------------------------*\
+  # CSS 重置 (Reset)
+  # 统一不同浏览器默认样式
+\*------------------------------------ */
+
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 ul, ol {
@@ -9,13 +20,19 @@ ul, ol {
 }
 
 a {
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
 }
+
+
+/* ------------------------------------*\
+  # 基础排版 (Typography)
+  # 定义全局字体、字号、行高及文本颜色
+\*------------------------------------ */
 
 body {
   font-family: 
-    -apple-system, BlinkMacSystemFont, /* macOS/iOS 首选 */
+    -apple-system, BlinkMacSystemFont, /* macOS/iOS */
     "Segoe UI", Roboto, /* Windows/Android 首选 */
     "Helvetica Neue", Arial, /* 西文字体 */
     "PingFang SC", "Microsoft YaHei", /* 中文字体 */
@@ -25,34 +42,28 @@ body {
     color: #333;
 }
 
+/* ------------------------------------*\
+  # 图像基础样式
+\*------------------------------------ */
+
 img {
+  display: block;
   max-width: 100%;
   height: auto;
-  display: block;
 }
 
+/* ------------------------------------*\
+  # 表单元素基础样式
+  # 统一按钮、输入框、选择框、文本域外观
+\*------------------------------------ */
+
 button, input, select, textarea {
+  padding: 8px 12px;
   font-family: inherit;
   font-size: inherit;
   color: inherit;
+  outline: none;
   background: transparent;
   border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 8px 12px;
-  outline: none;
 }
-
-// $text-color: #FFFFFF;
-// $background-color: #1E1E1E;
-// $link-hover-color: #FF9100;
-// $link-hover-background-color: rgba(255, 145, 0, 0.1);
-// :root {
-//   --link-hover-color: #FF9100;
-//   --link-hover-background-color: rgba(255, 145, 0, 0.1);
-//   --background-color: #1E1E1E;
-//   --el-menu-hover-bg-color: #FF9100;
-//   --icons-color: #FF9100;
-//   --primary-text-color: #FF9100;
-//   --secondary-text-color: #ffffff;
-//   --login-background-color: #e09028;
-// }

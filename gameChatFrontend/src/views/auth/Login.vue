@@ -10,7 +10,6 @@ import router from '../../router'
 const captchaCode = ref('')
 const loading = ref(false)
 const userFormRef = ref(null)
-const phoneFormRef = ref(null)
 const { timeLeft, isCounting, start } = useCountdown()
 
 // 使用用户名+密码登陆表格
@@ -104,7 +103,6 @@ const getCode = async () => {
   try {
     start()
     const response = await sendSmsCode(phoneForm)
-    console.log('验证码已发送（开发阶段打印）')
   } catch (error) {
     console.error('获取短信验证码失败:', error)
   }
@@ -114,7 +112,6 @@ const login = async () => {
   userFormRef.value.validate(async (valid) => {
     if (!valid) {
       loading.value = false // 关闭 loading
-      console.log('验证失败')
       // TODO: login page
       return
     }
@@ -134,8 +131,6 @@ const login = async () => {
 </script>
 
 <template>
-  <!-- <el-row class="container"> -->
-  <!-- <el-col :span="15"> -->
   <div class="section content">
     <h2>用户登陆</h2>
     <el-form
@@ -183,22 +178,6 @@ const login = async () => {
       </el-form-item>
     </el-form>
   </div>
-  <!-- </el-col> -->
-  <!-- <el-col :span="9">
-      <div class="side-info content">
-        <h2>欢迎回来，继续探索！</h2>
-        <p class="welcome-text">
-          ⚔️ 秀出你的高光时刻，精彩继续！ <br />🎯
-          一秒进入状态，搭档们等你开场！ <br />🧩 最新 Mod
-          已上线，继续你的冒险！
-        </p> -->
-  <!-- <el-button @click="$emit('switch')">注册</el-button> -->
-  <!-- <router-link to="/auth/register">
-          <el-button>注册</el-button>
-        </router-link>
-      </div>
-    </el-col> -->
-  <!-- </el-row> -->
 </template>
 
 <style lang="scss" scoped>

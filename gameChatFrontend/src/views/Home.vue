@@ -1,10 +1,45 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue'
 import SiteFooter from '@/components/SiteFooter.vue'
-import router from '../router'
-import LottiePlayer from '../components/LottiePlayer.vue'
+import { ref, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
+
+const LottiePlayer = defineAsyncComponent(
+  () => import('../components/LottiePlayer.vue')
+)
 
 const registerClickAnimation = '/animations/register-hand.json'
+const showLottiePlayer = ref(false) // 控制 LottiePlayer 的显示
+const registerBtnRef = ref(null) // 引用注册按钮区域
+let observer = null // Intersection Observer 实例
+
+onMounted(() => {
+  // 当组件挂载后，开始观察注册按钮区域
+  if (registerBtnRef.value) {
+    observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // 如果进入视口
+            showLottiePlayer.value = true
+            // 停止观察，避免重复触发
+            if (observer) {
+              observer.unobserve(entry.target)
+            }
+          }
+        })
+      },
+      { threshold: 0.1 } // 10% 进入视口即触发
+    )
+    observer.observe(registerBtnRef.value)
+  }
+})
+
+onUnmounted(() => {
+  // 组件卸载时，停止观察
+  if (observer) {
+    observer.disconnect()
+  }
+})
 </script>
 
 <template>
@@ -57,10 +92,11 @@ const registerClickAnimation = '/animations/register-hand.json'
     </div>
 
     <!-- 点击注册区域 -->
-    <div class="register-btn">
+    <div class="register-btn" ref="registerBtnRef">
       <div class="register-wrapper" @click="$router.push('/auth')">
         <el-button>点击注册</el-button>
         <LottiePlayer
+          v-if="showLottiePlayer"
           :animationData="registerClickAnimation"
           :loop="true"
           class="register-click-animation"
@@ -98,7 +134,7 @@ const registerClickAnimation = '/animations/register-hand.json'
   width: 100%;
   height: 874px;
   margin-top: 60px;
-  background-image: url('/images/background3.jpg');
+  background-image: url('/images/bannerBackground.jpg');
   background-size: cover;
   background-position: center;
   color: var(--primary-text-color);
@@ -108,7 +144,7 @@ const registerClickAnimation = '/animations/register-hand.json'
 /* 首页背景上的文本盒 */
 .text-box {
   margin: 50px 100px;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9); //突出文字
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
 }
 
 /* 按钮样式 */
@@ -130,7 +166,7 @@ const registerClickAnimation = '/animations/register-hand.json'
   margin-left: 50px;
   width: 880px;
   height: 600px;
-  background-image: url(/images/background1.avif);
+  background-image: url(/images/detailsBackground.avif);
   background-size: cover;
   background-position: center;
   border-radius: 20px; /* 图片圆角以提升视觉效果 */
@@ -143,7 +179,7 @@ const registerClickAnimation = '/animations/register-hand.json'
   color: var(--el-text-color-primary);
 }
 
-// 详情区域 - 文本列表
+/* 详情区域 - 文本列表 */
 .details-box .text-box ul {
   display: flex;
   flex-direction: column;
@@ -188,6 +224,10 @@ const registerClickAnimation = '/animations/register-hand.json'
   font-size: 30px;
   border-radius: 14px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.register-btn .el-button:hover {
+  border: none;
 }
 
 .register-btn .register-click-animation {

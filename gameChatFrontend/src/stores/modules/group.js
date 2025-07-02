@@ -99,7 +99,6 @@ export const useGroupStore = defineStore(
       try {
         const response = await getGroupMembers(activeGroupId.value)
         groupMembers.value = response.data.members
-        console.log(groupMembers.value)
       } catch (error) {
         console.error(error)
       }

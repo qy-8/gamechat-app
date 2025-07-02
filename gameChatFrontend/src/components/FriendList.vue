@@ -3,7 +3,6 @@ import { onMounted, reactive, ref, computed } from 'vue'
 import {
   searchFriend,
   sendFriendRequest,
-  deleteFriend,
   updateFriendStatus,
   getBlackList
 } from '../api/friend'
@@ -21,8 +20,6 @@ import GroupRequestListDialog from './GroupRequestListDialog.vue'
 import { useChatStore, useFriendStore, useGroupStore } from '../stores'
 import { storeToRefs } from 'pinia'
 import UserBadge from './common/UserBadge.vue'
-
-// import { useDraggableWidth } from '@/composables/useDraggableWidth'
 
 const chatStore = useChatStore()
 const friendStore = useFriendStore()
@@ -71,7 +68,6 @@ const { friendList } = storeToRefs(friendStore)
 const handleSearchUsername = async () => {
   formRef.value.validate(async (valid) => {
     if (!valid) {
-      console.log('验证失败')
       return
     }
 
@@ -111,7 +107,7 @@ const handleSendFriendRequest = async () => {
       await sendFriendRequest(searchResult.value[0]._id)
       ElMessage.success('好友请求已发送！')
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   } else {
     ElMessage.warning('无法发送好友请求')
@@ -176,11 +172,6 @@ const selectFriendForChat = (friend) => {
   groupStore.clearActiveGroup()
   chatStore.selectFriendToChat(friend)
 }
-
-// const { startDragging } = useDraggableWidth(friendListPanelRef, {
-//   minWidth: 200,
-//   maxWidth: 500
-// })
 </script>
 
 <template>
@@ -379,7 +370,6 @@ const selectFriendForChat = (friend) => {
 
 .search-friend-container {
   display: flex;
-  // justify-content: space-between;
   align-items: center;
   height: auto;
   padding: 12px 10px 0 10px;
@@ -439,7 +429,6 @@ const selectFriendForChat = (friend) => {
   width: 100%;
   display: flex;
   justify-content: center;
-  // align-items: center;
 }
 
 :deep(.direct-message-input .el-input .el-input__wrapper) {
@@ -487,9 +476,7 @@ const selectFriendForChat = (friend) => {
 
 .resize-bar {
   width: 4px;
-  // cursor: ew-resize;
   background-color: var(--el-bg-color-home-details-box-bgc);
-  // transition: background-color 0.2s;
 }
 
 .el-menu {

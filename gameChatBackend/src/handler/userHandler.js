@@ -11,7 +11,7 @@ const sendSmsCodeToPhone = (req, res) => {
   response.success(res, {}, '短信验证码已发送')
 }
 
-// 注册接口，接受三个参数，手机号码，短信验证码，用户名，密码和确认密码
+// 注册接口
 const register = async (req, res) => {
   const { phoneNumber, username, password } = req.body
   // 验证短信验证码是否正确，然后再查找数据库是否有相同手机号和用户名以减少服务器压力，提高性能

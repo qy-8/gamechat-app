@@ -60,7 +60,6 @@ export default [
           embeddedLanguageFormatting: 'auto'
         }
       ]
-      // 其他 Vue 相关规则
     }
   }
 ]

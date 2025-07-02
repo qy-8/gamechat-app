@@ -14,8 +14,8 @@ const getFriendList = async (req, res) => {
     })
       .populate('requester', 'username avatar _id')
       .populate('recipient', 'username avatar _id')
-    // 之前过滤出来的 requester 和 recipient 中的一个包含自己
-    // 现在要通过查看 requester 和 recipient 中的哪个是自己来返回另一个用户给前端
+
+    // 查看 requester 和 recipient 中的哪个是自己来返回另一个用户给前端
     const friendsList = friendships.map((friendship) => {
       if (friendship.requester._id.toString() === userId) {
         return friendship.recipient // 如果当前用户是请求者，好友就是接收者

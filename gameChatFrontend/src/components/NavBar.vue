@@ -40,21 +40,22 @@ themeStore.initTheme()
 
 <style lang="scss" scoped>
 /* 版心样式设置 */
-
 .container {
   max-width: 1706px;
   margin: 0 auto;
 }
-/* 导航栏样式 */
 
+/* 导航栏样式 */
 .el-menu--horizontal {
   border-bottom: none;
 }
+
 /* svg logo 样式 */
 .logo svg {
   vertical-align: middle;
   margin-right: 8px;
 }
+
 /* 除 logo 区域，整体靠右 */
 .el-menu--horizontal > .el-menu-item:nth-child(1) {
   margin-right: auto;

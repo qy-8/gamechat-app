@@ -61,11 +61,11 @@ request.interceptors.response.use(
 
     // 如果 http 响应头状态码为 401
     if (error.response?.status === 401) {
-      // ElMessage.error('登录已过期，请重新登录')
       localStorage.removeItem('user')
       localStorage.removeItem('token')
       router.push('/auth')
     }
+    ElMessage.closeAll()
     ElMessage({
       message: error.response?.data?.message || '错误异常',
       type: 'error',

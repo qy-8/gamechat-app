@@ -3,3 +3,5 @@
 
 
 npx --no-install eslint . && npx --no-install prettier --check .
+
+npx lint-staged

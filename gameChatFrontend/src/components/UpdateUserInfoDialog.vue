@@ -38,10 +38,8 @@ const formRules = reactive({
 })
 
 const onSubmit = () => {
-  // TODO: loading
   formRef.value.validate(async (valid) => {
     if (!valid) {
-      console.log('验证失败')
       return
     }
     try {
@@ -49,7 +47,6 @@ const onSubmit = () => {
       ElMessage.success(response.message)
       emit('update:visible', false)
     } catch (error) {
-      // ElMessage.closeAll()
       ElMessage.error('更新用户信息失败')
       console.error(error)
     }

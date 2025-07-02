@@ -17,11 +17,6 @@ const uploadChatMessageImage = async (req, res) => {
   // 查找频道
   const conversation = await Conversation.findById(conversationId)
 
-  // .populate({
-  //   path: 'groupId',
-  //   select: 'members'
-  // })
-
   if (!conversation) {
     fs.unlinkSync(file.path)
     return response.error(res, '该频道不存在', 404)

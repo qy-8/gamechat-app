@@ -1,11 +1,73 @@
 import request from '../utils/request'
 
-// 拿到用户所有会话列表
+/**
+ * @module ChatAPI
+ * @description 包含与聊天、会话及消息相关的 API 请求。
+ */
+
+/**
+ * @typedef {object} GetOrCreateConversationRequest
+ * @property {string} targetUserId - 对话目标用户的 ID。
+ */
+
+/**
+ * @typedef {object} GetMessagesForConversationQueryParams
+ * @property {number} [page=1] - 页码（从 1 开始）。
+ * @property {number} [limit=20] - 每页消息数量。
+ */
+
+/**
+ * @typedef {object} SendMessageRequest
+ * @property {string} content - 消息内容。
+ * @property {'text'|'image'|'file'|'system'} messageType - 消息类型。
+ * @property {string[]} [repliedTo] - 被回复的消息ID数组（可选，根据代码实现推断）。
+ */
+
+/**
+ * @typedef {object} SendMessageInChannelRequest
+ * @property {string} channelId - 频道 ID。
+ * @property {string} content - 消息内容。
+ * @property {string} [messageType='text'] - 消息类型，如 text、image 等，默认为 text。
+ * @property {string[]} [mentionIds] - 被提及的用户ID数组（可选，Swagger中未明确但为常见字段）。
+ * @property {string[]} [repliedTo] - 被回复的消息ID数组（可选，根据代码实现推断）。
+ */
+
+/**
+ * @typedef {object} UploadImageAPIRequest
+ * @property {string} conversationId - 会话 ID（私聊或频道）。
+ * @property {File} file - 要上传的图片文件。
+ */
+
+/**
+ * @typedef {object} SearchMessageRequest
+ * @property {string} conversationId - 会话 ID。
+ * @property {string} searchTerm - 搜索关键词。
+ * @property {number} [page=1] - 当前页码（默认为 1）。
+ * @property {number} [limit=20] - 每页数量（默认为 20）。
+ */
+
+/**
+ * @typedef {object} ToggleMuteConversationRequest
+ * @property {string} conversationId - 会话 ID。
+ * @property {boolean} mute - 是否设为免打扰（true 为设为免打扰，false 为取消）。
+ */
+
+/**
+ * 拿到用户所有会话列表。
+ * @function getUserConversations
+ * @returns {Promise<object>} 包含用户会话列表的 Promise 对象。
+ */
 export const getUserConversations = () => {
   return request.get('/api/chat/conversations')
 }
 
-// 拿到用户所激活会话的消息列表
+/**
+ * 拿到用户会话的消息列表。
+ * @function getMessagesForConversation
+ * @param {string} conversationId - 会话 ID。
+ * @param {GetMessagesForConversationQueryParams} params - 查询参数，包含页码和每页消息数量。
+ * @returns {Promise<object>} 包含会话消息列表的 Promise 对象。
+ */
 export const getMessagesForConversation = (
   conversationId,
   page = 1,
@@ -19,14 +81,28 @@ export const getMessagesForConversation = (
   })
 }
 
-// 获取或创建会话
+/**
+ * 获取或创建会话。
+ * @function getOrCreateConversation
+ * @param {GetOrCreateConversationRequest} data - 请求体数据，包含对话目标用户的 ID。
+ * @returns {Promise<object>} 包含会话信息的 Promise 对象。
+ */
 export const getOrCreateConversation = (targetUserId) => {
   return request.post('/api/chat/conversations', {
     targetUserId
   })
 }
 
-// 发送私信消息
+/**
+ * 发送私信消息。
+ * @function sendMessage
+ * @param {object} conversationData - 消息数据。
+ * @param {string} conversationData.conversationId - 会话 ID。
+ * @param {string} conversationData.content - 消息内容。
+ * @param {'text'|'image'|'file'|'system'} conversationData.messageType - 消息类型。
+ * @param {string[]} [conversationData.repliedTo=[]] - 被回复的消息ID数组（可选）。
+ * @returns {Promise<object>} 包含发送消息结果的 Promise 对象。
+ */
 export const sendMessage = (conversationData) => {
   const {
     conversationId,
@@ -41,12 +117,22 @@ export const sendMessage = (conversationData) => {
   })
 }
 
-// 将消息标记为已读
+/**
+ * 将消息标记为已读。
+ * @function markAsRead
+ * @param {string} conversationId - 需要标记为已读的会话 ID。
+ * @returns {Promise<object>} 包含操作结果的 Promise 对象。
+ */
 export const markAsRead = (conversationId) => {
   return request.post(`/api/chat/conversations/${conversationId}/read`)
 }
 
-// 发送频道消息
+/**
+ * 发送频道消息。
+ * @function sendMessageInChannel
+ * @param {SendMessageInChannelRequest} data - 频道消息数据，包含频道ID、内容、消息类型、提及用户ID和回复消息ID。
+ * @returns {Promise<object>} 包含发送消息结果的 Promise 对象。
+ */
 export const sendMessageInChannel = (data) => {
   const {
     channelId,
@@ -63,15 +149,12 @@ export const sendMessageInChannel = (data) => {
   })
 }
 
-// export const sendMessageInChannel = (data) => {
-//   const { conversationId, channelId, content, messageType = 'text' } = data
-//   return request.post(`/api/channels/${conversationId}/messages`, {
-//     channelId,
-//     content,
-//     messageType
-//   })
-// }
-
+/**
+ * 上传消息图片。
+ * @function uploadImageAPI
+ * @param {UploadImageAPIRequest} data - 图片上传数据，包含会话ID和图片文件。
+ * @returns {Promise<object>} 包含图片上传结果的 Promise 对象。
+ */
 export const uploadImageAPI = (data) => {
   const { conversationId, file } = data
   const formData = new FormData()
@@ -83,7 +166,12 @@ export const uploadImageAPI = (data) => {
   })
 }
 
-// 搜索会话消息
+/**
+ * 搜索会话消息。
+ * @function searchMessage
+ * @param {SearchMessageRequest} data - 搜索参数，包含会话ID、搜索关键词、页码和每页数量。
+ * @returns {Promise<object>} 包含搜索结果列表的 Promise 对象。
+ */
 export const searchMessage = (data) => {
   const { conversationId, searchTerm, page = 1, limit = 20 } = data
   return request.get(
@@ -98,10 +186,14 @@ export const searchMessage = (data) => {
   )
 }
 
-// 静音/解除静音会话
+/**
+ * 静音/解除静音会话。
+ * @function toggleMuteConversation
+ * @param {ToggleMuteConversationRequest} data - 静音操作数据，包含会话ID和静音状态。
+ * @returns {Promise<object>} 包含操作结果的 Promise 对象。
+ */
 export const toggleMuteConversation = (data) => {
   const { conversationId, mute } = data
-  console.log(mute)
   return request.post(`api/chat/conversations/${conversationId}/mute`, {
     mute
   })

@@ -37,10 +37,6 @@ async function createAndBroadcastMessage(data) {
   await newMessage.save()
 
   // 更新会话的最新消息时间戳和内容
-  // await Conversation.updateOne(
-  //   { _id: channelId },
-  //   { lastMessageAt: newMessage.createdAt }
-  // )
   await Conversation.findByIdAndUpdate(conversationId, {
     lastMessage: newMessage._id,
     lastMessageAt: newMessage.createdAt,
@@ -107,38 +103,6 @@ async function createAndBroadcastMessage(data) {
     }
     io.to(conversationId).emit('new_message', messageForEmit)
     console.log(`已向房间 ${conversationId} 广播了新消息`)
-    // if (mentionIds && mentionIds.length > 0) {
-    //   console.log(3, mentionIds)
-
-    //   const mentionNotificationPayload = {
-    //     mentionedBy: messageForEmit.sender,
-    //     channel: {
-    //       id: messageForEmit.conversationId._id
-    //     },
-    //     group: {
-    //       id: messageForEmit.groupInfo._id,
-    //       name: messageForEmit.groupInfo.name
-    //     },
-    //     message: messageForEmit
-    //   }
-
-    //   for (const mentionedUserId of mentionIds) {
-    //     // 找到用户 sockets
-    //     console.log(4, mentionIds)
-
-    //     const recipientSockets = getUserSockets(mentionedUserId.toString())
-    //     if (recipientSockets) {
-    //       // 发送被 mentioned 的事件
-    //       recipientSockets.forEach((socketId) => {
-    //         io.to(socketId).emit(
-    //           'you_were_mentioned',
-    //           mentionNotificationPayload
-    //         )
-    //       })
-    //       console.log(`已向用户 ${mentionedUserId} 发送了 @ 提醒`)
-    //     }
-    //   }
-    // }
   }
 
   return messageForEmit
