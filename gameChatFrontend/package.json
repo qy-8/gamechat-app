@@ -17,8 +17,8 @@
   },
   "lint-staged": {
     "*.{css,scss,vue}": [
-      "stylelint --fix",   
-      "prettier --write"   
+      "stylelint --fix",
+      "prettier --write"
     ]
   },
   "dependencies": {
