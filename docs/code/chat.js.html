@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: chat.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: chat.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import request from '../utils/request'
+
+/**
+ * @module ChatAPI
+ * @description 包含与聊天、会话及消息相关的 API 请求。
+ */
+
+/**
+ * @typedef {object} GetOrCreateConversationRequest
+ * @property {string} targetUserId - 对话目标用户的 ID。
+ */
+
+/**
+ * @typedef {object} GetMessagesForConversationQueryParams
+ * @property {number} [page=1] - 页码（从 1 开始）。
+ * @property {number} [limit=20] - 每页消息数量。
+ */
+
+/**
+ * @typedef {object} SendMessageRequest
+ * @property {string} content - 消息内容。
+ * @property {'text'|'image'|'file'|'system'} messageType - 消息类型。
+ * @property {string[]} [repliedTo] - 被回复的消息ID数组（可选，根据代码实现推断）。
+ */
+
+/**
+ * @typedef {object} SendMessageInChannelRequest
+ * @property {string} channelId - 频道 ID。
+ * @property {string} content - 消息内容。
+ * @property {string} [messageType='text'] - 消息类型，如 text、image 等，默认为 text。
+ * @property {string[]} [mentionIds] - 被提及的用户ID数组（可选，Swagger中未明确但为常见字段）。
+ * @property {string[]} [repliedTo] - 被回复的消息ID数组（可选，根据代码实现推断）。
+ */
+
+/**
+ * @typedef {object} UploadImageAPIRequest
+ * @property {string} conversationId - 会话 ID（私聊或频道）。
+ * @property {File} file - 要上传的图片文件。
+ */
+
+/**
+ * @typedef {object} SearchMessageRequest
+ * @property {string} conversationId - 会话 ID。
+ * @property {string} searchTerm - 搜索关键词。
+ * @property {number} [page=1] - 当前页码（默认为 1）。
+ * @property {number} [limit=20] - 每页数量（默认为 20）。
+ */
+
+/**
+ * @typedef {object} ToggleMuteConversationRequest
+ * @property {string} conversationId - 会话 ID。
+ * @property {boolean} mute - 是否设为免打扰（true 为设为免打扰，false 为取消）。
+ */
+
+/**
+ * 拿到用户所有会话列表。
+ * @function getUserConversations
+ * @returns {Promise&lt;object>} 包含用户会话列表的 Promise 对象。
+ */
+export const getUserConversations = () => {
+  return request.get('/api/chat/conversations')
+}
+
+/**
+ * 拿到用户会话的消息列表。
+ * @function getMessagesForConversation
+ * @param {string} conversationId - 会话 ID。
+ * @param {GetMessagesForConversationQueryParams} params - 查询参数，包含页码和每页消息数量。
+ * @returns {Promise&lt;object>} 包含会话消息列表的 Promise 对象。
+ */
+export const getMessagesForConversation = (
+  conversationId,
+  page = 1,
+  limit = 20
+) => {
+  return request.get(`/api/chat/conversations/${conversationId}/messages`, {
+    params: {
+      page,
+      limit
+    }
+  })
+}
+
+/**
+ * 获取或创建会话。
+ * @function getOrCreateConversation
+ * @param {GetOrCreateConversationRequest} data - 请求体数据，包含对话目标用户的 ID。
+ * @returns {Promise&lt;object>} 包含会话信息的 Promise 对象。
+ */
+export const getOrCreateConversation = (targetUserId) => {
+  return request.post('/api/chat/conversations', {
+    targetUserId
+  })
+}
+
+/**
+ * 发送私信消息。
+ * @function sendMessage
+ * @param {object} conversationData - 消息数据。
+ * @param {string} conversationData.conversationId - 会话 ID。
+ * @param {string} conversationData.content - 消息内容。
+ * @param {'text'|'image'|'file'|'system'} conversationData.messageType - 消息类型。
+ * @param {string[]} [conversationData.repliedTo=[]] - 被回复的消息ID数组（可选）。
+ * @returns {Promise&lt;object>} 包含发送消息结果的 Promise 对象。
+ */
+export const sendMessage = (conversationData) => {
+  const {
+    conversationId,
+    content,
+    messageType,
+    repliedTo = []
+  } = conversationData
+  return request.post(`/api/chat/conversations/${conversationId}/messages`, {
+    content,
+    messageType,
+    repliedTo
+  })
+}
+
+/**
+ * 将消息标记为已读。
+ * @function markAsRead
+ * @param {string} conversationId - 需要标记为已读的会话 ID。
+ * @returns {Promise&lt;object>} 包含操作结果的 Promise 对象。
+ */
+export const markAsRead = (conversationId) => {
+  return request.post(`/api/chat/conversations/${conversationId}/read`)
+}
+
+/**
+ * 发送频道消息。
+ * @function sendMessageInChannel
+ * @param {SendMessageInChannelRequest} data - 频道消息数据，包含频道ID、内容、消息类型、提及用户ID和回复消息ID。
+ * @returns {Promise&lt;object>} 包含发送消息结果的 Promise 对象。
+ */
+export const sendMessageInChannel = (data) => {
+  const {
+    channelId,
+    content,
+    messageType = 'text',
+    mentionIds,
+    repliedTo = []
+  } = data
+  return request.post(`/api/chat/channels/${channelId}/messages`, {
+    content,
+    messageType,
+    mentionIds,
+    repliedTo
+  })
+}
+
+/**
+ * 上传消息图片。
+ * @function uploadImageAPI
+ * @param {UploadImageAPIRequest} data - 图片上传数据，包含会话ID和图片文件。
+ * @returns {Promise&lt;object>} 包含图片上传结果的 Promise 对象。
+ */
+export const uploadImageAPI = (data) => {
+  const { conversationId, file } = data
+  const formData = new FormData()
+  formData.append('image', file)
+  return request.post(`/api/chat/image/${conversationId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+/**
+ * 搜索会话消息。
+ * @function searchMessage
+ * @param {SearchMessageRequest} data - 搜索参数，包含会话ID、搜索关键词、页码和每页数量。
+ * @returns {Promise&lt;object>} 包含搜索结果列表的 Promise 对象。
+ */
+export const searchMessage = (data) => {
+  const { conversationId, searchTerm, page = 1, limit = 20 } = data
+  return request.get(
+    `api/chat/conversations/${conversationId}/messages/search`,
+    {
+      params: {
+        q: searchTerm,
+        page,
+        limit
+      }
+    }
+  )
+}
+
+/**
+ * 静音/解除静音会话。
+ * @function toggleMuteConversation
+ * @param {ToggleMuteConversationRequest} data - 静音操作数据，包含会话ID和静音状态。
+ * @returns {Promise&lt;object>} 包含操作结果的 Promise 对象。
+ */
+export const toggleMuteConversation = (data) => {
+  const { conversationId, mute } = data
+  return request.post(`api/chat/conversations/${conversationId}/mute`, {
+    mute
+  })
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AuthAPI.html">AuthAPI</a></li><li><a href="module-ChatAPI.html">ChatAPI</a></li><li><a href="module-FriendAPI.html">FriendAPI</a></li><li><a href="module-GroupAPI.html">GroupAPI</a></li><li><a href="module-UserAPI.html">UserAPI</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jul 02 2025 14:51:21 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

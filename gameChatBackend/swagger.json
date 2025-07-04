@@ -1,0 +1,4330 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Game Chat API",
+    "version": "1.0.0",
+    "description": "API documentation for the Game Chat project"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {}
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
+          "message": {
+            "type": "string",
+            "example": "操作失败"
+          },
+          "data": {
+            "type": "null",
+            "example": null
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/auth/users/me/password": {
+      "put": {
+        "summary": "重设密码",
+        "description": "重设密码。需要在请求头 `Authorization` 中携带 Token。",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "newPwd",
+                  "phoneNumber",
+                  "code"
+                ],
+                "properties": {
+                  "newPwd": {
+                    "type": "string",
+                    "format": "password",
+                    "description": "新密码",
+                    "example": "strongpassword123"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "手机号码",
+                    "example": "13849508394"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "手机验证码",
+                    "example": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "密码重置成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "密码重置成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，包括用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "用户不存在"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/captcha": {
+      "get": {
+        "summary": "发送图形验证码",
+        "description": "发送图形验证码。返回 SVG 格式的验证码图片。验证码文本会存储在服务器端 session 中以供后续验证。",
+        "tags": [
+          "Captcha"
+        ],
+        "responses": {
+          "200": {
+            "description": "返回图形验证码（SVG 格式）",
+            "content": {
+              "text/plain": {
+                "example": "<svg xmlns=\"http://www.w3.org/2000/svg\"\n     width=\"100\" height=\"40\">\n  <rect width=\"100%\" height=\"100%\" fill=\"#f4f4f4\"/>\n  <text x=\"10\" y=\"25\" font-size=\"24\" fill=\"#000\">A1B2C</text>\n</svg>\n"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/conversations": {
+      "post": {
+        "summary": "获取或创建会话",
+        "description": "根据当前用户和目标用户 ID 获取已有会话或创建新会话。需要在请求头中携带 Token。",
+        "tags": [
+          "Conversation"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "targetUserId"
+                ],
+                "properties": {
+                  "targetUserId": {
+                    "type": "string",
+                    "description": "对话目标用户的 ID",
+                    "example": "6650262e6c6b8f0012f462b1"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "获取或创建会话成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Conversation"
+                        },
+                        "message": {
+                          "example": "会话创建成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误（如缺少 targetUserId 或 targetUserId 与当前用户相同）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "获取当前用户的会话列表",
+        "description": "获取当前用户参与的所有会话信息，包含对方用户信息、最后一条消息、是否已读等。需要在请求头中携带 Token。",
+        "tags": [
+          "Conversation"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UserConversation"
+                          }
+                        },
+                        "message": {
+                          "example": "获取会话列表成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/conversations/{conversationId}/messages": {
+      "post": {
+        "summary": "发送消息到私聊",
+        "description": "在指定会话中发送一条消息。需要验证会话有效。需要在请求头中携带 Token。",
+        "tags": [
+          "Message"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "会话 ID",
+            "schema": {
+              "type": "string",
+              "example": "665146bd8ef9e9f1f25c4b77"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "content",
+                  "messageType"
+                ],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "消息内容",
+                    "example": "你好，我是测试消息"
+                  },
+                  "messageType": {
+                    "type": "string",
+                    "enum": [
+                      "text",
+                      "image",
+                      "file",
+                      "system"
+                    ],
+                    "description": "消息类型",
+                    "example": "text"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "消息发送成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Message"
+                        },
+                        "message": {
+                          "example": "消息发送成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求数据无效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "获取会话消息",
+        "description": "分页获取指定会话的消息列表（按创建时间倒序排列）。需要验证会话有效。需要在请求头中携带 Token。",
+        "tags": [
+          "Message"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "会话 ID",
+            "schema": {
+              "type": "string",
+              "example": "665146bd8ef9e9f1f25c4b77"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "页码（从 1 开始）",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "example": 2
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "每页消息数量",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取会话消息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "messages": {
+                              "type": "array",
+                              "items": {
+                                "allOf": [
+                                  {
+                                    "$ref": "#/components/schemas/Message"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "isSentByMe": {
+                                        "type": "boolean",
+                                        "description": "当前用户是否是发送者",
+                                        "example": true
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "currentPage": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "totalPages": {
+                              "type": "integer",
+                              "example": 5
+                            },
+                            "totalMessages": {
+                              "type": "integer",
+                              "example": 83
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "example": 20
+                            }
+                          }
+                        },
+                        "message": {
+                          "example": "会话消息获取成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/channels/{channelId}/messages": {
+      "post": {
+        "summary": "发送消息到频道",
+        "description": "群组成员可以在指定频道发送消息，支持文本和其他类型消息。",
+        "tags": [
+          "Message"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "description": "频道 ID",
+            "schema": {
+              "type": "string",
+              "example": "665ff812345678abcdef1234"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "content"
+                ],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "消息内容",
+                    "example": "这是我发的第一条消息！"
+                  },
+                  "messageType": {
+                    "type": "string",
+                    "description": "消息类型，如 text、image 等，默认为 text",
+                    "example": "text"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "消息发送成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "object",
+                      "description": "已发送的消息信息"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "消息发送成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "消息内容为空",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "频道不存在或用户不在群组中",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误，消息发送失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/image/{conversationId}": {
+      "post": {
+        "summary": "上传聊天图片",
+        "description": "通过 multipart/form-data 上传聊天图片，需登录用户并提供 conversationId。文件字段名应为 `image`。",
+        "tags": [
+          "Message"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "会话 ID（私聊或频道）",
+            "schema": {
+              "type": "string",
+              "example": "665f0c6fc3123456789abcde"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "要上传的图片文件"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "图片上传成功，返回消息对象",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "图片上传成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "图片未上传或参数无效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "会话不存在或用户未加入会话",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "上传失败，服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat//conversations/{conversationId}/messages/search": {
+      "get": {
+        "summary": "搜索会话中的消息",
+        "description": "根据关键词搜索指定会话中的聊天消息，支持分页。",
+        "tags": [
+          "Message"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "会话 ID",
+            "schema": {
+              "type": "string",
+              "example": "6650cabc1234567890abcdef"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "搜索关键词",
+            "schema": {
+              "type": "string",
+              "example": "你好"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "当前页码（默认为 1）",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "每页数量（默认为 20）",
+            "schema": {
+              "type": "integer",
+              "example": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "搜索成功，返回符合条件的消息列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "搜索成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "messages": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Message"
+                          }
+                        },
+                        "currentPage": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 3
+                        },
+                        "totalResults": {
+                          "type": "integer",
+                          "example": 45
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求缺少搜索关键词",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "用户不是会话成员",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "会话不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/conversations/{conversationId}/mute": {
+      "post": {
+        "summary": "设为免打扰 / 取消免打扰",
+        "description": "设置或取消对指定会话的免打扰状态。",
+        "tags": [
+          "Conversation"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "会话 ID",
+            "schema": {
+              "type": "string",
+              "example": "6650cabc1234567890abcdef"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "mute"
+                ],
+                "properties": {
+                  "mute": {
+                    "type": "boolean",
+                    "description": "是否设为免打扰（true 为设为免打扰，false 为取消）",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "会话已设为免打扰"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "muted": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误，例如 mute 字段不是布尔值或会话 ID 非法",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends": {
+      "get": {
+        "summary": "获取好友列表",
+        "description": "获取当前用户的所有好友信息（username、avatar、_id），已排除自己。需要在请求头中携带 Token。",
+        "tags": [
+          "Friends"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取好友列表成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/FriendUser"
+                          }
+                        },
+                        "message": {
+                          "example": "获取好友列表成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，缺少或无效的 Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/{friendId}": {
+      "delete": {
+        "summary": "删除好友",
+        "description": "当前登录用户删除指定好友（软删除，修改状态）。需要在请求头中携带 Token。.",
+        "tags": [
+          "Friends"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "friendId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "好友用户的ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "好友删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string",
+                          "example": "好友删除成功"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "好友删除成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误（如未提供好友ID或试图删除自己）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "好友关系不存在或已删除",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/{friendId}/status": {
+      "put": {
+        "summary": "更新好友关系状态（拉黑或取消拉黑）",
+        "description": "当前登录用户对指定好友执行拉黑或取消拉黑操作。拉黑陌生人时会自动创建拉黑关系。需要在请求头中携带 Token。",
+        "tags": [
+          "Friends"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "friendId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "目标用户的ID"
+          }
+        ],
+        "requestBody": {
+          "description": "状态更新信息",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "friends",
+                      "blocked"
+                    ],
+                    "description": "好友状态，\"blocked\"表示拉黑，\"friends\"表示恢复好友状态"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "操作成功，返回更新后的好友关系对象",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Friendship"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "已将该用户拉黑或已经将该用户拉出黑名单"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误（如未提供目标用户ID，或status无效）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限错误（如没有拉黑对方或该用户未被拉黑）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "未找到对应的好友关系（拉黑时自动创建除外）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/search": {
+      "get": {
+        "summary": "搜索好友（根据用户名精确匹配）",
+        "description": "根据用户名精准搜索陌生人，搜索结果不包含当前登录用户。返回匹配的用户列表。需要在请求头中携带 Token。",
+        "tags": [
+          "Friends"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "要搜索的用户名关键词，支持全词匹配（不区分大小写）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "搜索成功，返回用户列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string",
+                            "description": "用户ID"
+                          },
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像URL"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "搜索成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数无效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "请提供有效的关键词"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "搜索失败，服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "搜索失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/requests": {
+      "post": {
+        "summary": "发送好友请求",
+        "description": "当前登录用户向目标用户发送好友请求。需要在请求头中携带 Token。",
+        "tags": [
+          "Friends"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "receiverId"
+                ],
+                "properties": {
+                  "receiverId": {
+                    "type": "string",
+                    "description": "目标用户的ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "申请成功，返回好友请求对象",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "description": "关系ID"
+                        },
+                        "requester": {
+                          "type": "string",
+                          "description": "请求者ID"
+                        },
+                        "recipient": {
+                          "type": "string",
+                          "description": "接收者ID"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "状态，pending表示等待验证"
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "申请成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "发送好友请求失败"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "目标用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "该用户不存在"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "已存在冲突的好友关系",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "你们已经是好友了"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "发送好友请求失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/requests/{requestId}": {
+      "put": {
+        "summary": "处理好友请求（接受或拒绝）",
+        "description": "当前登录用户对收到的好友请求进行接受或拒绝操作。需要在请求头中携带 Token。",
+        "tags": [
+          "Friends"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "description": "好友请求ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "操作动作，accept表示接受，decline表示拒绝",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "action"
+                ],
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "accept",
+                      "decline"
+                    ],
+                    "description": "处理动作"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "操作成功，返回更新后的好友请求对象",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "description": "好友请求ID"
+                        },
+                        "requester": {
+                          "type": "string",
+                          "description": "请求者ID"
+                        },
+                        "recipient": {
+                          "type": "string",
+                          "description": "接收者ID"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "当前状态，如 friends 或 declined"
+                        },
+                        "acceptedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "接受时间，若接受请求"
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数无效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "操作无效"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限处理该请求",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "该用户无权限处理此请求"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "好友请求不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "好友请求不存在"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "请求已被处理",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "此请求被处理过"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "操作失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/requests/incoming": {
+      "get": {
+        "summary": "获取收到的好友请求列表",
+        "description": "返回当前登录用户所有待处理的好友请求（收到的请求）。需要在请求头中携带 Token。",
+        "tags": [
+          "Friends"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "好友请求列表获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string",
+                            "description": "好友请求ID"
+                          },
+                          "requester": {
+                            "type": "object",
+                            "properties": {
+                              "_id": {
+                                "type": "string",
+                                "description": "请求者ID"
+                              },
+                              "username": {
+                                "type": "string",
+                                "description": "请求者用户名"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "description": "请求者头像URL"
+                              }
+                            }
+                          },
+                          "recipient": {
+                            "type": "string",
+                            "description": "接收者ID（当前用户）"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "请求状态（pending）"
+                          },
+                          "requestedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "请求时间（如果有）"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误，获取失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取好友请求失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/blackList": {
+      "get": {
+        "summary": "获取黑名单列表",
+        "description": "返回当前用户拉黑的所有用户信息",
+        "tags": [
+          "Friends"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "黑名单获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string",
+                            "description": "用户ID"
+                          },
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "用户头像URL"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误，获取失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取黑名单列表失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/": {
+      "post": {
+        "summary": "创建群组",
+        "description": "用户创建一个新的群组，群组创建者会自动加入群组。需要在 `Authorization` 里添加 Token",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "description"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "群组名称",
+                    "example": "游戏爱好者"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "群组简介",
+                    "example": "这是一个讨论独立游戏的群组"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "群组创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "群组创建成功"
+                        },
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "群组名称",
+                              "example": "游戏爱好者"
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "群组简介",
+                              "example": "这是一个讨论独立游戏的群组"
+                            },
+                            "createdBy": {
+                              "type": "string",
+                              "example": "65d7e1f2b9c1e1234d6a0000"
+                            },
+                            "members": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "example": "65d7e1f2b9c1e1234d6a0000"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "example": {
+                        "status": "success",
+                        "message": "群组创建成功",
+                        "data": {
+                          "name": "游戏爱好者",
+                          "description": "这是一个讨论独立游戏的群组",
+                          "createdBy": "65d7e1f2b9c1e1234d6a0000",
+                          "members": [
+                            "64b7c9b5f1d2a4e0d6e8fbc9",
+                            "65d7e1f2b9c1e1234d6a0000",
+                            "65d7e1f2b9c1e1234d6a0001"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "创建群组失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "创建群组失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/mine": {
+      "get": {
+        "summary": "获取用户所属的群组所有用户",
+        "description": "获取用户所属的群组内所有用户的详细信息，包括用户名、头像。需要在 `Authorization` 里添加 Token",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取群组信息成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "获取群组信息成功"
+                        },
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "群组名称",
+                              "example": "游戏爱好者"
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "群组简介",
+                              "example": "这是一个讨论独立游戏的群组"
+                            },
+                            "createdBy": {
+                              "type": "string",
+                              "example": "65d7e1f2b9c1e1234d6a0000"
+                            },
+                            "members": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "description": "用户ID（ObjectId）",
+                                    "example": "65d7e1f2b9c1e1234d6a0000"
+                                  },
+                                  "avatar": {
+                                    "type": "string",
+                                    "description": "用户头像",
+                                    "example": "https://example.com/avatar.jpg"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "example": {
+                        "status": "success",
+                        "message": "获取群组信息成功",
+                        "data": {
+                          "name": "游戏爱好者",
+                          "description": "这是一个讨论独立游戏的群组",
+                          "createdBy": "65d7e1f2b9c1e1234d6a0000",
+                          "members": [
+                            {
+                              "id": "64b7c9b5f1d2a4e0d6e8fbc9",
+                              "avatar": "https://example.com/avatar1.jpg"
+                            },
+                            {
+                              "id": "65d7e1f2b9c1e1234d6a0000",
+                              "avatar": "https://example.com/avatar2.jpg"
+                            },
+                            {
+                              "id": "65d7e1f2b9c1e1234d6a0001",
+                              "avatar": "https://example.com/avatar3.jpg"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，获取群组信息失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "获取群组信息失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/invitations": {
+      "post": {
+        "summary": "批量邀请用户加入群组",
+        "description": "只有群主可以邀请用户加入群组。支持同时邀请多个用户。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "群组ID",
+            "schema": {
+              "type": "string",
+              "example": "60f5a3c2e4b0a51234567890"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "inviteeIds"
+                ],
+                "properties": {
+                  "inviteeIds": {
+                    "type": "array",
+                    "description": "被邀请的用户ID数组",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "60f5a3c2e4b0a51234567891"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "邀请成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "object",
+                      "example": {}
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "邀请成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，例如群组不存在、非群主邀请、用户已在群组中、或邀请自己",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "群组不存在/只有群主才能邀请用户/用户已在该群组中/不能邀请自己加入群组"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "存在重复邀请",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "已发送过邀请，请等待用户处理"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "发送群组邀请失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/leave": {
+      "delete": {
+        "summary": "退出群组",
+        "description": "用户退出指定的群组。用户将从群组成员列表中移除。需要在 `Authorization` 里添加 Token",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "groupId"
+                ],
+                "properties": {
+                  "groupId": {
+                    "type": "string",
+                    "description": "群组id",
+                    "example": "63a6f8bde5bda2d43278e2c9"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功退出群组",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "您已退出该群组"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，例如用户不在该群组中",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "您不在该群组中/退出群组失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/:groupId/avatar": {
+      "post": {
+        "summary": "上传群组头像",
+        "description": "上传群组头像文件。需要添加 Token，以 multipart/form-data 方式上传头像。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "avatar"
+                ],
+                "properties": {
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "要上传的群组头像文件"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "头像上传成功，返回头像 URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "url": {
+                              "type": "string",
+                              "example": "/uploads/group_avatar_123456.png"
+                            }
+                          }
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "群组头像上传成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "上传失败（例如未上传文件）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "群组头像上传失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/channel": {
+      "post": {
+        "summary": "创建频道",
+        "description": "在指定群组内创建一个新的频道。需要在 `Authorization` 里添加 Token",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "groupId"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "频道名称",
+                    "example": "公告频道"
+                  },
+                  "groupId": {
+                    "type": "string",
+                    "description": "群组id",
+                    "example": "63a6f8bde5bda2d43278e2c9"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "频道创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "频道创建成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，例如群组不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "创建频道失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/channel/{channelId}": {
+      "delete": {
+        "summary": "删除频道",
+        "description": "通过频道 ID 删除指定频道（逻辑删除，将频道状态设为 0）。需要添加 Token。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "description": "要删除的频道ID",
+            "schema": {
+              "type": "string",
+              "example": "662de0fd9b49e6b58c67d0aa"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "频道删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "频道删除成功"
+                        },
+                        "data": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "频道不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "频道不存在"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "删除频道失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "删除频道失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/channels": {
+      "get": {
+        "summary": "获取群组的所有频道",
+        "description": "根据群组 ID 获取该群组下的所有频道。需要在请求头 `Authorization` 中携带 Token。",
+        "tags": [
+          "Channel"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "群组的 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取频道成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Channel"
+                          }
+                        },
+                        "message": {
+                          "example": "获取频道成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "获取频道失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "获取频道失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/invitations/response": {
+      "post": {
+        "summary": "响应群组邀请",
+        "description": "用户可以通过此接口接受或拒绝群组邀请。需要身份验证。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "群组ID",
+            "schema": {
+              "type": "string",
+              "example": "60f5a3c2e4b0a51234567890"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "action"
+                ],
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "accept",
+                      "decline"
+                    ],
+                    "description": "用户对群组邀请的响应",
+                    "example": "accept"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "object",
+                      "example": null
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "已成功加入群组"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "无效操作",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "无效操作"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "群组不存在或邀请已失效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "群组不存在 / 邀请已失效"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "操作失败（服务器错误）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "操作失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}": {
+      "get": {
+        "summary": "获取群组详情（成员列表）",
+        "description": "获取指定群组的详细信息，包括所有成员。仅群组成员可查看。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "群组ID",
+            "schema": {
+              "type": "string",
+              "example": "60f5a3c2e4b0a51234567890"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功，返回群组及其成员信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "example": "60f5a3c2e4b0a51234567890"
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "我的游戏组"
+                        },
+                        "members": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "_id": {
+                                "type": "string",
+                                "example": "60f5a3c2e4b0a51234567891"
+                              },
+                              "username": {
+                                "type": "string",
+                                "example": "player01"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "example": "/avatars/avatar01.png"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取群组详情成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "当前用户不是群组成员，无法访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "你不是该群组成员，无权查看"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "群组不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "群组不存在"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取群组详情失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "解散群组",
+        "description": "仅群主可以解散群组。该操作会移除所有成员的群组关联，并解绑该群组下所有频道。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "要解散的群组 ID",
+            "schema": {
+              "type": "string",
+              "example": "6650cabc1234567890abcdef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "群组成功解散",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "群组已成功解散"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Group"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "非群主无权限解散群组",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "群组不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/members": {
+      "get": {
+        "summary": "搜索群组成员",
+        "description": "在指定群组中根据用户名搜索群组成员。仅群组成员可访问。支持分页。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "群组ID",
+            "schema": {
+              "type": "string",
+              "example": "60f5a3c2e4b0a51234567890"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "搜索关键字（匹配用户名）",
+            "schema": {
+              "type": "string",
+              "example": "小明"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "当前页码（默认为 1）",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "每页返回数量（默认为 20）",
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成员搜索成功或无搜索词返回空列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "members": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "_id": {
+                                "type": "string",
+                                "example": "60f5a3c2e4b0a51234567891"
+                              },
+                              "username": {
+                                "type": "string",
+                                "example": "小明"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "example": "/uploads/avatar1.png"
+                              }
+                            }
+                          }
+                        },
+                        "currentPage": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 5
+                        },
+                        "totalMembers": {
+                          "type": "integer",
+                          "example": 43
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成员搜索成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "群组不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "当前用户不是群组成员",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/invitations/pending": {
+      "get": {
+        "summary": "获取当前用户的待处理群组邀请",
+        "description": "返回当前登录用户尚未响应的群组邀请信息，需要携带 Bearer Token。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取待处理的邀请列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "array",
+                      "description": "待处理的邀请列表",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string",
+                            "description": "邀请记录的 ID",
+                            "example": "662f0c9fd203d5a8b4f3a123"
+                          },
+                          "group": {
+                            "type": "object",
+                            "description": "邀请所属的群组信息",
+                            "properties": {
+                              "_id": {
+                                "type": "string",
+                                "example": "663fae123fc6d803a8d38a77"
+                              },
+                              "name": {
+                                "type": "string",
+                                "example": "狼人杀爱好者"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "example": "/uploads/group_avatar.png"
+                              }
+                            }
+                          },
+                          "inviter": {
+                            "type": "object",
+                            "description": "邀请人信息",
+                            "properties": {
+                              "_id": {
+                                "type": "string",
+                                "example": "663fae123fc6d803a8d38a78"
+                              },
+                              "username": {
+                                "type": "string",
+                                "example": "Henry"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "example": "/uploads/user_avatar.jpg"
+                              }
+                            }
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2025-06-08T12:34:56.789Z"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取待处理的群组邀请成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录或 token 无效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/members/{memberId}": {
+      "delete": {
+        "summary": "移除群组成员",
+        "description": "群主可以将群组中的其他成员移出群组，不能移除自己。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "群组 ID",
+            "schema": {
+              "type": "string",
+              "example": "6640ab1234cf8a0012c88ef9"
+            }
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "description": "要移除的用户 ID",
+            "schema": {
+              "type": "string",
+              "example": "6640ab1234cf8a0012c88efa"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成员移除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "data": {
+                      "type": "object",
+                      "example": {}
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "移除成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求无效（如尝试移除自己）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "没有权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "群组或用户未找到",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/info": {
+      "patch": {
+        "summary": "修改群组信息（群名与群描述）",
+        "description": "只有群主可以修改群组名称和描述，名称最长 10 个字符，描述最长 15 个字符。",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "群组 ID",
+            "schema": {
+              "type": "string",
+              "example": "6650cabc1234567890abcdef"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "新的群组名称（最长 10 个字符）",
+                    "example": "游戏开发组"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "群组简介（最长 15 个字符）",
+                    "example": "我们热爱 Indie Game"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "群组信息修改成功或无变动",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "群组信息更新成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Group"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求数据无效，如名称为空、超长等",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未提供有效身份信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "非群主无权操作",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "群组不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "群组名称已被占用",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register/phone": {
+      "post": {
+        "summary": "发送短信验证码",
+        "description": "通过验证图形验证码，向用户手机号发送短信验证码",
+        "tags": [
+          "SMS"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "type": "string",
+                    "description": "用户手机号",
+                    "example": "13800138000"
+                  },
+                  "captcha": {
+                    "type": "string",
+                    "description": "图形验证码",
+                    "example": "abc12"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "短信验证码已成功发送",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "短信验证码已发送"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "图形验证码错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "图形验证码错误"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "操作失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "操作失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "用户注册",
+        "description": "注册新用户，需提供手机号、短信验证码、用户名、密码",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "phoneNumber",
+                  "code",
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "手机号码（中国格式）",
+                    "example": "13800138000"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "短信验证码",
+                    "example": "123456"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "用户名",
+                    "example": "gamer123"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "description": "密码",
+                    "example": "strongpassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "注册成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "注册成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "验证码无效或已过期",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "验证码错误或者已过期"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "服务器错误"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login/phone": {
+      "post": {
+        "summary": "用户使用手机号登陆",
+        "description": "用户登陆，使用手机号和验证码或手机号和密码的方式登录",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "phoneNumber"
+                ],
+                "properties": {
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "手机号码（中国格式）",
+                    "example": "13800138000"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "短信验证码（可选，必须和验证码二选一）",
+                    "example": "123456"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "description": "密码（可选，必须和验证码二选一）",
+                    "example": "strongpassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "注册成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "登陆成功"
+                        },
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "token": {
+                              "type": "string",
+                              "description": "访问令牌",
+                              "example": "eyJhbGciOiJIUzI1NiIsInR..."
+                            }
+                          }
+                        }
+                      },
+                      "example": {
+                        "status": "success",
+                        "message": "登陆成功",
+                        "data": {
+                          "token": "eyJhbGciOiJIUzI1NiIsInR..."
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，可能的错误包括用户不存在、验证码错误、密码错误、未提供密码或验证码",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "用户不存在/验证码不正确/密码错误/请提供密码或验证码"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "操作失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login/username": {
+      "post": {
+        "summary": "用户使用用户名登陆",
+        "description": "用户登陆，使用用户名和密码的方式登录",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名",
+                    "example": "gamer123"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "description": "密码",
+                    "example": "strongpassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登陆成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "登陆成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，可能的错误包括用户不存在、密码错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "密码错误/用户名不存在"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/info": {
+      "get": {
+        "summary": "获取用户信息",
+        "description": "获取用户信息。需要在请求头 `Authorization` 里添加 Bearer Token",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取用户信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string",
+                              "example": "64b7c9b5f1d2a4e0d6e8fbc9"
+                            },
+                            "username": {
+                              "type": "string",
+                              "example": "gamer111"
+                            },
+                            "avatar": {
+                              "type": "string",
+                              "example": "https://example.com/avatar.png"
+                            },
+                            "phoneNumber": {
+                              "type": "string",
+                              "example": "13800138000"
+                            },
+                            "favoriteGames": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "example": [
+                                "Game1",
+                                "Game2"
+                              ]
+                            },
+                            "groups": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "example": [
+                                "Group1",
+                                "Group2"
+                              ]
+                            }
+                          }
+                        },
+                        "message": {
+                          "example": "获取用户信息成功"
+                        }
+                      },
+                      "example": {
+                        "status": "success",
+                        "message": "操作成功",
+                        "data": {
+                          "_id": "64b7c9b5f1d2a4e0d6e8fbc9",
+                          "username": "gamer111",
+                          "avatar": "https://example.com/avatar.png",
+                          "phoneNumber": "13800138000",
+                          "favoriteGames": [
+                            "Game1",
+                            "Game2"
+                          ],
+                          "groups": [
+                            "Group1",
+                            "Group2"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "用户不存在"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/update": {
+      "put": {
+        "summary": "更新用户信息",
+        "description": "更新用户个人信息，包括用户名,手机号码。需要在请求头 `Authorization` 中携带 Token。",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "avatar",
+                  "phoneNumber"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名",
+                    "example": "gamer123"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "手机号码（中国格式）",
+                    "example": "13800138000"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "用户信息更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "用户信息更新成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "用户名不存在"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me/avatar": {
+      "put": {
+        "summary": "上传或更新用户头像",
+        "description": "用户上传头像图片，将图片上传至 OSS 并更新数据库中的头像地址。需要在请求头携带 Token。",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "avatar"
+                ],
+                "properties": {
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "用户头像文件"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "头像上传成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "avatarUrl": {
+                              "type": "string",
+                              "example": "https://bucket.oss.x.com/avatar/x.png"
+                            }
+                          }
+                        },
+                        "message": {
+                          "example": "个人头像更新成功"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "上传失败，缺少文件或 userId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "个人头像上传失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "用户不存在，头像信息未更新"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "服务器内部错误: 上传个人头像失败"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/delete": {
+      "delete": {
+        "summary": "删除用户",
+        "description": "删除当前用户，将用户的 status 设置为 0。需要在请求头 `Authorization` 中携带 Token。",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "用户已删除（状态设置为 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "用户已删除（状态设置为 0）"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求错误，例如用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "example": "用户不存在"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}
