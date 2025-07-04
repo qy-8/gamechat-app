@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: ThemeStore</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: ThemeStore</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Pinia Store，用于管理应用程序的亮/暗主题模式。
+该 Store 会自动同步主题状态到 `<html>` 元素的 class 列表，并支持持久化。</div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_themeStore.js.html">stores/modules/themeStore.js</a>, <a href="stores_modules_themeStore.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~initTheme"><span class="type-signature">(inner) </span>initTheme<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    初始化主题模式。
+如果 `localStorage` 中没有 'theme' 的值，则会检查用户的系统颜色偏好（ prefers-color-scheme: dark ）来设置初始主题。
+如果 `persist: true` 已启用，此函数通常会在 Pinia 恢复状态后运行。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_themeStore.js.html">stores/modules/themeStore.js</a>, <a href="stores_modules_themeStore.js.html#line64">line 64</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~toggleTheme"><span class="type-signature">(inner) </span>toggleTheme<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    切换 `isDarkMode` 状态。
+如果当前是亮模式，则切换到暗模式；反之亦然。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_themeStore.js.html">stores/modules/themeStore.js</a>, <a href="stores_modules_themeStore.js.html#line54">line 54</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~useThemeStore"><span class="type-signature">(inner) </span>useThemeStore<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Pinia Store，用于管理应用程序的亮/暗主题模式。
+它可以检测系统偏好，支持手动切换主题，并持久化主题状态。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>isDarkMode</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;boolean></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">响应式布尔值，表示当前是否处于黑暗模式。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>toggleTheme</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">切换 `isDarkMode` 状态的函数。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>initTheme</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">初始化主题模式的函数，会检查 localStorage 和系统偏好。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_themeStore.js.html">stores/modules/themeStore.js</a>, <a href="stores_modules_themeStore.js.html#line11">line 11</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AppStore.html">AppStore</a></li><li><a href="module-AuthAPI.html">AuthAPI</a></li><li><a href="module-AuthService.html">AuthService</a></li><li><a href="module-ChannelStore.html">ChannelStore</a></li><li><a href="module-ChatAPI.html">ChatAPI</a></li><li><a href="module-ChatStore.html">ChatStore</a></li><li><a href="module-EventBus.html">EventBus</a></li><li><a href="module-FriendAPI.html">FriendAPI</a></li><li><a href="module-FriendStore.html">FriendStore</a></li><li><a href="module-GroupAPI.html">GroupAPI</a></li><li><a href="module-GroupStore.html">GroupStore</a></li><li><a href="module-MainApplication.html">MainApplication</a></li><li><a href="module-PasswordValidators.html">PasswordValidators</a></li><li><a href="module-PiniaStore.html">PiniaStore</a></li><li><a href="module-Request.html">Request</a></li><li><a href="module-SocketService.html">SocketService</a></li><li><a href="module-ThemeStore.html">ThemeStore</a></li><li><a href="module-UserAPI.html">UserAPI</a></li><li><a href="module-UserStore.html">UserStore</a></li><li><a href="module-router.html">router</a></li></ul><h3>Events</h3><ul><li><a href="module-SocketService.html#~event:connect">connect</a></li><li><a href="module-SocketService.html#~event:connect_error">connect_error</a></li><li><a href="module-SocketService.html#~event:disconnect">disconnect</a></li><li><a href="module-SocketService.html#~event:new_friend_request">new_friend_request</a></li><li><a href="module-SocketService.html#~event:new_group_invitation">new_group_invitation</a></li><li><a href="module-SocketService.html#~event:new_message">new_message</a></li></ul><h3>Global</h3><ul><li><a href="global.html#start">start</a></li><li><a href="global.html#startDragging">startDragging</a></li><li><a href="global.html#useCountdown">useCountdown</a></li><li><a href="global.html#useDraggableWidth">useDraggableWidth</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Jul 04 2025 12:45:49 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

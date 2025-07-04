@@ -1,22 +1,32 @@
 <script setup>
+/**
+ * @file CreateChannelDialog.vue
+ * @description 用于创建新群组频道的对话框组件。
+ * @component CreateChannelDialog
+ * @property {boolean} visible - 控制对话框的显示与隐藏。
+ * @emits update:visible - 当对话框可见状态改变时触发。
+ * @emits created - 当频道成功创建后触发。
+ */
 import { ref, reactive } from 'vue'
 import { createChannel } from '@/api/group.js'
 import BaseDialog from './common/BaseDialog.vue'
-import { useGroupStore } from '@/stores'
-import { getChannelList } from '../api/group'
+import { useGroupStore, useChatStore } from '@/stores'
 
 const props = defineProps({
   visible: Boolean
 })
 const emit = defineEmits(['update:visible', 'created'])
 
+// 频道表单数据
 const form = reactive({
   name: ''
 })
+// 表单引用，用于触发表单验证
 const createChannelFormRef = ref(null)
 const groupStore = useGroupStore()
+const chatStore = useChatStore()
 
-// 创建群聊表格规则
+// 创建频道表单验证规则
 const createChannelRules = reactive({
   name: [
     { required: true, message: '请输入频道名称', trigger: 'blur' },
@@ -28,6 +38,10 @@ const createChannelRules = reactive({
   ]
 })
 
+/**
+ * 提交表单创建频道。
+ * 验证表单后，调用 API 创建频道，并处理成功/失败消息。
+ */
 const onSubmit = () => {
   createChannelFormRef.value.validate(async (valid) => {
     if (!valid) {
@@ -38,11 +52,11 @@ const onSubmit = () => {
         ...form,
         groupId: groupStore.activeGroup._id
       })
+      chatStore.getConversations()
       ElMessage.success(response.message)
-      emit('update:visible', false)
-      emit('created')
+      emit('update:visible', false) // 关闭对话框
+      emit('created') // 通知父组件频道已创建
     } catch (error) {
-      ElMessage.error('频道名已存在')
       console.error(error)
     }
   })
@@ -76,5 +90,3 @@ const onSubmit = () => {
     </BaseDialog>
   </div>
 </template>
-
-<style lang="scss" scoped></style>

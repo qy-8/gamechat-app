@@ -417,8 +417,8 @@ router.post(
 router.post(
   '/image/:conversationId',
   authMiddleware,
-  upload.single('image'), // multer 中间件处理文件
-  uploadChatMessageImage // 你的控制器函数
+  upload.single('image'),
+  uploadChatMessageImage
 )
 
 /**

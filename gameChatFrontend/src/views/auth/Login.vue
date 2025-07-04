@@ -1,5 +1,11 @@
 <script setup>
-import { reactive, ref } from 'vue'
+/**
+ * @file views/auth/Login.vue
+ * @description 用户登录组件，提供手机号+验证码登录方式。
+ * 包含图形验证码获取、短信验证码发送和登录逻辑。
+ * @component LoginPage
+ */
+import { reactive, ref, onMounted } from 'vue'
 import { fetchCaptcha, sendSmsCode } from '@/api/auth'
 import { useCountdown } from '@/composables/useCountdown'
 import { loginByPhone } from '../../api/auth'
@@ -12,13 +18,7 @@ const loading = ref(false)
 const userFormRef = ref(null)
 const { timeLeft, isCounting, start } = useCountdown()
 
-// 使用用户名+密码登陆表格
-const userForm = reactive({
-  username: '',
-  password: ''
-})
-
-// 使用手机号+图形验证码+短信验证码登陆表格
+// 使用手机号+图形验证码+短信验证码登陆表格数据
 const phoneForm = reactive({
   phoneNumber: '',
   captcha: '',
@@ -73,7 +73,12 @@ const phoneFormRules = reactive({
   ]
 })
 
-// 获取图形验证码
+/**
+ * @function captcha
+ * @description 获取新的图形验证码图片。
+ * 调用 API 获取验证码图片，并更新 `captchaCode`。
+ * @returns {Promise<void>}
+ */
 const captcha = async () => {
   try {
     const response = await fetchCaptcha()
@@ -83,15 +88,27 @@ const captcha = async () => {
   }
 }
 
-captcha()
-
-// 点击图片更新图片验证码
+onMounted(() => {
+  // 在组件挂载到 DOM 后获取图形验证码
+  captcha()
+})
+/**
+ * @function getNewCaptcha
+ * @description 点击图形验证码图片时，获取并更新新的图片验证码。
+ * @returns {Promise<void>}
+ */
 const getNewCaptcha = async () => {
   captcha()
 }
 
-// 点击获取验证码按钮获取短信验证码 - 测试阶段短信验证码在后端Terminal内模拟发送
+/**
+ * @function getCode
+ * @description 点击“获取验证码”按钮时，发送短信验证码。
+ * 在发送前会校验手机号码和图形验证码。
+ * @returns {Promise<void>}
+ */
 const getCode = async () => {
+  // 校验手机号码和图形验证码是否填写
   if (phoneForm.phoneNumber === '') {
     ElMessage.error('请填写手机号码')
     return
@@ -101,21 +118,30 @@ const getCode = async () => {
     return
   }
   try {
-    start()
-    const response = await sendSmsCode(phoneForm)
+    start() // 启动倒计时
+    await sendSmsCode(phoneForm) // 调用 API 发送短信验证码
   } catch (error) {
     console.error('获取短信验证码失败:', error)
+    captcha() // 刷新图形验证码
   }
 }
 
+/**
+ * @function login
+ * @description 执行用户登录操作。
+ * 验证表单后，调用 API 进行登录，并处理登录成功/失败的逻辑。
+ * 成功则存储 token，更新 Store，并跳转到聊天页面。
+ * @returns {Promise<void>}
+ */
 const login = async () => {
+  // 触发表单验证
   userFormRef.value.validate(async (valid) => {
     if (!valid) {
       loading.value = false // 关闭 loading
-      // TODO: login page
       return
     }
     try {
+      // 调用 API 进行手机号+验证码登录
       const result = await loginByPhone(phoneForm)
       const token = result.data
       localStorage.setItem('token', token)
@@ -125,6 +151,7 @@ const login = async () => {
       router.push('/chat')
     } catch (error) {
       console.error(error)
+      captcha()
     }
   })
 }
@@ -133,6 +160,7 @@ const login = async () => {
 <template>
   <div class="section content">
     <h2>用户登陆</h2>
+    <!-- 登陆表单 开始 -->
     <el-form
       v-loading="loading"
       ref="userFormRef"
@@ -177,9 +205,10 @@ const login = async () => {
         </div>
       </el-form-item>
     </el-form>
+    <!-- 登陆表单 结束 -->
   </div>
 </template>
 
 <style lang="scss" scoped>
-@use './auth.scss' as *;
+@use './auth.scss' as *; // 导入认证页面的共享样式
 </style>

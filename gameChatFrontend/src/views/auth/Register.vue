@@ -1,5 +1,11 @@
 <script setup>
-import { reactive, ref } from 'vue'
+/**
+ * @file views/auth/Register.vue
+ * @description 用户注册组件，提供手机号、图形验证码、短信验证码、用户名和密码注册功能。
+ * 包含验证码获取、注册逻辑和表单重置。
+ * @component RegisterPage
+ */
+import { reactive, ref, onMounted } from 'vue'
 import { fetchCaptcha, sendSmsCode, registerUser } from '@/api/auth'
 import { ElMessage } from 'element-plus'
 import { useCountdown } from '@/composables/useCountdown'
@@ -7,19 +13,20 @@ import { createConfirmPasswordValidator } from '../../utils/pwdValidators'
 
 // 控制表单提交后的loading状态
 const captchaCode = ref('')
+// 表单数据模型
 const form = reactive({
   phoneNumber: '',
-  captcha: '',
-  code: '',
+  captcha: '', // 图形验证码
+  code: '', // 短信验证码
   username: '',
   password: '',
-  rePassword: ''
+  rePassword: '' // 确认密码
 })
 const loading = ref(false)
 const registerFormRef = ref(null)
 const { timeLeft, isCounting, start } = useCountdown()
 
-// 注册表单校验规则
+// 注册表单的校验规则
 const rules = reactive({
   phoneNumber: [
     { required: true, message: '请输入手机号码', trigger: 'blur' },
@@ -56,38 +63,58 @@ const rules = reactive({
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     {
-      pattern: /^[\S]{6,12}$/,
+      pattern: /^[\S]{6,12}$/, // 6-12位非空字符
       message: '密码需为6-12位非空字符',
       trigger: 'blur'
     }
   ],
   rePassword: [
     {
+      // 使用自定义验证器对比密码
       validator: createConfirmPasswordValidator(() => form.password),
       trigger: 'blur'
     }
   ]
 })
 
-// 获取图形验证码
+/**
+ * @function captcha
+ * @description 获取新的图形验证码图片。
+ * 调用 API 获取验证码图片，并更新 `captchaCode`。
+ * @returns {Promise<void>}
+ */
 const captcha = async () => {
   try {
-    const response = await fetchCaptcha()
-    captchaCode.value = response.data
+    const response = await fetchCaptcha() // 调用 API 获取图形验证码
+    captchaCode.value = response.data // 更新验证码图片数据
   } catch (error) {
     console.error('获取验证码失败:', error) // 捕获异常并打印错误
+    ElMessage.error('获取图形验证码失败，请重试。') // 提供用户反馈
   }
 }
 
-captcha()
+// 在组件挂载到 DOM 后获取图形验证码
+onMounted(() => {
+  captcha()
+})
 
-// 点击图片更新图片验证码
+/**
+ * @function getNewCaptcha
+ * @description 点击图形验证码图片时，获取并更新新的图片验证码。
+ * @returns {Promise<void>}
+ */
 const getNewCaptcha = async () => {
   captcha()
 }
 
-// 点击获取验证码按钮获取短信验证码 - 测试阶段短信验证码在后端Terminal内模拟发送
+/**
+ * @function getCode
+ * @description 点击“获取验证码”按钮时，发送短信验证码。
+ * 在发送前会校验手机号码和图形验证码。
+ * @returns {Promise<void>}
+ */
 const getCode = async () => {
+  // 校验手机号码和图形验证码是否填写
   if (form.phoneNumber === '') {
     ElMessage.error('请填写手机号码')
     return
@@ -97,16 +124,24 @@ const getCode = async () => {
     return
   }
   try {
-    start()
-    const response = await sendSmsCode(form)
+    start() // 启动倒计时
+    await sendSmsCode(form) // 调用 API 发送短信验证码
   } catch (error) {
     console.error('获取短信验证码失败:', error)
+    captcha() // 刷新图形验证码
   }
 }
 
-// 点击提交按钮后提交表单
+/**
+ * @function onSubmit
+ * @description 执行用户注册操作。
+ * 验证表单后，调用 API 进行注册，并处理注册成功/失败的逻辑。
+ * 成功则提示成功并重置表单。
+ * @returns {Promise<void>}
+ */
 const onSubmit = () => {
   loading.value = true // 开启 loading
+  // 触发表单验证
   registerFormRef.value.validate(async (valid) => {
     if (!valid) {
       loading.value = false // 关闭 loading
@@ -118,19 +153,22 @@ const onSubmit = () => {
       resetForm(registerFormRef)
     } catch (error) {
       console.error('提交失败，结果：', error)
+      captcha() // 注册失败时刷新图形验证码
     } finally {
       loading.value = false // 关闭 loading
     }
   })
 }
-// TODO: 成功后自动跳转到登陆页/自动调用登陆接口，
-// 限制短信验证码发送频率，
-// 防 XSS（跨站脚本攻击）后端必须过滤字段（尤其是 username、签名等文本字段）
 
-// 重置表单
+/**
+ * @function resetForm
+ * @description 重置注册表单的所有字段和验证状态。
+ * @param {Ref<import('element-plus').ElFormInstance|null>} registerFormRef - 引用
+ * @returns {void}
+ */
 const resetForm = (registerFormRef) => {
   if (!registerFormRef.value) return
-  registerFormRef.value.resetFields()
+  registerFormRef.value.resetFields() // 调用 Element Plus 表单的重置方法
 }
 </script>
 
@@ -203,10 +241,8 @@ const resetForm = (registerFormRef) => {
       </el-form-item>
     </el-form>
   </div>
-  <!-- </el-col> -->
-  <!-- </el-row> -->
 </template>
 
 <style lang="scss" scoped>
-@use './auth.scss' as *;
+@use './auth.scss' as *; // 导入认证页面的共享样式
 </style>

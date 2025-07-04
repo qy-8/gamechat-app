@@ -1,0 +1,3295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: ChatStore</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: ChatStore</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Pinia Store，用于管理聊天会话、消息、实时通信事件和消息搜索功能。
+它是聊天功能的核心状态管理模块。</div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~clearActiveConversation"><span class="type-signature">(inner) </span>clearActiveConversation<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    清除当前活跃会话的状态。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line389">line 389</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~clearReplyingTo"><span class="type-signature">(inner) </span>clearReplyingTo<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    清除当前回复的消息状态。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line422">line 422</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~clearSearchResults"><span class="type-signature">(inner) </span>clearSearchResults<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    清空所有消息搜索结果并重置搜索状态。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line513">line 513</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~getConversations"><span class="type-signature">(inner) </span>getConversations<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    获取当前用户的所有会话列表。
+在用户未登录时，清空会话列表。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line223">line 223</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        如果获取会话列表失败，会打印错误信息。
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~getMessages"><span class="type-signature">(inner) </span>getMessages<span class="signature">(conversationId, pageToLoad<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    获取指定会话的消息列表。
+支持分页加载，新消息会追加到现有列表。
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>conversationId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">要获取消息的会话 ID。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageToLoad</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last">要加载的页码。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line246">line 246</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        如果获取消息失败，会打印错误信息并清空消息列表。
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~handleNewRealTimeMessage"><span class="type-signature">(inner) </span>handleNewRealTimeMessage<span class="signature">(newMessage)</span><span class="type-signature"> &rarr; {void}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    处理实时接收到的新消息。
+更新当前会话的消息列表，并更新会话列表中的最新消息和未读计数，同时触发桌面通知。
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>newMessage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">新消息数据对象。
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>conversationId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">消息所属会话的 ID。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>content</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">消息内容。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>messageType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">消息类型（如 'text', 'image'）。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sender._id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">消息发送者的用户 ID。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sender.username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">消息发送者的用户名。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>conversationType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">会话类型（'private' 或 'group'）。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>groupInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">如果是群组消息，包含群组信息。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line136">line 136</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~loadMoreSearchResults"><span class="type-signature">(inner) </span>loadMoreSearchResults<span class="signature">(conversationId, searchTerm)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    加载更多消息搜索结果。
+仅在还有更多结果且当前未在搜索中时触发。
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>conversationId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前活跃会话 ID。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>searchTerm</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前搜索关键词。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line493">line 493</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~searchMessagesInConversation"><span class="type-signature">(inner) </span>searchMessagesInConversation<span class="signature">(conversationId, searchTerm, page<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    在指定会话中搜索消息。
+支持分页和加载更多搜索结果。
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>conversationId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">要搜索的会话 ID。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>searchTerm</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">搜索关键词。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>page</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last">要加载的搜索结果页码。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line431">line 431</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~selectFriendToChat"><span class="type-signature">(inner) </span>selectFriendToChat<span class="signature">(friend)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    通过好友信息选择一个私聊会话。
+如果会话不存在，则创建新的会话。
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>friend</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">好友对象，包含 _id, username, avatar 等。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line333">line 333</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~selectGroupChannelToChat"><span class="type-signature">(inner) </span>selectGroupChannelToChat<span class="signature">(channel)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    通过群组频道信息选择一个群组会话。
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>channel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">群组频道对象，包含 _id, name 等信息。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line369">line 369</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~setActiveConversation"><span class="type-signature">(inner) </span>setActiveConversation<span class="signature">(conversation)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    设置当前活跃的会话，并加载其消息列表。
+如果会话有未读消息，会标记为已读。
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>conversation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">要激活的会话对象。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line290">line 290</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~setActiveFriend"><span class="type-signature">(inner) </span>setActiveFriend<span class="signature">(friend)</span><span class="type-signature"> &rarr; {void}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    设置活跃会话的伙伴信息（主要用于私聊显示）。
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>friend</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">好友对象。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line398">line 398</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~setReplyingTo"><span class="type-signature">(inner) </span>setReplyingTo<span class="signature">(message)</span><span class="type-signature"> &rarr; {void}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    设置要回复的消息内容。
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">要回复的消息对象。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line412">line 412</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~useChatStore"><span class="type-signature">(inner) </span>useChatStore<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Pinia Store，用于管理聊天相关的所有状态和操作。
+包含会话列表、消息列表、活跃会话、加载状态、消息回复以及消息搜索功能。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>conversations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;Array.&lt;object>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">用户的所有会话列表。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>messages</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;Array.&lt;object>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前活跃会话的消息列表。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>activeConversation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;(object|null)></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前活跃的会话对象。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>isLoadingConversations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;boolean></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">会话列表是否正在加载中。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>currentMessagePage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前消息列表已加载的页码。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>totalMessagePages</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前活跃会话的总消息页数。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>canLoadMoreMessages</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;boolean></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">是否可以加载更多消息。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>isLoadingMessages</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;boolean></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">消息列表是否正在加载中。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>messageLimitPerPage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">每页加载的消息数量限制。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>replyingToMessage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;(object|null)></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前正在回复的消息对象。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>searchResults</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;Array.&lt;object>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">消息搜索结果列表。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>isSearchingMessages</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;boolean></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">消息是否正在搜索中。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>currentSearchPage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前搜索结果已加载的页码。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>totalSearchPages</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">搜索结果的总页数。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>canLoadMoreSearchResults</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;boolean></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">是否可以加载更多搜索结果。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>currentSearchTerm</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前的搜索关键词。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>activeConversationPartner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Ref.&lt;object></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">当前活跃私聊会话的伙伴用户信息。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>handleNewRealTimeMessage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">处理实时接收到的新消息。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>getConversations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">获取用户所有会话列表。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>getMessages</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">获取指定会话的消息列表。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>setActiveConversation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">设置当前活跃的会话。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>selectFriendToChat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">通过好友信息选择并激活聊天会话。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>selectGroupChannelToChat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">通过群组频道信息选择并激活聊天会话。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clearActiveConversation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">清除当前活跃会话状态。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>setActiveFriend</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">设置活跃会话伙伴（用于私聊）。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>setReplyingTo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">设置要回复的消息。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clearReplyingTo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">清除回复消息状态。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>searchMessagesInConversation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">在指定会话中搜索消息。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>loadMoreSearchResults</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">加载更多消息搜索结果。</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clearSearchResults</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">清空消息搜索结果。</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="stores_modules_chat.js.html">stores/modules/chat.js</a>, <a href="stores_modules_chat.js.html#line20">line 20</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AppStore.html">AppStore</a></li><li><a href="module-AuthAPI.html">AuthAPI</a></li><li><a href="module-AuthService.html">AuthService</a></li><li><a href="module-ChannelStore.html">ChannelStore</a></li><li><a href="module-ChatAPI.html">ChatAPI</a></li><li><a href="module-ChatStore.html">ChatStore</a></li><li><a href="module-EventBus.html">EventBus</a></li><li><a href="module-FriendAPI.html">FriendAPI</a></li><li><a href="module-FriendStore.html">FriendStore</a></li><li><a href="module-GroupAPI.html">GroupAPI</a></li><li><a href="module-GroupStore.html">GroupStore</a></li><li><a href="module-MainApplication.html">MainApplication</a></li><li><a href="module-PasswordValidators.html">PasswordValidators</a></li><li><a href="module-PiniaStore.html">PiniaStore</a></li><li><a href="module-Request.html">Request</a></li><li><a href="module-SocketService.html">SocketService</a></li><li><a href="module-ThemeStore.html">ThemeStore</a></li><li><a href="module-UserAPI.html">UserAPI</a></li><li><a href="module-UserStore.html">UserStore</a></li><li><a href="module-router.html">router</a></li></ul><h3>Events</h3><ul><li><a href="module-SocketService.html#~event:connect">connect</a></li><li><a href="module-SocketService.html#~event:connect_error">connect_error</a></li><li><a href="module-SocketService.html#~event:disconnect">disconnect</a></li><li><a href="module-SocketService.html#~event:new_friend_request">new_friend_request</a></li><li><a href="module-SocketService.html#~event:new_group_invitation">new_group_invitation</a></li><li><a href="module-SocketService.html#~event:new_message">new_message</a></li></ul><h3>Global</h3><ul><li><a href="global.html#start">start</a></li><li><a href="global.html#startDragging">startDragging</a></li><li><a href="global.html#useCountdown">useCountdown</a></li><li><a href="global.html#useDraggableWidth">useDraggableWidth</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Jul 04 2025 12:45:49 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

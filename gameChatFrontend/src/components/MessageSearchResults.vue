@@ -1,10 +1,14 @@
 <script setup>
+/**
+ * @file MessageSearchResults.vue
+ * @description 显示聊天消息搜索结果的组件，支持无限滚动加载更多结果。
+ * @component MessageSearchResults
+ */
 import MessageItem from '@/components/MessageItem.vue'
-import { useChatStore, useUserStore } from '@/stores'
+import { useChatStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 
 const chatStore = useChatStore()
-const userStore = useUserStore()
 
 const {
   searchResults,
@@ -14,7 +18,10 @@ const {
 } = storeToRefs(chatStore)
 const { loadMoreSearchResults, clearSearchResults } = chatStore
 
-// 定义加载更多的函数，用于 el-scrollbar 的 v-infinite-scroll
+/**
+ * 处理加载更多。
+ * 仅在有活跃会话 ID 和搜索词时触发加载。
+ */
 const handleLoadMore = () => {
   // 只有在有活跃会话 ID 且有搜索词时才加载更多搜索结果
   if (chatStore.activeConversation?._id && currentSearchTerm.value) {
@@ -69,6 +76,10 @@ const handleLoadMore = () => {
 </template>
 
 <style scoped lang="scss">
+/*------------------------------------*\
+ # 消息搜索结果容器
+ # 描述：定义搜索结果容器的最小/最大宽度、最大高度、内边距和溢出处理。
+\*------------------------------------*/
 .message-search-results-container {
   min-width: 300px;
   max-width: 450px;
@@ -78,6 +89,10 @@ const handleLoadMore = () => {
   overflow: hidden;
 }
 
+/*------------------------------------*\
+ # 加载和无结果状态
+ # 描述：定义搜索中和无结果时显示状态的通用样式，包括文本对齐、内边距和颜色。
+\*------------------------------------*/
 .loading-state,
 .no-results-state {
   text-align: center;
@@ -90,6 +105,10 @@ const handleLoadMore = () => {
   height: 100%;
 }
 
+/*------------------------------------*\
+ # 加载提示和无更多结果提示
+ # 描述：定义加载提示和“没有更多结果”提示文本的样式。
+\*------------------------------------*/
 .loading-tip,
 .no-more-results-tip {
   text-align: center;
@@ -98,6 +117,10 @@ const handleLoadMore = () => {
   font-size: 14px;
 }
 
+/*------------------------------------*\
+ # 搜索结果项样式
+ # 描述：定义单个搜索结果消息项的鼠标样式、内边距和底部边框。
+\*------------------------------------*/
 .search-result-item {
   cursor: pointer;
   padding: 8px 0;

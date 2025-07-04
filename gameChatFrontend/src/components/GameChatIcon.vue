@@ -1,5 +1,10 @@
 <!-- eslint-disable vue/max-len -->
 <script setup>
+/**
+ * @file ChatIcon.vue
+ * @description 自定义GameChat图标组件。
+ * @component ChatIcon
+ */
 defineOptions({
   name: 'ChatIcon'
 })
@@ -48,10 +53,18 @@ defineOptions({
 </template>
 
 <style lang="scss" scoped>
+/*------------------------------------*\
+ # SVG文本颜色
+ # 描述：设置SVG文本元素的填充颜色，使用主题变量。
+\*------------------------------------*/
 text {
   fill: var(--icons-color);
 }
 
+/*------------------------------------*\
+ # SVG路径颜色
+ # 描述：设置SVG路径的描边颜色，使用主题变量。
+\*------------------------------------*/
 path {
   stroke: var(--icons-color);
 }

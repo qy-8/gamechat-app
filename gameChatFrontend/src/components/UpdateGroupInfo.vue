@@ -1,4 +1,12 @@
 <script setup>
+/**
+ * @file UpdateGroupInfo.vue
+ * @description 用于更新群组名称和描述的对话框组件。
+ * @component UpdateGroupInfo
+ * @property {boolean} visible - 控制对话框的显示与隐藏。
+ * @emits update:visible - 当对话框可见状态改变时触发。
+ * @emits updated - 当群组信息成功更新后触发。
+ */
 import { ref, reactive } from 'vue'
 import BaseDialog from './common/BaseDialog.vue'
 import { useGroupStore } from '../stores'
@@ -9,13 +17,14 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:visible', 'updated'])
 const groupStore = useGroupStore()
+// 表单数据，初始化为当前活跃群组的信息
 const form = reactive({
   name: groupStore.activeGroup.name,
   description: groupStore.activeGroup.description
 })
 const formRef = ref(null)
 
-// 创建群聊表格规则
+// 表单验证规则
 const formRules = reactive({
   name: [
     { required: true, message: '请输入群组名称', trigger: 'blur' },
@@ -35,6 +44,10 @@ const formRules = reactive({
   ]
 })
 
+/**
+ * 提交表单更新群组信息。
+ * 验证表单后，调用 API 更新群组信息，并处理成功/失败消息。
+ */
 const onSubmit = () => {
   formRef.value.validate(async (valid) => {
     if (!valid) {
@@ -47,7 +60,7 @@ const onSubmit = () => {
         description: form.description
       })
       ElMessage.success(response.message)
-      groupStore.updateGroup(form.name, form.description)
+      groupStore.updateGroup(form.name, form.description) // 更新 Store 中的群组信息
       emit('update:visible', false)
     } catch (error) {
       ElMessage.error('更新群组信息失败')
@@ -89,5 +102,3 @@ const onSubmit = () => {
     </BaseDialog>
   </div>
 </template>
-
-<style lang="scss" scoped></style>

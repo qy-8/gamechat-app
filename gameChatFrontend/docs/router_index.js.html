@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: router/index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: router/index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file router/index.js
+ * @description 配置 Vue Router 实例，定义应用程序的所有路由及其导航守卫。
+ * @module router
+ */
+
+import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores'
+const Home = () => import('@/views/Home.vue')
+const Chat = () => import('@/views/Chat.vue')
+const ChannelList = () => import('@/components/ChannelList.vue')
+const FriendList = () => import('@/components/FriendList.vue')
+
+/**
+ * 定义应用程序的路由。
+ * @type {Array&lt;Object>}
+ */
+const routes = [
+  {
+    path: '/',
+    component: Home,
+    name: 'Home'
+  },
+  {
+    path: '/auth',
+    component: () => import('@/views/auth/auth.vue'),
+    name: 'Auth',
+    redirect: '/auth/login', // 默认重定向到登录页
+    children: [
+      {
+        path: 'login',
+        name: 'Login',
+        component: () => import('../views/auth/Login.vue')
+      },
+      {
+        path: 'register',
+        name: 'Register',
+        component: () => import('../views/auth/Register.vue')
+      }
+    ]
+  },
+  {
+    path: '/chat',
+    component: Chat,
+    name: 'Chat',
+    children: [
+      {
+        path: '',
+        name: 'ChannelList',
+        component: ChannelList
+      },
+      {
+        path: 'friends',
+        name: 'FriendList',
+        component: FriendList
+      }
+    ],
+    meta: { requiresAuth: true } // 需要认证才能访问此路由及其子路由
+  }
+]
+
+/**
+ * 创建 Vue Router 实例。
+ * 使用 history 模式，提供更友好的 URL。
+ * @type {Router}
+ */
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+/**
+ * 全局前置路由守卫。
+ * 在每次路由导航前执行，用于处理认证检查和状态同步。
+ * @param {RouteLocationNormalized} to - 即将进入的目标路由对象。
+ * @param {RouteLocationNormalizedLoaded} from - 当前导航正要离开的路由对象。
+ * @param {Function} next - 钩子函数，用于解析当前的导航。
+ * @returns {string|void} 如果需要重定向，返回目标路径字符串；否则不返回。
+ */
+router.beforeEach((to) => {
+  const userStore = useUserStore()
+  const isAuthenticated = !!userStore.token // 检查用户是否已认证（是否有 token）
+
+  // 同步 Pinia Store 与 localStorage 中的用户认证状态
+  const local = JSON.parse(localStorage.getItem('user') || '{}')
+  if (!local.token &amp;&amp; userStore.token) {
+    userStore.logout()
+  }
+
+  // 访问权限页面 - 需要登陆但无token则导航到login页面
+  if (to.meta.requiresAuth &amp;&amp; !isAuthenticated) {
+    return '/auth'
+  }
+  // 默认导航到目标页面
+})
+
+export default router
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AppStore.html">AppStore</a></li><li><a href="module-AuthAPI.html">AuthAPI</a></li><li><a href="module-AuthService.html">AuthService</a></li><li><a href="module-ChannelStore.html">ChannelStore</a></li><li><a href="module-ChatAPI.html">ChatAPI</a></li><li><a href="module-ChatStore.html">ChatStore</a></li><li><a href="module-EventBus.html">EventBus</a></li><li><a href="module-FriendAPI.html">FriendAPI</a></li><li><a href="module-FriendStore.html">FriendStore</a></li><li><a href="module-GroupAPI.html">GroupAPI</a></li><li><a href="module-GroupStore.html">GroupStore</a></li><li><a href="module-MainApplication.html">MainApplication</a></li><li><a href="module-PasswordValidators.html">PasswordValidators</a></li><li><a href="module-PiniaStore.html">PiniaStore</a></li><li><a href="module-Request.html">Request</a></li><li><a href="module-SocketService.html">SocketService</a></li><li><a href="module-ThemeStore.html">ThemeStore</a></li><li><a href="module-UserAPI.html">UserAPI</a></li><li><a href="module-UserStore.html">UserStore</a></li><li><a href="module-router.html">router</a></li></ul><h3>Events</h3><ul><li><a href="module-SocketService.html#~event:connect">connect</a></li><li><a href="module-SocketService.html#~event:connect_error">connect_error</a></li><li><a href="module-SocketService.html#~event:disconnect">disconnect</a></li><li><a href="module-SocketService.html#~event:new_friend_request">new_friend_request</a></li><li><a href="module-SocketService.html#~event:new_group_invitation">new_group_invitation</a></li><li><a href="module-SocketService.html#~event:new_message">new_message</a></li></ul><h3>Global</h3><ul><li><a href="global.html#start">start</a></li><li><a href="global.html#startDragging">startDragging</a></li><li><a href="global.html#useCountdown">useCountdown</a></li><li><a href="global.html#useDraggableWidth">useDraggableWidth</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Jul 04 2025 12:45:49 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

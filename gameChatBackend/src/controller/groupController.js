@@ -212,7 +212,7 @@ const uploadGroupAvatar = async (req, res) => {
 
     const updatedGroup = await Group.findByIdAndUpdate(
       groupId,
-      { avatar: ossFileUrl }, // 确保你的 Group 模型有 avatarUrl 字段
+      { avatar: ossFileUrl },
       { new: true } // 返回更新之后的数据
     )
 

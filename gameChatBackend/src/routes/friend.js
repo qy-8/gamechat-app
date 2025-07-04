@@ -192,7 +192,7 @@ router.put('/:friendId/status', authMiddleware, updateFriendshipStatus)
  *     tags:
  *       - Friends
  *     security:
- *       - bearerAuth: []  # 如果你用的是 Bearer Token 鉴权
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: q

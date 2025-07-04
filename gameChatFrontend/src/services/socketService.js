@@ -1,3 +1,9 @@
+/**
+ * @file services/socketService.js
+ * @description 负责管理 Socket.IO 客户端连接、事件监听和状态同步。
+ * @module SocketService
+ */
+
 import { io } from 'socket.io-client'
 import {
   useUserStore,
@@ -5,42 +11,75 @@ import {
   useFriendStore,
   useGroupStore
 } from '@/stores'
-import emitter from './eventBus'
+import emitter from './eventBus' // 导入全局事件总线
 
+/**
+ * @type {Socket|null}
+ * @description Socket.IO 客户端实例。
+ * @private
+ */
 let socket = null
 
+/**
+ * @function connectSocket
+ * @description 连接 Socket.IO 服务器。
+ * 如果 socket 已连接或用户没有 token，则不执行连接。
+ * 设置连接、断开、错误和各种实时消息事件监听器。
+ * @returns {Socket|null} 连接成功的 Socket 实例，如果无法连接则返回 null。
+ */
 export const connectSocket = () => {
   const userStore = useUserStore()
   const chatStore = useChatStore()
 
+  // 如果 socket 已经存在且已连接，直接返回
   if (socket && socket.connected) {
     return socket
   }
 
+  // 如果用户没有 token，则无法连接
   if (!userStore.token) {
     console.error('Socket.IO: 该用户无 token')
     return null
   }
 
+  // 获取 Socket URL
   const VITE_SOCKET_URL =
     import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000'
 
+  // 创建 Socket 实例，并附带认证 token
   socket = io(VITE_SOCKET_URL, {
     auth: {
       token: userStore.token
     }
   })
 
+  /**
+   * @event connect
+   * @description 监听 Socket 连接成功事件。
+   */
   socket.on('connect', () => {
     console.log('Socket 连接成功')
   })
 
+  /**
+   * @event disconnect
+   * @description 监听 Socket 断开连接事件。
+   * 如果是服务器断开，尝试重连。
+   * @param {string} reason - 断开连接的原因。
+   */
   socket.on('disconnect', (reason) => {
     if (reason === 'io server disconnect') {
       socket.connect() // 尝试重连
     }
+    console.warn(`Socket: 连接断开，原因: ${reason}`)
   })
 
+  /**
+   * @event connect_error
+   * @description 监听 Socket 连接错误事件。
+   * 如果是认证失败，则执行用户登出并提示重新登录。
+   * @param {Error} err - 连接错误对象。
+   */
   socket.on('connect_error', (err) => {
     console.error(`Socket: 连接错误， 原因：${err.message}`)
     if (err.message.includes('认证失败')) {
@@ -50,10 +89,23 @@ export const connectSocket = () => {
     }
   })
 
+  /**
+   * @event new_message
+   * @description 监听新的实时消息事件。
+   * 处理普通消息和提及消息，并更新聊天 Store 和发送通知。
+   * @param {object} newMessage - 新消息数据。
+   * @param {Array<string>} newMessage.mentions - 被提及用户的ID列表。
+   * @param {string} newMessage.conversationId - 消息所属会话ID。
+   * @param {object} newMessage.groupInfo - 如果是群组消息，包含群组信息。
+   * @param {object} newMessage.sender - 消息发送者信息。
+   * @param {string} newMessage.content - 消息内容。
+   */
   socket.on('new_message', (newMessage) => {
+    // 如果没有提及任何人，直接处理为普通新消息
     if (newMessage.mentions.length === 0) {
       chatStore.handleNewRealTimeMessage(newMessage)
     } else {
+      // 如果消息包含提及，并且当前不在该会话中，则发送桌面通知
       if (newMessage.conversationId !== chatStore.activeConversation?._id) {
         emitter.emit('show-notification', {
           type: 'mention',
@@ -61,16 +113,28 @@ export const connectSocket = () => {
           message: `${newMessage.sender.username}: ${newMessage.content}`
         })
       }
+      // 即使在当前会话，也要处理新消息，因为提及消息也可能是普通消息
+      chatStore.handleNewRealTimeMessage(newMessage)
     }
   })
 
-  // 新好友请求
+  /**
+   * @event new_friend_request
+   * @description 监听新的好友请求事件。
+   * 更新好友 Store 中的请求列表。
+   * @param {object} requestData - 新的好友请求数据。
+   */
   socket.on('new_friend_request', (requestData) => {
     const friendStore = useFriendStore()
     friendStore.handleNewRequest(requestData)
   })
 
-  // 新群组邀请
+  /**
+   * @event new_group_invitation
+   * @description 监听新的群组邀请事件。
+   * 更新群组 Store 中的邀请列表。
+   * @param {object} invitationData - 新的群组邀请数据。
+   */
   socket.on('new_group_invitation', (invitationData) => {
     const groupStore = useGroupStore()
     groupStore.handleNewRequest(invitationData)
@@ -79,6 +143,11 @@ export const connectSocket = () => {
   return socket
 }
 
+/**
+ * @function disconnectSocket
+ * @description 断开 Socket.IO 连接。
+ * @returns {void}
+ */
 export const disconnectSocket = () => {
   if (socket) {
     socket.disconnect()
@@ -86,7 +155,11 @@ export const disconnectSocket = () => {
   }
 }
 
+/**
+ * @function getSocket
+ * @description 获取当前活动的 Socket.IO 实例。
+ * @returns {Socket|null} 当前的 Socket 实例，如果未连接则可能为 null。
+ */
 export const getSocket = () => {
-  // 返回当前模块中存储的 socket 实例
   return socket
 }
