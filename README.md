@@ -24,8 +24,7 @@
   <a href="#-功能模块-functional-modules">功能清单</a> •
   <a href="#-快速开始-quick-start">快速开始</a> •
   <a href="#-更多功能演示-more-demos">更多功能演示</a> •
-  <a href="#-目录结构-simplified">目录结构</a>
-
+  <a href="https://github.com/qy-8/gamechat-app?tab=readme-ov-file#-%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84simplified">目录结构</a>
 </p>
 
 ## ✨ 核心特性 (Core Features)
@@ -80,7 +79,7 @@
 - **引用回复**: 支持引用并回复指定消息。
 - **@提及**: 支持在群聊中`@`特定成员并发送强提醒。
 
-### 🔔 通知与个性化模块 (<a href="#-intelligent-notifications--theming">查看演示</a>)
+### 🔔 通知与个性化模块 (<a href="#-intelligent-notifications--theming">查看通知演示</a>)
 
 - **多维通知系统**: 实现新好友/群组邀请、新消息的浏览器桌面通知。
 - **@提及强提醒**: 被`@`时会收到高优先级通知，可穿透“免打扰”设置。
