@@ -59,7 +59,7 @@
 - **会话管理**: 提供安全的退出登录功能。
 - **账户安全**: 提供修改密码与注销账户功能。
 
-### 👨‍👩‍👧‍👦 好友与群组模块 (<a href="#-friend--group-management">查看群组演示</a>)
+### 👨‍👩‍👧‍👦 好友与群组模块 (<a href="https://github.com/qy-8/gamechat-app?tab=readme-ov-file#%E7%BE%A4%E7%BB%84%E4%B8%8E%E9%A2%91%E9%81%93%E5%85%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%AE%A1%E7%90%86-group--channel-lifecycle-management">查看群组演示</a>)
 
 - **好友管理**: 实现搜索用户、发送好友请求、处理请求（同意/拒绝）、拉黑好友、删除好友、好友列表以及黑名单列表展示。
 - **群组创建与管理**: 支持创建新群组、解散群组、修改群组信息及更换群组头像。
@@ -79,7 +79,7 @@
 - **引用回复**: 支持引用并回复指定消息。
 - **@提及**: 支持在群聊中`@`特定成员并发送强提醒。
 
-### 🔔 通知与个性化模块 (<a href="#-intelligent-notifications--theming">查看通知演示</a>)
+### 🔔 通知与个性化模块 (<a href="https://github.com/qy-8/gamechat-app?tab=readme-ov-file#%E6%99%BA%E8%83%BD%E9%80%9A%E7%9F%A5-intelligent-notifications">查看通知演示</a>)
 
 - **多维通知系统**: 实现新好友/群组邀请、新消息的浏览器桌面通知。
 - **@提及强提醒**: 被`@`时会收到高优先级通知，可穿透“免打扰”设置。
