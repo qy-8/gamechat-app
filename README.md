@@ -20,8 +20,8 @@
 
 <p align="center">
   <a href="#-核心特性-core-features">核心特性</a> •
-  <a href="#-技术栈-tech-stack">技术栈</a> •
-  <a href="#-功能模块-functional-modules">功能清单</a> •
+  <a href="https://github.com/qy-8/gamechat-app?tab=readme-ov-file#%EF%B8%8F-%E6%8A%80%E6%9C%AF%E6%A0%88-tech-stack">技术栈</a> •
+  <a href="#-功能模块-functional-modules">功能模块</a> •
   <a href="#-快速开始-quick-start">快速开始</a> •
   <a href="#-更多功能演示-more-demos">更多功能演示</a> •
   <a href="https://github.com/qy-8/gamechat-app?tab=readme-ov-file#-%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84simplified">目录结构</a>
