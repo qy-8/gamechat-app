@@ -151,6 +151,7 @@ const onSubmit = () => {
       const response = await registerUser(form)
       ElMessage({ message: '注册成功', type: 'success' })
       resetForm(registerFormRef)
+      router.push('/auth/login')
     } catch (error) {
       console.error('提交失败，结果：', error)
       captcha() // 注册失败时刷新图形验证码

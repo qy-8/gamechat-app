@@ -160,7 +160,13 @@ export const useUserStore = defineStore(
     const logout = () => {
       token.value = ''
       userInfo.value = { ...defaultUserInfo } // 重置为默认用户信息
-      localStorage.removeItem('token') // 清除 localStorage 中的 token
+      // 清除 localStorage
+      localStorage.removeItem('token')
+      localStorage.removeItem('group')
+      localStorage.removeItem('chat')
+      localStorage.removeItem('theme')
+      localStorage.removeItem('user')
+
       mutedConversations.value.clear() // 清空免打扰会话列表
     }
 

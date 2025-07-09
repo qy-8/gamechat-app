@@ -66,7 +66,7 @@ onUnmounted(() => {
       :append-to-body="true"
       center
       width="unset"
-      style="background-color: transparent"
+      style="background-color: transparent; box-shadow: none"
       class="minimal-loading-dialog"
     >
       <div class="loading-content-dialog">
@@ -86,7 +86,6 @@ onUnmounted(() => {
 .minimal-loading-dialog {
   // 核心：确保 el-dialog 本身没有背景和阴影
   ::v-deep(.el-dialog) {
-    box-shadow: none;
     display: flex;
     flex-direction: column;
     align-items: center;

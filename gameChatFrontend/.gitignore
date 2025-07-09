@@ -26,3 +26,6 @@ dist-ssr
 # Auto-generated files
 components.d.ts
 auto-imports.d.ts
+
+# 忽略 Rollup Visualizer 的打包分析报告
+stats.html

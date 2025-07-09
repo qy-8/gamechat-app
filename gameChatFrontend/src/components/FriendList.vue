@@ -155,9 +155,14 @@ const updateSelectedFriendStatus = async (friendId, status) => {
   if (friendId) {
     try {
       const response = await updateFriendStatus({ friendId, status })
-      ElMessage.success('拉黑成功')
+      console.log(status)
+      if (status === 'blocked') {
+        ElMessage.success('拉黑成功')
+      } else {
+        ElMessage.success('拉出黑名单成功')
+      }
       await getBlockedList()
-      await getList()
+      await friendStore.getList()
     } catch (error) {
       console.error(error)
     } finally {

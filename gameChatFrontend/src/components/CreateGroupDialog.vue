@@ -9,10 +9,11 @@
 import { ref, reactive } from 'vue'
 import { createGroup } from '@/api/group.js'
 import BaseDialog from './common/BaseDialog.vue'
-import { useGroupStore } from '../stores'
+import { useGroupStore, useChatStore } from '../stores'
 import { ElMessage } from 'element-plus' // 确保导入 ElMessage
 
 const groupStore = useGroupStore()
+const chatStore = useChatStore()
 const props = defineProps({
   visible: Boolean
 })
@@ -60,6 +61,7 @@ const onSubmit = () => {
       ElMessage.success(response.message)
       emit('update:visible', false) // 关闭对话框
       groupStore.addNewGroup(response.data) // 将新创建的群组添加到 store
+      chatStore.getConversations()
     } catch (error) {
       ElMessage.closeAll()
       ElMessage.error('群组名已存在')

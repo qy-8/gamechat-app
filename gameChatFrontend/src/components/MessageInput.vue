@@ -124,6 +124,7 @@ const sendInputMessage = async () => {
   // 根据会话类型发送消息
   if (chatStore.activeConversation?.type === 'private') {
     try {
+      chatStore.clearReplyingTo() // 清除回复状态
       await sendPrivateMessage({
         ...messagePayload
       })

@@ -97,7 +97,7 @@ onUnmounted(() => {
           一个属于游戏人的聊天室！游戏创作者、Mod 制作者和玩家们的聚集地！
         </p>
         <el-button
-          @click="$router.push('/auth')"
+          @click="$router.push('/auth/register')"
           size="large"
           color="var(--primary-text-color)"
           >加入我们</el-button
@@ -135,7 +135,7 @@ onUnmounted(() => {
 
     <!-- 点击注册区域 -->
     <div class="register-btn" ref="registerBtnRef">
-      <div class="register-wrapper" @click="$router.push('/auth')">
+      <div class="register-wrapper" @click="$router.push('/auth/register')">
         <el-button>点击注册</el-button>
         <LottiePlayer
           v-if="showLottiePlayer"

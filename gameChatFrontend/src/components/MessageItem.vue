@@ -405,6 +405,7 @@ const handleReply = () => {
  # 描述：定义图片消息的最大尺寸和鼠标样式。
 \*------------------------------------*/
 .image-content {
+  margin-top: 6px;
   max-width: 180px;
   max-height: 180px;
   cursor: pointer;

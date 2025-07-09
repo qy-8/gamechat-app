@@ -24,7 +24,7 @@ const app = express()
 const server = http.createServer(app)
 app.use(
   cors({
-    origin: 'http://localhost:5173', // 允许前端访问
+    origin: ['http://localhost:5173', 'http://localhost:4173'], // 允许前端访问
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true // 允许携带 cookie
@@ -32,8 +32,9 @@ app.use(
 )
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST']
+    origin: ['http://localhost:5173', 'http://localhost:4173'],
+    methods: ['GET', 'POST'],
+    credentials: true // 允许携带 cookie
   }
 })
 

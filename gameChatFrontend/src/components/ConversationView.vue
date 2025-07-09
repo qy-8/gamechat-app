@@ -357,6 +357,10 @@ const handleKickMember = async (memberId) => {
   }
 }
 
+.invite-popover-content p {
+  padding-top: 30px;
+  text-align: center;
+}
 /*------------------------------------*\
  # 成员徽章和好友列表样式
  # 描述：确保成员徽章和好友列表项占据其容器的全部宽度。

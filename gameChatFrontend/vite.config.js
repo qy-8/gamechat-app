@@ -17,6 +17,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000', // 后端服务器
+        changeOrigin: true // 需要虚拟主机站点
+      }
+    }
+  },
   plugins: [
     vue(),
     compression({
