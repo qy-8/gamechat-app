@@ -15,16 +15,16 @@
 
 这个项目不仅实现了核心的聊天功能，还深度整合了前端工程化的最佳实践，包括代码规范、自动化检查、性能优化和专业的文档管理。
 
-![项目截图](https://github.com/qy-8/gamechat-app/blob/main/assets/gameChat_core.gif?raw=true)
+![项目截图](./assets/gameChat_core.gif)
 *<p align="center">此为核心功能与黑暗/光明模式切换的GIF动图，更多功能展示请点击下方“更多演示”链接</p>*
 
 <p align="center">
   <a href="#-核心特性-core-features">核心特性</a> •
-  <a href="https://github.com/qy-8/gamechat-app?tab=readme-ov-file#%EF%B8%8F-%E6%8A%80%E6%9C%AF%E6%A0%88-tech-stack">技术栈</a> •
+  <a href="#️-技术栈-tech-stack">技术栈</a> •
   <a href="#-功能模块-functional-modules">功能模块</a> •
   <a href="#-快速开始-quick-start">快速开始</a> •
   <a href="#-更多功能演示-more-demos">更多功能演示</a> •
-  <a href="https://github.com/qy-8/gamechat-app?tab=readme-ov-file#-%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84simplified">目录结构</a>
+  <a href="#-目录结构simplified">目录结构</a>
 </p>
 
 ## ✨ 核心特性 (Core Features)
@@ -59,7 +59,7 @@
 - **会话管理**: 提供安全的退出登录功能。
 - **账户安全**: 提供修改密码与注销账户功能。
 
-### 👨‍👩‍👧‍👦 好友与群组模块 (<a href="https://github.com/qy-8/gamechat-app?tab=readme-ov-file#%E7%BE%A4%E7%BB%84%E4%B8%8E%E9%A2%91%E9%81%93%E5%85%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%AE%A1%E7%90%86-group--channel-lifecycle-management">查看群组演示</a>)
+### 👨‍👩‍👧‍👦 好友与群组模块 ([查看群组演示](#群组与频道全生命周期管理-group--channel-lifecycle-management))
 
 - **好友管理**: 实现搜索用户、发送好友请求、处理请求（同意/拒绝）、拉黑好友、删除好友、好友列表以及黑名单列表展示。
 - **群组创建与管理**: 支持创建新群组、解散群组、修改群组信息及更换群组头像。
@@ -79,7 +79,7 @@
 - **引用回复**: 支持引用并回复指定消息。
 - **@提及**: 支持在群聊中`@`特定成员并发送强提醒。
 
-### 🔔 通知与个性化模块 (<a href="https://github.com/qy-8/gamechat-app?tab=readme-ov-file#%E6%99%BA%E8%83%BD%E9%80%9A%E7%9F%A5-intelligent-notifications">查看通知演示</a>)
+### 🔔 通知与个性化模块 ([查看通知演示](#智能通知-intelligent-notifications))
 
 - **多维通知系统**: 实现新好友/群组邀请、新消息的浏览器桌面通知。
 - **@提及强提醒**: 被`@`时会收到高优先级通知，可穿透“免打扰”设置。
