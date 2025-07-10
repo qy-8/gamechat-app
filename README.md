@@ -138,24 +138,24 @@
 ## 🎥 更多功能演示 (More Demos)
 
 ### 群组与频道全生命周期管理 (Group & Channel Lifecycle Management)
-![群组与频道全生命周期管理](https://github.com/qy-8/gamechat-app/blob/main/assets/gameChat_group_and_channel.gif?raw=true)
+![群组与频道全生命周期管理](./assets/gameChat_group_and_channel.gif)
 <p align="center"><i>展示了群组从创建、成员管理（邀请/踢出成员）、信息修改到频道增加与切换、最终解散群组的全生命周期操作，体现了前端状态的实时响应能力。</i></p>
 
 ### 智能通知 (Intelligent Notifications)
-![智能通知演示](https://github.com/qy-8/gamechat-app/blob/main/assets/gameChat_notifications.gif?raw=true)
+![智能通知演示](./assets/gameChat_notifications.gif)
 <p align="center"><i>演示了普通消息弹窗与@提及穿透免打扰设置。</i></p>
 
 
 ### 无限滚动 (Infinite Scrolling)
-![无限滚动演示](https://github.com/qy-8/gamechat-app/blob/main/assets/gameChat_scroll.gif?raw=true)
+![无限滚动演示](./assets/gameChat_scroll.gif)
 <p align="center"><i>演示了聊天记录或的无限加载功能，用户滚动到顶部时会自动加载更多内容，提供流畅的浏览体验。</i></p>
 
 ### 好友系统与实时交互 (Friend System & Real-time Interaction)
-![好友系统演示](https://github.com/qy-8/gamechat-app/blob/main/assets/gameChat_friend_request.gif?raw=true)
+![好友系统演示](./assets/gameChat_friend_request.gif)
 <p align="center"><i>通过双窗口演示，直观展示了用户A如何实时接收到用户B的好友请求通知，验证了前后端 WebSocket 通信的有效性。项目还完整支持好友之间消息发送、删除、拉黑、取消拉黑与请求处理等管理功能。</i></p>
 
 ### 账户设置 (Account Settings)
-![账户设置截图](https://github.com/qy-8/gamechat-app/blob/main/assets/account_settings.png?raw=true)
+![账户设置截图](./assets/account_settings.png)
 <p align="center"><i>提供包括头像更换、个人信息修改、密码重置、退出登陆及账户注销在内的完整账户管理功能。</i></p>
 
 ---
