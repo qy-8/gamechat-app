@@ -145,7 +145,6 @@
 ![智能通知演示](./assets/gameChat_notifications.gif)
 <p align="center"><i>演示了普通消息弹窗与@提及穿透免打扰设置。</i></p>
 
-
 ### 无限滚动 (Infinite Scrolling)
 ![无限滚动演示](./assets/gameChat_scroll.gif)
 <p align="center"><i>演示了聊天记录或的无限加载功能，用户滚动到顶部时会自动加载更多内容，提供流畅的浏览体验。</i></p>
